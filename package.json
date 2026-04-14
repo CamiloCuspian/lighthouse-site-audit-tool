@@ -15,8 +15,21 @@
     "meta-tags",
     "cli"
   ],
+<<<<<<< HEAD
+  "author": "CamiloCuspian",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CamiloCuspian/lighthouse-site-audit-tool.git"
+  },
+  "homepage": "https://github.com/CamiloCuspian/lighthouse-site-audit-tool#readme",
+  "bugs": {
+    "url": "https://github.com/CamiloCuspian/lighthouse-site-audit-tool/issues"
+  },
+=======
   "author": "Camilo",
   "license": "MIT",
+>>>>>>> 43eaf990f4ecddc5a7ad71ba17aca76b740f832e
   "scripts": {
     "audit": "node cli/index.js"
   },

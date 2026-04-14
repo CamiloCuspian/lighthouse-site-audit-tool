@@ -33,8 +33,13 @@ Todo en un solo comando. Sin pantalla en blanco. Sin servidor.
 
 ```bash
 # Clona el repositorio
+<<<<<<< HEAD
+git clone https://github.com/CamiloCuspian/lighthouse-site-audit-tool.git
+cd lighthouse-site-audit-tool
+=======
 git clone https://github.com/TU_USUARIO/lighthouse-reporter.git
 cd lighthouse-reporter
+>>>>>>> 43eaf990f4ecddc5a7ad71ba17aca76b740f832e
 
 # Instala las dependencias (solo la primera vez)
 npm install
