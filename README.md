@@ -2,7 +2,7 @@
 
 Audita **todas las páginas** de tu sitio web con Google Lighthouse y genera un **reporte HTML estático completo** — sin pantallas en blanco, sin servidor, sin configuración compleja.
 
-![Version](https://img.shields.io/badge/version-0.2.0-blue)
+![Version](https://img.shields.io/badge/version-0.3.0-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
@@ -12,6 +12,7 @@ Audita **todas las páginas** de tu sitio web con Google Lighthouse y genera un 
 
 - 🔍 **Crawlea** todas las páginas del sitio automáticamente
 - 🔦 **Audita** con Lighthouse: Performance, Accesibilidad, Best Practices y SEO
+- 🔄 **Comparación histórica**: botón para comparar con auditorías anteriores almacenadas automáticamente
 - 🏷️ **Extrae Meta Tags SEO** por página: title, description, H1, canonical, robots, conteo de palabras — con alertas automáticas
 - 💀 **Detecta Links Rotos** (404, 500, timeouts) y en qué página estaban enlazados
 - 📊 **Genera un reporte HTML** estático con detalles expandibles y promedios del sitio
@@ -33,13 +34,8 @@ Todo en un solo comando. Sin pantalla en blanco. Sin servidor.
 
 ```bash
 # Clona el repositorio
-<<<<<<< HEAD
 git clone https://github.com/CamiloCuspian/lighthouse-site-audit-tool.git
 cd lighthouse-site-audit-tool
-=======
-git clone https://github.com/TU_USUARIO/lighthouse-reporter.git
-cd lighthouse-reporter
->>>>>>> 43eaf990f4ecddc5a7ad71ba17aca76b740f832e
 
 # Instala las dependencias (solo la primera vez)
 npm install
@@ -58,10 +54,27 @@ node cli/index.js --site https://tusitio.com --max 10
 
 # Guardar el reporte en carpeta personalizada
 node cli/index.js --site https://tusitio.com --out ./mi-reporte
+
+# Auditar sitio con autenticación
+node cli/index.js --site https://tusitio.com --cookie "session=abc123" --header "Authorization=Bearer token"
+
+# Comparar con reporte anterior
+node cli/index.js --site https://tusitio.com --compare ./reports/results.json
 ```
 
 Cuando termine abre `reports/index.html` en tu navegador.
 También encontrarás `reports/sitemap.xml` listo para Google Search Console.
+
+---
+
+## 📦 Publicar en npm
+
+```bash
+npm login
+npm publish
+```
+
+Luego puedes instalar globalmente: `npm install -g lighthouse-reporter`
 
 ---
 
@@ -72,6 +85,9 @@ También encontrarás `reports/sitemap.xml` listo para Google Search Console.
 | `--site` / `-s` | URL del sitio a auditar | *requerido* |
 | `--max` / `-m` | Máximo de páginas a auditar | `30` |
 | `--out` / `-o` | Carpeta de salida del reporte | `./reports` |
+| `--cookie` / `-c` | Cookie para autenticación | |
+| `--header` / `-H` | Header adicional (puede repetirse) | |
+| `--compare` | Ruta a reporte JSON anterior para comparar | |
 
 ---
 
@@ -130,10 +146,10 @@ lighthouse-reporter/
 
 ## 🗺️ Roadmap
 
-- [ ] Comparar reportes entre auditorías (histórico)
+- [x] Comparar reportes entre auditorías (histórico)
+- [x] Soporte para sitios con autenticación
+- [x] Publicar como paquete npm (`npm install -g lighthouse-reporter`)
 - [ ] Modo watch: re-auditar cuando detecta cambios
-- [ ] Soporte para sitios con autenticación
-- [ ] Publicar como paquete npm (`npm install -g lighthouse-reporter`)
 
 ---
 

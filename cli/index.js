@@ -11,28 +11,59 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
 
-import { crawlSite }                    from './crawler.js';
+import { crawlSite } from './crawler.js';
 import { launchChrome, killChrome, auditPage } from './auditor.js';
-import { generateReport }               from './reporter.js';
-import { generateSitemap }              from './sitemap.js';
+import { generateReport } from './reporter.js';
+import { generateSitemap } from './sitemap.js';
 
 const program = new Command();
 
 program
   .name('lighthouse-reporter')
-  .description('Audita todas las páginas de un sitio con Lighthouse y genera un reporte HTML estático.')
-  .version('0.2.0')
+  .description(
+    'Audita todas las páginas de un sitio con Lighthouse y genera un reporte HTML estático.'
+  )
+  .version('0.3.0')
   .requiredOption('-s, --site <url>', 'URL del sitio a auditar (ej: https://tusitio.com)')
-  .option('-m, --max <number>',  'Máximo de páginas a auditar', '30')
-  .option('-o, --out <path>',    'Carpeta de salida para el reporte', './reports')
+  .option('-m, --max <number>', 'Máximo de páginas a auditar', '30')
+  .option('-o, --out <path>', 'Carpeta de salida para el reporte', './reports')
+  .option('-c, --cookie <value>', 'Cookie para autenticación (ej: "session=abc123")')
+  .option(
+    '-H, --header <name=value>',
+    'Header adicional (ej: "Authorization=Bearer token")',
+    (val, prev) => prev.concat([val]),
+    []
+  )
+  .option('--compare <path>', 'Ruta a reporte JSON anterior para comparar')
   .parse(process.argv);
 
 const opts = program.opts();
 
+const extraHeaders = {};
+if (opts.cookie) {
+  extraHeaders['Cookie'] = opts.cookie;
+}
+opts.header.forEach((h) => {
+  const [name, value] = h.split('=', 2);
+  if (name && value) extraHeaders[name] = value;
+});
+
+let prevResults = null;
+if (opts.compare) {
+  try {
+    const prevData = readFileSync(resolve(opts.compare), 'utf8');
+    prevResults = JSON.parse(prevData);
+  } catch (err) {
+    console.error(chalk.red(`\n✗ Error cargando reporte anterior: ${err.message}`));
+    process.exit(1);
+  }
+}
+
 async function main() {
-  const siteUrl   = opts.site.endsWith('/') ? opts.site.slice(0, -1) : opts.site;
-  const maxPages  = parseInt(opts.max, 10);
+  const siteUrl = opts.site.endsWith('/') ? opts.site.slice(0, -1) : opts.site;
+  const maxPages = parseInt(opts.max, 10);
   const outputDir = resolve(opts.out);
 
   console.log(chalk.bold.blue('\n🔦 Lighthouse Reporter v0.2.0\n'));
@@ -50,7 +81,9 @@ async function main() {
   }
 
   if (pages.length === 0) {
-    console.error(chalk.red('\n✗ No se encontraron páginas. Verifica que la URL sea correcta y accesible.'));
+    console.error(
+      chalk.red('\n✗ No se encontraron páginas. Verifica que la URL sea correcta y accesible.')
+    );
     process.exit(1);
   }
 
@@ -71,7 +104,7 @@ async function main() {
 
   // 3. Auditar cada página con Lighthouse
   const auditResults = [];
-  const auditErrors  = [];
+  const auditErrors = [];
 
   try {
     for (let i = 0; i < pages.length; i++) {
@@ -79,18 +112,19 @@ async function main() {
       const spinner = ora(`[${i + 1}/${pages.length}] Auditando ${url}`).start();
 
       try {
-        const result = await auditPage(url);
+        const result = await auditPage(url, extraHeaders);
         // Combinar resultado de Lighthouse con meta tags del crawler
         auditResults.push({ ...result, meta });
 
         const avg = Math.round(
-          (result.scores.performance + result.scores.accessibility +
-           result.scores.bestPractices + result.scores.seo) / 4
+          (result.scores.performance +
+            result.scores.accessibility +
+            result.scores.bestPractices +
+            result.scores.seo) /
+            4
         );
         spinner.succeed(
-          chalk.green(`[${i + 1}/${pages.length}]`) +
-          ` ${url} ` +
-          chalk.bold(`(avg: ${avg})`)
+          chalk.green(`[${i + 1}/${pages.length}]`) + ` ${url} ` + chalk.bold(`(avg: ${avg})`)
         );
       } catch (err) {
         spinner.fail(chalk.red(`[${i + 1}/${pages.length}] Error en ${url}: ${err.message}`));
@@ -98,11 +132,17 @@ async function main() {
       }
     }
   } finally {
-    try { await killChrome(); } catch { /* EPERM Windows — ignorar */ }
+    try {
+      await killChrome();
+    } catch {
+      /* EPERM Windows — ignorar */
+    }
   }
 
   if (auditResults.length === 0) {
-    console.error(chalk.red('\n✗ Ninguna página se auditó con éxito. Revisa que Chrome esté instalado.'));
+    console.error(
+      chalk.red('\n✗ Ninguna página se auditó con éxito. Revisa que Chrome esté instalado.')
+    );
     process.exit(1);
   }
 
@@ -113,14 +153,20 @@ async function main() {
 
   // 5. Generar reporte HTML
   console.log(chalk.blue('\n📊 Generando reporte HTML...'));
-  const siteName   = new URL(siteUrl).hostname;
-  const reportPath = generateReport(auditResults, brokenLinks, outputDir, siteName, siteUrl);
+  const siteName = new URL(siteUrl).hostname;
+  const reportPath = generateReport(auditResults, brokenLinks, outputDir, siteName, prevResults);
   console.log(chalk.gray(`     → ${reportPath}`));
 
   // 6. Resumen final
-  const avgPerf = Math.round(auditResults.reduce((s, r) => s + r.scores.performance, 0) / auditResults.length);
-  const avgSEO  = Math.round(auditResults.reduce((s, r) => s + r.scores.seo, 0) / auditResults.length);
-  const avgAcc  = Math.round(auditResults.reduce((s, r) => s + r.scores.accessibility, 0) / auditResults.length);
+  const avgPerf = Math.round(
+    auditResults.reduce((s, r) => s + r.scores.performance, 0) / auditResults.length
+  );
+  const avgSEO = Math.round(
+    auditResults.reduce((s, r) => s + r.scores.seo, 0) / auditResults.length
+  );
+  const avgAcc = Math.round(
+    auditResults.reduce((s, r) => s + r.scores.accessibility, 0) / auditResults.length
+  );
 
   const seoIssues = auditResults.reduce((n, r) => n + (r.meta?.issues?.length ?? 0), 0);
 
@@ -134,10 +180,11 @@ async function main() {
   console.log(`    Accesibilidad: ${colorScore(avgAcc)}`);
   console.log('');
 
-  if (brokenLinks.length > 0)
-    console.log(chalk.red(`  💀 Links rotos    : ${brokenLinks.length}`));
+  if (brokenLinks.length > 0) console.log(chalk.red(`  💀 Links rotos    : ${brokenLinks.length}`));
   if (seoIssues > 0)
-    console.log(chalk.yellow(`  ⚠  Problemas SEO : ${seoIssues} en ${auditResults.length} páginas`));
+    console.log(
+      chalk.yellow(`  ⚠  Problemas SEO : ${seoIssues} en ${auditResults.length} páginas`)
+    );
   if (auditErrors.length > 0)
     console.log(chalk.yellow(`  ✗  Audits fallidos: ${auditErrors.length}`));
 
@@ -150,7 +197,7 @@ function colorScore(s) {
   return chalk.bold.red(s);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(chalk.red('\n✗ Error inesperado:'), err);
   process.exit(1);
 });

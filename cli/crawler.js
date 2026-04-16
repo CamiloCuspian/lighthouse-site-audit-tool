@@ -19,11 +19,11 @@ function extractLinks(html) {
 function getMeta(html, name) {
   const r = new RegExp(
     `<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']*)["']` +
-    `|<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["']${name}["']`,
+      `|<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["']${name}["']`,
     'i'
   );
   const m = r.exec(html);
-  return (m && (m[1] || m[2])) ? (m[1] || m[2]).trim() : '';
+  return m && (m[1] || m[2]) ? (m[1] || m[2]).trim() : '';
 }
 
 function getTitle(html) {
@@ -49,8 +49,9 @@ function getH2s(html) {
 }
 
 function getCanonical(html) {
-  const m = /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']*)["']/i.exec(html)
-         || /<link[^>]+href=["']([^"']*)["'][^>]+rel=["']canonical["']/i.exec(html);
+  const m =
+    /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']*)["']/i.exec(html) ||
+    /<link[^>]+href=["']([^"']*)["'][^>]+rel=["']canonical["']/i.exec(html);
   return m ? m[1].trim() : '';
 }
 
@@ -66,16 +67,16 @@ function estimateWordCount(html) {
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  return clean.split(' ').filter(w => w.length > 1).length;
+  return clean.split(' ').filter((w) => w.length > 1).length;
 }
 
 // ── CRAWL PRINCIPAL ──────────────────────────────────────────────────────────
 
 export async function crawlSite(baseUrl, maxPages = 50) {
-  const visited    = new Set();
-  const queue      = [{ url: baseUrl, foundOn: null }];
-  const pages      = [];   // { url, meta }
-  const brokenLinks = [];  // { url, status, foundOn }
+  const visited = new Set();
+  const queue = [{ url: baseUrl, foundOn: null }];
+  const pages = []; // { url, meta }
+  const brokenLinks = []; // { url, status, foundOn }
 
   const origin = new URL(baseUrl).origin;
 
@@ -95,7 +96,7 @@ export async function crawlSite(baseUrl, maxPages = 50) {
         signal: AbortSignal.timeout(10000),
         redirect: 'follow',
       });
-    } catch (err) {
+    } catch {
       // Timeout u otro error de red → link roto
       if (foundOn) {
         brokenLinks.push({ url: cleanUrl, status: 'Timeout/Error', foundOn });
@@ -120,15 +121,15 @@ export async function crawlSite(baseUrl, maxPages = 50) {
 
     // ── Extraer meta tags SEO ──────────────────────────────────────────────
     const meta = {
-      title:           getTitle(html),
-      description:     getMeta(html, 'description'),
-      ogTitle:         getMeta(html, 'og:title'),
-      ogDescription:   getMeta(html, 'og:description'),
-      h1:              getH1(html),
-      h2s:             getH2s(html),
-      canonical:       getCanonical(html),
-      robots:          getRobots(html),
-      wordCount:       estimateWordCount(html),
+      title: getTitle(html),
+      description: getMeta(html, 'description'),
+      ogTitle: getMeta(html, 'og:title'),
+      ogDescription: getMeta(html, 'og:description'),
+      h1: getH1(html),
+      h2s: getH2s(html),
+      canonical: getCanonical(html),
+      robots: getRobots(html),
+      wordCount: estimateWordCount(html),
     };
 
     // Alertas SEO automáticas
@@ -140,21 +141,28 @@ export async function crawlSite(baseUrl, maxPages = 50) {
     // ── Descubrir más links ────────────────────────────────────────────────
     const hrefs = extractLinks(html);
     for (const href of hrefs) {
-      if (!href || href.startsWith('mailto:') || href.startsWith('tel:') ||
-          href.startsWith('javascript:')) continue;
+      if (
+        !href ||
+        href.startsWith('mailto:') ||
+        href.startsWith('tel:') ||
+        href.startsWith('javascript:')
+      )
+        continue;
 
       try {
-        const absolute   = new URL(href, cleanUrl).href;
+        const absolute = new URL(href, cleanUrl).href;
         const linkParsed = new URL(absolute);
 
         if (linkParsed.origin !== origin) continue;
         if (!['http:', 'https:'].includes(linkParsed.protocol)) continue;
 
         const normalized = absolute.split('?')[0].split('#')[0].replace(/\/$/, '');
-        if (!visited.has(normalized) && !queue.find(q => q.url === normalized)) {
+        if (!visited.has(normalized) && !queue.find((q) => q.url === normalized)) {
           queue.push({ url: normalized, foundOn: cleanUrl });
         }
-      } catch { /* href inválido */ }
+      } catch {
+        /* href inválido */
+      }
     }
   }
 
@@ -167,31 +175,43 @@ export async function crawlSite(baseUrl, maxPages = 50) {
 function detectSeoIssues(meta, url) {
   const issues = [];
 
-  if (!meta.title)
-    issues.push({ type: 'error', msg: 'Sin título (<title> vacío o ausente)' });
+  if (!meta.title) issues.push({ type: 'error', msg: 'Sin título (<title> vacío o ausente)' });
   else if (meta.title.length < 30)
-    issues.push({ type: 'warning', msg: `Título muy corto (${meta.title.length} chars, mínimo 30)` });
+    issues.push({
+      type: 'warning',
+      msg: `Título muy corto (${meta.title.length} chars, mínimo 30)`,
+    });
   else if (meta.title.length > 60)
-    issues.push({ type: 'warning', msg: `Título muy largo (${meta.title.length} chars, máximo 60)` });
+    issues.push({
+      type: 'warning',
+      msg: `Título muy largo (${meta.title.length} chars, máximo 60)`,
+    });
 
-  if (!meta.description)
-    issues.push({ type: 'error', msg: 'Sin meta description' });
+  if (!meta.description) issues.push({ type: 'error', msg: 'Sin meta description' });
   else if (meta.description.length < 70)
-    issues.push({ type: 'warning', msg: `Meta description corta (${meta.description.length} chars, mínimo 70)` });
+    issues.push({
+      type: 'warning',
+      msg: `Meta description corta (${meta.description.length} chars, mínimo 70)`,
+    });
   else if (meta.description.length > 160)
-    issues.push({ type: 'warning', msg: `Meta description muy larga (${meta.description.length} chars, máximo 160)` });
+    issues.push({
+      type: 'warning',
+      msg: `Meta description muy larga (${meta.description.length} chars, máximo 160)`,
+    });
 
-  if (!meta.h1)
-    issues.push({ type: 'error', msg: 'Sin H1' });
+  if (!meta.h1) issues.push({ type: 'error', msg: 'Sin H1' });
 
-  if (meta.canonical && meta.canonical !== url && !meta.canonical.endsWith('/') )
+  if (meta.canonical && meta.canonical !== url && !meta.canonical.endsWith('/'))
     issues.push({ type: 'info', msg: `Canonical apunta a URL diferente: ${meta.canonical}` });
 
   if (meta.robots && (meta.robots.includes('noindex') || meta.robots.includes('nofollow')))
     issues.push({ type: 'warning', msg: `Robots: ${meta.robots}` });
 
   if (meta.wordCount < 300)
-    issues.push({ type: 'warning', msg: `Contenido escaso (~${meta.wordCount} palabras, recomendado 300+)` });
+    issues.push({
+      type: 'warning',
+      msg: `Contenido escaso (~${meta.wordCount} palabras, recomendado 300+)`,
+    });
 
   return issues;
 }

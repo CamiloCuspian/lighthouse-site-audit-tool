@@ -10,13 +10,17 @@ import { join } from 'path';
 export function generateSitemap(pages, outputDir) {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-  const urls = pages.map(({ url }) => `
+  const urls = pages
+    .map(
+      ({ url }) => `
   <url>
     <loc>${escXml(url)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>${url.split('/').length <= 4 ? '1.0' : '0.8'}</priority>
-  </url>`).join('');
+  </url>`
+    )
+    .join('');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

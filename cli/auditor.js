@@ -32,7 +32,7 @@ export async function killChrome() {
 }
 
 /** Audita una URL usando el Chrome ya lanzado. */
-export async function auditPage(url) {
+export async function auditPage(url, extraHeaders = {}) {
   if (!chromeInstance) throw new Error('Chrome no está lanzado. Llama launchChrome() primero.');
 
   const options = {
@@ -40,6 +40,7 @@ export async function auditPage(url) {
     output: 'json',
     port: chromeInstance.port,
     onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
+    extraHeaders,
   };
 
   const runnerResult = await lighthouse(url, options);
@@ -49,42 +50,42 @@ export async function auditPage(url) {
     url,
     fetchTime: report.fetchTime,
     scores: {
-      performance:   Math.round((report.categories.performance?.score        ?? 0) * 100),
-      accessibility: Math.round((report.categories.accessibility?.score      ?? 0) * 100),
-      bestPractices: Math.round((report.categories['best-practices']?.score  ?? 0) * 100),
-      seo:           Math.round((report.categories.seo?.score                ?? 0) * 100),
+      performance: Math.round((report.categories.performance?.score ?? 0) * 100),
+      accessibility: Math.round((report.categories.accessibility?.score ?? 0) * 100),
+      bestPractices: Math.round((report.categories['best-practices']?.score ?? 0) * 100),
+      seo: Math.round((report.categories.seo?.score ?? 0) * 100),
     },
     metrics: {
-      fcp: report.audits['first-contentful-paint']?.displayValue    ?? 'N/A',
-      lcp: report.audits['largest-contentful-paint']?.displayValue  ?? 'N/A',
-      tbt: report.audits['total-blocking-time']?.displayValue       ?? 'N/A',
-      cls: report.audits['cumulative-layout-shift']?.displayValue   ?? 'N/A',
-      si:  report.audits['speed-index']?.displayValue               ?? 'N/A',
-      tti: report.audits['interactive']?.displayValue               ?? 'N/A',
+      fcp: report.audits['first-contentful-paint']?.displayValue ?? 'N/A',
+      lcp: report.audits['largest-contentful-paint']?.displayValue ?? 'N/A',
+      tbt: report.audits['total-blocking-time']?.displayValue ?? 'N/A',
+      cls: report.audits['cumulative-layout-shift']?.displayValue ?? 'N/A',
+      si: report.audits['speed-index']?.displayValue ?? 'N/A',
+      tti: report.audits['interactive']?.displayValue ?? 'N/A',
     },
     opportunities: Object.values(report.audits)
-      .filter(a => a.details?.type === 'opportunity' && a.score !== null && a.score < 0.9)
-      .map(a => ({
-        id:           a.id,
-        title:        a.title,
-        description:  a.description ?? '',
-        score:        Math.round((a.score ?? 0) * 100),
+      .filter((a) => a.details?.type === 'opportunity' && a.score !== null && a.score < 0.9)
+      .map((a) => ({
+        id: a.id,
+        title: a.title,
+        description: a.description ?? '',
+        score: Math.round((a.score ?? 0) * 100),
         displayValue: a.displayValue ?? '',
-        headings:     a.details?.headings ?? [],
-        items:        (a.details?.items ?? []).slice(0, 20),
+        headings: a.details?.headings ?? [],
+        items: (a.details?.items ?? []).slice(0, 20),
       }))
       .sort((a, b) => a.score - b.score)
       .slice(0, 10),
     diagnostics: Object.values(report.audits)
-      .filter(a => a.details?.type === 'table' && a.score !== null && a.score < 0.9)
-      .map(a => ({
-        id:           a.id,
-        title:        a.title,
-        description:  a.description ?? '',
-        score:        Math.round((a.score ?? 0) * 100),
+      .filter((a) => a.details?.type === 'table' && a.score !== null && a.score < 0.9)
+      .map((a) => ({
+        id: a.id,
+        title: a.title,
+        description: a.description ?? '',
+        score: Math.round((a.score ?? 0) * 100),
         displayValue: a.displayValue ?? '',
-        headings:     a.details?.headings ?? [],
-        items:        (a.details?.items ?? []).slice(0, 20),
+        headings: a.details?.headings ?? [],
+        items: (a.details?.items ?? []).slice(0, 20),
       }))
       .sort((a, b) => a.score - b.score)
       .slice(0, 10),

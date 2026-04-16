@@ -8,15 +8,17 @@
  *  - Botón exportar CSV
  */
 
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 
 function escHtml(str) {
   return String(str ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function scoreColor(score) {
@@ -31,16 +33,19 @@ function scoreLabel(score) {
   return 'Crítico';
 }
 
-function scoreRing(score, label) {
-  const color = scoreColor(score);
-  const dash  = Math.round(score * 1.76);
+function scoreRing(score, label, isComparison = false) {
+  const absScore = Math.abs(score);
+  const color = isComparison ? (score > 0 ? '#10b981' : '#ef4444') : scoreColor(absScore);
+  const dash = Math.round(absScore * 1.76);
+  const sign = isComparison && score !== 0 ? (score > 0 ? '+' : '') : '';
+  const displayScore = isComparison ? score : absScore;
   return `
     <div class="score-ring">
       <svg viewBox="0 0 64 64" width="56" height="56">
         <circle cx="32" cy="32" r="28" fill="none" stroke="#e8e8e8" stroke-width="6"/>
         <circle cx="32" cy="32" r="28" fill="none" stroke="${color}" stroke-width="6"
           stroke-dasharray="${dash} 176" stroke-linecap="round" transform="rotate(-90 32 32)"/>
-        <text x="32" y="37" text-anchor="middle" font-size="15" font-weight="bold" fill="${color}">${score}</text>
+        <text x="32" y="37" text-anchor="middle" font-size="15" font-weight="bold" fill="${color}">${sign}${displayScore}</text>
       </svg>
       <span class="ring-label">${label}</span>
     </div>`;
@@ -50,19 +55,24 @@ function formatCell(value) {
   if (value === null || value === undefined) return '—';
   if (typeof value === 'object') {
     if (value.type === 'url' || value.type === 'link') {
-      const text  = value.text || value.url || '';
-      const url   = value.url  || value.text || '';
+      const text = value.text || value.url || '';
+      const url = value.url || value.text || '';
       const short = text.length > 55 ? '…' + text.slice(-50) : text;
-      return url ? `<a href="${escHtml(url)}" target="_blank">${escHtml(short)}</a>` : escHtml(short);
+      return url
+        ? `<a href="${escHtml(url)}" target="_blank">${escHtml(short)}</a>`
+        : escHtml(short);
     }
-    if (value.type === 'bytes')     return formatBytes(value.value);
+    if (value.type === 'bytes') return formatBytes(value.value);
     if (value.type === 'ms' || value.type === 'timespanMs')
-      return value.value >= 1000 ? (value.value/1000).toFixed(1)+' s' : Math.round(value.value)+' ms';
+      return value.value >= 1000
+        ? (value.value / 1000).toFixed(1) + ' s'
+        : Math.round(value.value) + ' ms';
     if (value.type === 'node')
-      return `<code class="node-snippet">${escHtml((value.snippet||value.nodeLabel||'').slice(0,80))}</code>`;
+      return `<code class="node-snippet">${escHtml((value.snippet || value.nodeLabel || '').slice(0, 80))}</code>`;
     if (value.type === 'source-location') {
-      const u = value.url || ''; const line = value.line != null ? `:${value.line}` : '';
-      return `<a href="${escHtml(u)}" target="_blank">${escHtml(u.split('/').pop()+line)}</a>`;
+      const u = value.url || '';
+      const line = value.line != null ? `:${value.line}` : '';
+      return `<a href="${escHtml(u)}" target="_blank">${escHtml(u.split('/').pop() + line)}</a>`;
     }
     if (value.value !== undefined) return escHtml(String(value.value));
     return escHtml(JSON.stringify(value).slice(0, 60));
@@ -79,15 +89,15 @@ function formatCell(value) {
 function formatBytes(bytes) {
   if (!bytes) return '0 B';
   if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KiB';
-  return (bytes/1048576).toFixed(2) + ' MiB';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KiB';
+  return (bytes / 1048576).toFixed(2) + ' MiB';
 }
 
 // ── SECCIONES HTML ────────────────────────────────────────────────────────────
 
 function auditDetailBlock(audit) {
-  const color    = scoreColor(audit.score);
-  const headings = (audit.headings || []).filter(h => h.label || h.key);
+  const color = scoreColor(audit.score);
+  const headings = (audit.headings || []).filter((h) => h.label || h.key);
   const hasTable = headings.length > 0 && audit.items?.length > 0;
 
   return `
@@ -100,17 +110,24 @@ function auditDetailBlock(audit) {
     </summary>
     <div class="audit-body">
       ${audit.description ? `<p class="audit-desc">${escHtml(audit.description)}</p>` : ''}
-      ${hasTable ? `
+      ${
+        hasTable
+          ? `
       <div class="table-wrap">
         <table class="detail-table">
-          <thead><tr>${headings.map(h => `<th>${escHtml(h.label||h.key||'')}</th>`).join('')}</tr></thead>
+          <thead><tr>${headings.map((h) => `<th>${escHtml(h.label || h.key || '')}</th>`).join('')}</tr></thead>
           <tbody>
-            ${audit.items.map(item =>
-              `<tr>${headings.map(h => `<td>${formatCell(item[h.key])}</td>`).join('')}</tr>`
-            ).join('')}
+            ${audit.items
+              .map(
+                (item) =>
+                  `<tr>${headings.map((h) => `<td>${formatCell(item[h.key])}</td>`).join('')}</tr>`
+              )
+              .join('')}
           </tbody>
         </table>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
     </div>
   </details>`;
 }
@@ -137,33 +154,40 @@ function metaTagsTable(results) {
           </tr>
         </thead>
         <tbody>
-          ${results.map(r => {
-            const m = r.meta || {};
-            const issues = m.issues || [];
-            const errors   = issues.filter(i => i.type === 'error');
-            const warnings = issues.filter(i => i.type === 'warning');
-            const infos    = issues.filter(i => i.type === 'info');
+          ${results
+            .map((r) => {
+              const m = r.meta || {};
+              const issues = m.issues || [];
+              const errors = issues.filter((i) => i.type === 'error');
+              const warnings = issues.filter((i) => i.type === 'warning');
+              const infos = issues.filter((i) => i.type === 'info');
 
-            const rowClass = errors.length > 0 ? 'row-error' : warnings.length > 0 ? 'row-warn' : '';
-            const titleLen = m.title ? ` <span class="char-count ${m.title.length > 60 || m.title.length < 30 ? 'count-bad' : 'count-ok'}">${m.title.length}</span>` : '';
-            const descLen  = m.description ? ` <span class="char-count ${m.description.length > 160 || m.description.length < 70 ? 'count-bad' : 'count-ok'}">${m.description.length}</span>` : '';
+              const rowClass =
+                errors.length > 0 ? 'row-error' : warnings.length > 0 ? 'row-warn' : '';
+              const titleLen = m.title
+                ? ` <span class="char-count ${m.title.length > 60 || m.title.length < 30 ? 'count-bad' : 'count-ok'}">${m.title.length}</span>`
+                : '';
+              const descLen = m.description
+                ? ` <span class="char-count ${m.description.length > 160 || m.description.length < 70 ? 'count-bad' : 'count-ok'}">${m.description.length}</span>`
+                : '';
 
-            return `
+              return `
             <tr class="${rowClass}">
               <td class="url-cell"><a href="${escHtml(r.url)}" target="_blank">${escHtml(r.url.replace(/^https?:\/\/[^/]+/, '') || '/')}</a></td>
               <td>${m.title ? escHtml(m.title.slice(0, 55)) + (m.title.length > 55 ? '…' : '') + titleLen : '<span class="empty-val">—</span>'}</td>
               <td>${m.description ? escHtml(m.description.slice(0, 60)) + (m.description.length > 60 ? '…' : '') + descLen : '<span class="empty-val">—</span>'}</td>
               <td>${m.h1 ? escHtml(m.h1.slice(0, 50)) : '<span class="empty-val">—</span>'}</td>
-              <td class="canonical-cell">${m.canonical ? `<span title="${escHtml(m.canonical)}">${escHtml(m.canonical.replace(/^https?:\/\/[^/]+/, '').slice(0,30) || '/')}</span>` : '<span class="empty-val">—</span>'}</td>
+              <td class="canonical-cell">${m.canonical ? `<span title="${escHtml(m.canonical)}">${escHtml(m.canonical.replace(/^https?:\/\/[^/]+/, '').slice(0, 30) || '/')}</span>` : '<span class="empty-val">—</span>'}</td>
               <td class="num-cell">${m.wordCount ?? '—'}</td>
               <td class="issues-cell">
-                ${errors.map(i   => `<span class="issue-tag tag-error" title="${escHtml(i.msg)}">✗ ${escHtml(i.msg.slice(0,35))}</span>`).join('')}
-                ${warnings.map(i => `<span class="issue-tag tag-warn"  title="${escHtml(i.msg)}">⚠ ${escHtml(i.msg.slice(0,35))}</span>`).join('')}
-                ${infos.map(i    => `<span class="issue-tag tag-info"  title="${escHtml(i.msg)}">ℹ ${escHtml(i.msg.slice(0,35))}</span>`).join('')}
+                ${errors.map((i) => `<span class="issue-tag tag-error" title="${escHtml(i.msg)}">✗ ${escHtml(i.msg.slice(0, 35))}</span>`).join('')}
+                ${warnings.map((i) => `<span class="issue-tag tag-warn"  title="${escHtml(i.msg)}">⚠ ${escHtml(i.msg.slice(0, 35))}</span>`).join('')}
+                ${infos.map((i) => `<span class="issue-tag tag-info"  title="${escHtml(i.msg)}">ℹ ${escHtml(i.msg.slice(0, 35))}</span>`).join('')}
                 ${issues.length === 0 ? '<span class="issue-tag tag-ok">✓ OK</span>' : ''}
               </td>
             </tr>`;
-          }).join('')}
+            })
+            .join('')}
         </tbody>
       </table>
     </div>
@@ -171,7 +195,8 @@ function metaTagsTable(results) {
 }
 
 function brokenLinksSection(brokenLinks) {
-  if (brokenLinks.length === 0) return `
+  if (brokenLinks.length === 0)
+    return `
   <section class="report-section">
     <h2 class="section-heading">💀 Links Rotos <span class="badge-ok">Ninguno ✓</span></h2>
   </section>`;
@@ -185,12 +210,16 @@ function brokenLinksSection(brokenLinks) {
           <tr><th>URL rota</th><th>Código</th><th>Encontrado en</th></tr>
         </thead>
         <tbody>
-          ${brokenLinks.map(b => `
+          ${brokenLinks
+            .map(
+              (b) => `
           <tr>
             <td><a href="${escHtml(b.url)}" target="_blank">${escHtml(b.url)}</a></td>
             <td><span class="status-badge ${b.status >= 500 ? 'badge-error' : 'badge-warn'}">${escHtml(String(b.status))}</span></td>
             <td><a href="${escHtml(b.foundOn)}" target="_blank">${escHtml(b.foundOn)}</a></td>
-          </tr>`).join('')}
+          </tr>`
+            )
+            .join('')}
         </tbody>
       </table>
     </div>
@@ -199,7 +228,9 @@ function brokenLinksSection(brokenLinks) {
 
 function pageCard(result, index) {
   const { url, scores, metrics, opportunities, diagnostics } = result;
-  const avgScore    = Math.round((scores.performance + scores.accessibility + scores.bestPractices + scores.seo) / 4);
+  const avgScore = Math.round(
+    (scores.performance + scores.accessibility + scores.bestPractices + scores.seo) / 4
+  );
   const statusColor = scoreColor(avgScore);
 
   return `
@@ -228,17 +259,25 @@ function pageCard(result, index) {
       <div class="metric"><span class="metric-name">TTI</span><span class="metric-val">${metrics.tti}</span></div>
     </div>
 
-    ${opportunities.length > 0 ? `
+    ${
+      opportunities.length > 0
+        ? `
     <div class="audit-section">
       <div class="section-label">🔧 Oportunidades de mejora</div>
-      ${opportunities.map(o => auditDetailBlock(o)).join('')}
-    </div>` : ''}
+      ${opportunities.map((o) => auditDetailBlock(o)).join('')}
+    </div>`
+        : ''
+    }
 
-    ${diagnostics.length > 0 ? `
+    ${
+      diagnostics.length > 0
+        ? `
     <div class="audit-section">
       <div class="section-label">🔍 Diagnósticos</div>
-      ${diagnostics.map(d => auditDetailBlock(d)).join('')}
-    </div>` : ''}
+      ${diagnostics.map((d) => auditDetailBlock(d)).join('')}
+    </div>`
+        : ''
+    }
   </div>`;
 }
 
@@ -246,45 +285,113 @@ function pageCard(result, index) {
 
 function buildCsvData(results, brokenLinks) {
   const rows = [
-    ['URL','Performance','Accesibilidad','Best Practices','SEO','Promedio',
-     'FCP','LCP','TBT','CLS','Title','Title Largo','Description','Desc Largo','H1','Canonical','Palabras','Problemas SEO']
+    [
+      'URL',
+      'Performance',
+      'Accesibilidad',
+      'Best Practices',
+      'SEO',
+      'Promedio',
+      'FCP',
+      'LCP',
+      'TBT',
+      'CLS',
+      'Title',
+      'Title Largo',
+      'Description',
+      'Desc Largo',
+      'H1',
+      'Canonical',
+      'Palabras',
+      'Problemas SEO',
+    ],
   ];
 
   for (const r of results) {
-    const m   = r.meta || {};
-    const avg = Math.round((r.scores.performance+r.scores.accessibility+r.scores.bestPractices+r.scores.seo)/4);
+    const m = r.meta || {};
+    const avg = Math.round(
+      (r.scores.performance + r.scores.accessibility + r.scores.bestPractices + r.scores.seo) / 4
+    );
     rows.push([
       r.url,
-      r.scores.performance, r.scores.accessibility, r.scores.bestPractices, r.scores.seo, avg,
-      r.metrics.fcp, r.metrics.lcp, r.metrics.tbt, r.metrics.cls,
-      m.title || '', m.title?.length || 0,
-      m.description || '', m.description?.length || 0,
-      m.h1 || '', m.canonical || '', m.wordCount || 0,
-      (m.issues || []).map(i => i.msg).join(' | '),
+      r.scores.performance,
+      r.scores.accessibility,
+      r.scores.bestPractices,
+      r.scores.seo,
+      avg,
+      r.metrics.fcp,
+      r.metrics.lcp,
+      r.metrics.tbt,
+      r.metrics.cls,
+      m.title || '',
+      m.title?.length || 0,
+      m.description || '',
+      m.description?.length || 0,
+      m.h1 || '',
+      m.canonical || '',
+      m.wordCount || 0,
+      (m.issues || []).map((i) => i.msg).join(' | '),
     ]);
   }
 
-  const brokenRows = [[], ['=== LINKS ROTOS ==='], ['URL','Estado HTTP','Encontrado en']];
+  const brokenRows = [[], ['=== LINKS ROTOS ==='], ['URL', 'Estado HTTP', 'Encontrado en']];
   for (const b of brokenLinks) brokenRows.push([b.url, b.status, b.foundOn]);
 
   return [...rows, ...brokenRows]
-    .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+    .map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
     .join('\n');
 }
 
 // ── EXPORT PRINCIPAL ──────────────────────────────────────────────────────────
 
-export function generateReport(results, brokenLinks, outputDir, siteName, siteUrl) {
+export function generateReport(results, brokenLinks, outputDir, siteName, prevResults = null) {
   mkdirSync(outputDir, { recursive: true });
 
-  const date    = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-  const total   = results.length;
-  const avgPerf = Math.round(results.reduce((s,r) => s+r.scores.performance, 0) / total);
-  const avgAcc  = Math.round(results.reduce((s,r) => s+r.scores.accessibility, 0) / total);
-  const avgBP   = Math.round(results.reduce((s,r) => s+r.scores.bestPractices, 0) / total);
-  const avgSEO  = Math.round(results.reduce((s,r) => s+r.scores.seo, 0) / total);
+  const date = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  const total = results.length;
+  const avgPerf = Math.round(results.reduce((s, r) => s + r.scores.performance, 0) / total);
+  const avgAcc = Math.round(results.reduce((s, r) => s + r.scores.accessibility, 0) / total);
+  const avgBP = Math.round(results.reduce((s, r) => s + r.scores.bestPractices, 0) / total);
+  const avgSEO = Math.round(results.reduce((s, r) => s + r.scores.seo, 0) / total);
 
-  const csvData    = buildCsvData(results, brokenLinks);
+  // Historial de reportes
+  let previousReports = [];
+  try {
+    const historyDir = join(outputDir, 'history');
+    mkdirSync(historyDir, { recursive: true });
+    previousReports = readdirSync(historyDir)
+      .filter((f) => f.endsWith('.json'))
+      .map((f) => f.replace('.json', ''))
+      .sort()
+      .reverse();
+  } catch {
+    /* ignore */
+  }
+
+  let comparison = null;
+  if (prevResults && prevResults.results) {
+    const prevTotal = prevResults.results.length;
+    const prevAvgPerf = Math.round(
+      prevResults.results.reduce((s, r) => s + r.scores.performance, 0) / prevTotal
+    );
+    const prevAvgAcc = Math.round(
+      prevResults.results.reduce((s, r) => s + r.scores.accessibility, 0) / prevTotal
+    );
+    const prevAvgBP = Math.round(
+      prevResults.results.reduce((s, r) => s + r.scores.bestPractices, 0) / prevTotal
+    );
+    const prevAvgSEO = Math.round(
+      prevResults.results.reduce((s, r) => s + r.scores.seo, 0) / prevTotal
+    );
+    comparison = {
+      performance: avgPerf - prevAvgPerf,
+      accessibility: avgAcc - prevAvgAcc,
+      bestPractices: avgBP - prevAvgBP,
+      seo: avgSEO - prevAvgSEO,
+    };
+  }
+
+  const csvData = buildCsvData(results, brokenLinks);
   const csvEscaped = csvData.replace(/\\/g, '\\\\').replace(/`/g, '\\`');
 
   const html = `<!DOCTYPE html>
@@ -407,21 +514,52 @@ export function generateReport(results, brokenLinks, outputDir, siteName, siteUr
 
 <header>
   <h1>🔦 Lighthouse Reporter</h1>
-  <p>${escHtml(siteName)} · ${total} página${total!==1?'s':''} auditada${total!==1?'s':''} · ${date}</p>
+  <p>${escHtml(siteName)} · ${total} página${total !== 1 ? 's' : ''} auditada${total !== 1 ? 's' : ''} · ${date}</p>
   <div class="header-actions">
     <button class="btn-csv" onclick="downloadCSV()">⬇ Exportar CSV</button>
   </div>
 </header>
 
 <div class="summary" id="summary">
+  ${
+    previousReports.length > 1
+      ? `
+  <div style="margin-bottom:1rem;text-align:center">
+    <button onclick="toggleComparison()" id="compareBtn" style="background:#3b82f6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px">Ver comparación histórica</button>
+    <div id="comparisonSelector" style="display:none;margin-top:.5rem">
+      <select id="prevReportSelect" onchange="loadComparison(this.value)" style="padding:4px;border:1px solid #d1d5db;border-radius:4px">
+        <option value="">Seleccionar reporte anterior</option>
+        ${previousReports
+          .slice(1)
+          .map((r) => `<option value="${r}">${r.replace('T', ' ')}</option>`)
+          .join('')}
+      </select>
+    </div>
+  </div>
+  `
+      : ''
+  }
   <span class="summary-title">Promedios del sitio</span>
-  ${scoreRing(avgPerf, 'Performance')}
-  ${scoreRing(avgAcc,  'Accesibilidad')}
-  ${scoreRing(avgBP,   'Best Practices')}
-  ${scoreRing(avgSEO,  'SEO')}
-  ${brokenLinks.length > 0
-    ? `<span class="badge-error" style="margin-left:auto">💀 ${brokenLinks.length} link${brokenLinks.length!==1?'s':''} roto${brokenLinks.length!==1?'s':''}</span>`
-    : `<span class="badge-ok" style="margin-left:auto">💀 Sin links rotos</span>`}
+   ${scoreRing(avgPerf, 'Performance')}
+   ${scoreRing(avgAcc, 'Accesibilidad')}
+   ${scoreRing(avgBP, 'Best Practices')}
+   ${scoreRing(avgSEO, 'SEO')}
+   ${
+     comparison
+       ? `
+   <span class="summary-title" style="margin-top:1rem">Comparación vs reporte anterior</span>
+   ${comparison.performance !== 0 ? scoreRing(comparison.performance, 'Performance', true) : ''}
+   ${comparison.accessibility !== 0 ? scoreRing(comparison.accessibility, 'Accesibilidad', true) : ''}
+   ${comparison.bestPractices !== 0 ? scoreRing(comparison.bestPractices, 'Best Practices', true) : ''}
+   ${comparison.seo !== 0 ? scoreRing(comparison.seo, 'SEO', true) : ''}
+   `
+       : ''
+   }
+  ${
+    brokenLinks.length > 0
+      ? `<span class="badge-error" style="margin-left:auto">💀 ${brokenLinks.length} link${brokenLinks.length !== 1 ? 's' : ''} roto${brokenLinks.length !== 1 ? 's' : ''}</span>`
+      : `<span class="badge-ok" style="margin-left:auto">💀 Sin links rotos</span>`
+  }
 </div>
 
 ${metaTagsTable(results)}
@@ -448,6 +586,84 @@ function downloadCSV() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+let currentData = null;
+let comparisonData = null;
+
+// Cargar datos actuales
+fetch('./results.json').then(r => r.json()).then(d => currentData = d);
+
+function toggleComparison() {
+  const sel = document.getElementById('comparisonSelector');
+  sel.style.display = sel.style.display === 'none' ? 'block' : 'none';
+}
+
+async function loadComparison(timestamp) {
+  if (!timestamp) {
+    const compDiv = document.getElementById('comparisonSection');
+    if (compDiv) compDiv.remove();
+    return;
+  }
+  try {
+    const response = await fetch('./history/' + timestamp + '.json');
+    comparisonData = await response.json();
+    updateComparison(timestamp);
+  } catch (err) {
+    alert('Error cargando reporte: ' + err.message);
+  }
+}
+
+function updateComparison(timestamp) {
+  if (!comparisonData) return;
+
+  const prevTotal = comparisonData.results.length;
+  const prevAvgPerf = Math.round(comparisonData.results.reduce((s,r) => s+r.scores.performance, 0) / prevTotal);
+  const prevAvgAcc = Math.round(comparisonData.results.reduce((s,r) => s+r.scores.accessibility, 0) / prevTotal);
+  const prevAvgBP = Math.round(comparisonData.results.reduce((s,r) => s+r.scores.bestPractices, 0) / prevTotal);
+  const prevAvgSEO = Math.round(comparisonData.results.reduce((s,r) => s+r.scores.seo, 0) / prevTotal);
+
+  const currTotal = currentData.results.length;
+  const avgPerf = Math.round(currentData.results.reduce((s,r) => s+r.scores.performance, 0) / currTotal);
+  const avgAcc = Math.round(currentData.results.reduce((s,r) => s+r.scores.accessibility, 0) / currTotal);
+  const avgBP = Math.round(currentData.results.reduce((s,r) => s+r.scores.bestPractices, 0) / currTotal);
+  const avgSEO = Math.round(currentData.results.reduce((s,r) => s+r.scores.seo, 0) / currTotal);
+
+  const comparison = {
+    performance: avgPerf - prevAvgPerf,
+    accessibility: avgAcc - prevAvgAcc,
+    bestPractices: avgBP - prevAvgBP,
+    seo: avgSEO - prevAvgSEO
+  };
+
+  const summary = document.getElementById('summary');
+  let compDiv = document.getElementById('comparisonSection');
+  if (!compDiv) {
+    compDiv = document.createElement('div');
+    compDiv.id = 'comparisonSection';
+    summary.appendChild(compDiv);
+  }
+
+  compDiv.innerHTML = '<span class="summary-title">Comparación vs ' + timestamp.replace('T', ' ') + '</span>' +
+    (comparison.performance !== 0 ? scoreRing(comparison.performance, 'Performance', true) : '') +
+    (comparison.accessibility !== 0 ? scoreRing(comparison.accessibility, 'Accesibilidad', true) : '') +
+    (comparison.bestPractices !== 0 ? scoreRing(comparison.bestPractices, 'Best Practices', true) : '') +
+    (comparison.seo !== 0 ? scoreRing(comparison.seo, 'SEO', true) : '');
+}
+
+function scoreRing(score, label, isComparison = false) {
+  const absScore = Math.abs(score);
+  const color = isComparison ? (score > 0 ? '#10b981' : '#ef4444') : scoreColor(absScore);
+  const dash = Math.round(absScore * 1.76);
+  const sign = isComparison && score !== 0 ? (score > 0 ? '+' : '') : '';
+  const displayScore = isComparison ? score : absScore;
+  return '<div class="score-ring"><svg viewBox="0 0 64 64" width="56" height="56"><circle cx="32" cy="32" r="28" fill="none" stroke="#e8e8e8" stroke-width="6"/><circle cx="32" cy="32" r="28" fill="none" stroke="' + color + '" stroke-width="6" stroke-dasharray="' + dash + ' 176" stroke-linecap="round" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle" font-size="15" font-weight="bold" fill="' + color + '">' + sign + displayScore + '</text></svg><span class="ring-label">' + label + '</span></div>';
+}
+
+function scoreColor(score) {
+  if (score >= 90) return '#10b981';
+  if (score >= 50) return '#f59e0b';
+  return '#ef4444';
+}
 </script>
 </body>
 </html>`;
@@ -456,7 +672,21 @@ function downloadCSV() {
   writeFileSync(outFile, html, 'utf-8');
 
   const jsonFile = join(outputDir, 'results.json');
-  writeFileSync(jsonFile, JSON.stringify({ site: siteName, date, results, brokenLinks }, null, 2), 'utf-8');
+  writeFileSync(
+    jsonFile,
+    JSON.stringify({ site: siteName, date, results, brokenLinks }, null, 2),
+    'utf-8'
+  );
+
+  // Guardar en historial
+  const timestamp = date.replace(/:/g, '-').replace(/ /g, 'T').slice(0, 19);
+  const historyFile = join(outputDir, 'history', `${timestamp}.json`);
+  writeFileSync(
+    historyFile,
+    JSON.stringify({ site: siteName, date, results, brokenLinks }, null, 2),
+    'utf-8'
+  );
+  previousReports.unshift(timestamp);
 
   return outFile;
 }
