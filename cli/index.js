@@ -27,7 +27,8 @@ program
   )
   .version('0.3.0')
   .requiredOption('-s, --site <url>', 'URL del sitio a auditar (ej: https://tusitio.com)')
-  .option('-m, --max <number>', 'Máximo de páginas a auditar', '30')
+  .option('-m, --max <number>', 'Máximo de páginas a auditar (default: 500; usa --all para sin límite)', '500')
+  .option('-a, --all', 'Auditar TODAS las páginas del sitio sin límite (equivale a --max ilimitado)')
   .option('-o, --out <path>', 'Carpeta de salida para el reporte', './reports')
   .option('-c, --cookie <value>', 'Cookie para autenticación (ej: "session=abc123")')
   .option(
@@ -63,12 +64,12 @@ if (opts.compare) {
 
 async function main() {
   const siteUrl = opts.site.endsWith('/') ? opts.site.slice(0, -1) : opts.site;
-  const maxPages = parseInt(opts.max, 10);
+  const maxPages = opts.all ? Infinity : parseInt(opts.max, 10);
   const outputDir = resolve(opts.out);
 
   console.log(chalk.bold.blue('\n🔦 Lighthouse Reporter v0.2.0\n'));
   console.log(chalk.gray(`  Sitio    : ${siteUrl}`));
-  console.log(chalk.gray(`  Máx pags : ${maxPages}`));
+  console.log(chalk.gray(`  Máx pags : ${maxPages === Infinity ? 'Sin límite (--all)' : maxPages}`));
   console.log(chalk.gray(`  Salida   : ${outputDir}\n`));
 
   // 1. Crawlear el sitio → obtener páginas + meta tags + links rotos
@@ -188,6 +189,21 @@ async function main() {
   if (auditErrors.length > 0)
     console.log(chalk.yellow(`  ✗  Audits fallidos: ${auditErrors.length}`));
 
+  console.log('');
+  console.log(chalk.bold.cyan('  ── Filtros de Analytics recomendados ─────────────────────────────'));
+  console.log(chalk.cyan('  Este audit usó el User-Agent: ') + chalk.white('LighthouseAuditBot/1.0'));
+  console.log(chalk.cyan('  Para excluir estas visitas de tus reportes de analítica:\n'));
+  console.log(chalk.bold('  Google Analytics 4 (GA4):'));
+  console.log(chalk.gray('    Admin → Propiedad → Filtros de datos → Crear filtro'));
+  console.log(chalk.gray('    Tipo: Excluir  |  Campo: Dispositivo → Agente de usuario'));
+  console.log(chalk.gray('    Condición: contiene "LighthouseAuditBot"\n'));
+  console.log(chalk.bold('  Universal Analytics (UA):'));
+  console.log(chalk.gray('    Admin → Vista → Filtros → + Agregar filtro'));
+  console.log(chalk.gray('    Tipo: Personalizado → Excluir  |  Campo: Agente de usuario'));
+  console.log(chalk.gray('    Patrón: LighthouseAuditBot\n'));
+  console.log(chalk.bold('  Google Search Console / Cloudflare / server logs:'));
+  console.log(chalk.gray('    Filtra por User-Agent que contenga "LighthouseAuditBot"'));
+  console.log(chalk.cyan('  ────────────────────────────────────────────────────────────────────'));
   console.log('');
 }
 

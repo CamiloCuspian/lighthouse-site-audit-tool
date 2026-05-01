@@ -18,6 +18,9 @@ export async function launchChrome() {
       '--disable-gpu',
       '--disable-dev-shm-usage',
       '--disable-extensions',
+      '--disable-background-networking',
+      // UA de bot para que analíticas server-side no registren la visita
+      '--user-agent=Mozilla/5.0 (compatible; LighthouseAuditBot/1.0; +bot)',
     ],
   });
   return chromeInstance;
@@ -41,6 +44,26 @@ export async function auditPage(url, extraHeaders = {}) {
     port: chromeInstance.port,
     onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
     extraHeaders,
+    // Bloquea scripts de analítica/tracking para que no registren visitas falsas
+    blockedUrlPatterns: [
+      '*google-analytics.com*',
+      '*analytics.google.com*',
+      '*googletagmanager.com*',
+      '*doubleclick.net*',
+      '*googlesyndication.com*',
+      '*facebook.com/tr*',
+      '*connect.facebook.net*',
+      '*fbevents.js*',
+      '*hotjar.com*',
+      '*clarity.ms*',
+      '*bing.com/bat.js*',
+      '*snap.licdn.com*',
+      '*static.ads-twitter.com*',
+      '*sc-static.net/scevent*',
+      '*cdn.segment.com*',
+      '*cdn.amplitude.com*',
+      '*cdn.mxpnl.com*',
+    ],
   };
 
   const runnerResult = await lighthouse(url, options);

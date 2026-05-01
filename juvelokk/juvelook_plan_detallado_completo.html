@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0d0d;color:#e0e0e0;font-size:13px;line-height:1.55}
+.wrap{max-width:960px;margin:0 auto;padding:20px}
+h1{font-size:17px;font-weight:700;color:#fff;margin-bottom:3px}
+.sub{font-size:11px;color:#666;margin-bottom:18px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid #1e1e1e;padding-bottom:0}
+.tab{padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;border-radius:5px 5px 0 0;color:#666;border:none;background:none;white-space:nowrap}
+.tab.active{color:#fff;background:#181818;border-bottom:2px solid #60a5fa}
+.panel{display:none}.panel.active{display:block}
+
+/* BADGES */
+.badge{display:inline-block;border-radius:3px;padding:2px 6px;font-size:10px;font-weight:700;white-space:nowrap}
+.t{background:#1a2e1a;color:#4ade80}.m{background:#1a1f38;color:#60a5fa}.b{background:#2e1a1a;color:#f87171}
+.p1{background:#2e1a1a;color:#f87171}.p2{background:#2e2a10;color:#facc15}.p3{background:#1a1f38;color:#60a5fa}
+.low{background:#1a2e1a;color:#4ade80}.med{background:#2e2a10;color:#facc15}.high{background:#2e1a1a;color:#f87171}
+
+/* KEYWORD TABLE */
+.kw-wrap{overflow-x:auto;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 10px;border-bottom:1px solid #222;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#555}
+td{padding:7px 10px;border-bottom:1px solid #181818;vertical-align:top}
+tr:hover td{background:#111}
+.kw{font-weight:600;color:#ddd;margin-bottom:2px}
+.kw-intent{font-size:11px;color:#666}
+
+/* SECTION HEADERS */
+.sec-h{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#555;margin:20px 0 10px}
+
+/* BRIEFING CARDS */
+.brief-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.brief-btn{padding:5px 10px;font-size:11px;border-radius:5px;cursor:pointer;border:1px solid #2a2a2a;background:#141414;color:#888;font-weight:600;transition:all .15s}
+.brief-btn.active{background:#1a1f38;color:#60a5fa;border-color:#2d3a5a}
+.brief-panel{display:none}.brief-panel.active{display:block}
+
+.brief-card{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:16px;margin-bottom:12px}
+.brief-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:10px}
+.brief-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.meta-box{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:6px;padding:8px 10px}
+.meta-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.8px;margin-bottom:4px}
+.meta-val{font-size:12px;color:#ccc}
+.meta-val.mono{font-family:monospace;font-size:11px;color:#93c5fd}
+
+/* H STRUCTURE */
+.h-tree{background:#0d0d0d;border-radius:8px;padding:12px;margin-bottom:12px;border:1px solid #1a1a1a}
+.h1-tag{color:#f59e0b;font-weight:700;font-size:12px;margin-bottom:10px}
+.h1-text{color:#fde68a;font-size:13px;font-weight:600;margin-bottom:12px;padding-left:14px}
+.h2-block{margin-bottom:10px;padding-left:10px;border-left:2px solid #2d3a5a}
+.h2-tag{color:#60a5fa;font-weight:700;font-size:11px}
+.h2-text{color:#93c5fd;font-size:12px;margin-bottom:6px}
+.h2-note{font-size:11px;color:#555;margin-bottom:6px;padding-left:12px}
+.h3-block{padding-left:14px;margin-bottom:5px}
+.h3-tag{color:#818cf8;font-weight:600;font-size:10px}
+.h3-text{color:#a5b4fc;font-size:11px}
+
+/* NOTES */
+.note{border-radius:7px;padding:10px 12px;margin-top:10px;font-size:12px;line-height:1.5}
+.note.yellow{background:#1e1a0a;border:1px solid #3a2e10;color:#fde68a}
+.note.blue{background:#0a1020;border:1px solid #1a2d4a;color:#93c5fd}
+.note.red{background:#1a0a0a;border:1px solid #3a1010;color:#fca5a5}
+.note.green{background:#0a1a0a;border:1px solid #1a3a1a;color:#86efac}
+.note-lbl{font-weight:700;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+
+/* COMP TABLE */
+.comp-row{display:grid;grid-template-columns:160px 1fr 1fr;gap:10px;padding:8px 0;border-bottom:1px solid #181818;align-items:start}
+.comp-row:last-child{border-bottom:none}
+.comp-label{font-size:12px;font-weight:600;color:#888}
+.comp-a{font-size:12px;color:#60a5fa}
+.comp-b{font-size:12px;color:#f87171}
+.comp-head{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#444;padding:6px 0}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.pill{display:inline-block;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;padding:2px 7px;font-size:11px;color:#aaa}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>📋 Plan Detallado SEO — Juvelook Colombia</h1>
+<p class="sub">Keyword research exhaustivo + briefings completos H1/H2/H3 · Pendiente de aprobación</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('kw')">🔍 Keywords completas</button>
+  <button class="tab" onclick="showTab('arq')">🗺 Arquitectura</button>
+  <button class="tab" onclick="showTab('brief')">📝 Briefings</button>
+  <button class="tab" onclick="showTab('comp')">⚔️ Competencia</button>
+  <button class="tab" onclick="showTab('rules')">✅ Reglas SEO</button>
+</div>
+
+<!-- ===== TAB 1: KEYWORDS COMPLETAS ===== -->
+<div id="tab-kw" class="panel active">
+
+  <div class="sec-h">Grupo A — TOFU · Conciencia del problema (usuario no conoce Juvelook)</div>
+  <div class="kw-wrap"><table>
+    <tr><th>Keyword</th><th>Volumen</th><th>Dificultad</th><th>Intención</th><th>Acción</th></tr>
+    <tr><td><div class="kw">lifting sin cirugía bogotá</div><div class="kw-intent">Busca clínica o método — intención mixta info+transaccional</div></td><td><span class="badge med">Alta</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU</span></td><td>✅ Incluir en página servicio + post</td></tr>
+    <tr><td><div class="kw">lifting sin cirugía medellín</div><div class="kw-intent">Variante local — mismo usuario diferente ciudad</div></td><td><span class="badge med">Alta</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU</span></td><td>✅ Variación en página servicio</td></tr>
+    <tr><td><div class="kw">lifting sin cirugía colombia</div><div class="kw-intent">Término umbrella — captura tráfico nacional</div></td><td><span class="badge high">Muy alta</span></td><td><span class="badge high">Alta</span></td><td><span class="badge t">TOFU</span></td><td>⚠️ Keyword secundaria, no principal</td></tr>
+    <tr><td><div class="kw">lifting inyectable facial</div><div class="kw-intent">Ya sabe que existe el lifting inyectable, busca opciones</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU</span></td><td>✅ Post TOFU principal</td></tr>
+    <tr><td><div class="kw">bioestimulador colágeno colombia</div><div class="kw-intent">Categoría general — busca información sobre bioestimuladores</div></td><td><span class="badge high">Alta</span></td><td><span class="badge high">Alta</span></td><td><span class="badge t">TOFU</span></td><td>⚠️ Competida — usar como secundaria</td></tr>
+    <tr><td><div class="kw">bioestimulador facial bogotá</div><div class="kw-intent">Con intención local — más calificado que el término general</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU</span></td><td>✅ En página de servicio</td></tr>
+    <tr><td><div class="kw">rejuvenecimiento facial sin cirugía colombia</div><div class="kw-intent">Umbrella amplio — intención de aprender opciones disponibles</div></td><td><span class="badge high">Alta</span></td><td><span class="badge high">Alta</span></td><td><span class="badge t">TOFU</span></td><td>⚠️ Incluir como H2 dentro de post general</td></tr>
+    <tr><td><div class="kw">ácido poliláctico facial colombia</div><div class="kw-intent">Usuario informado — ya buscó el activo, compara opciones</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU</span></td><td>✅ Post TOFU — puente hacia Juvelook</td></tr>
+    <tr><td><div class="kw">ácido poliláctico para qué sirve</div><div class="kw-intent">Pregunta educativa — muy baja competencia, fácil de posicionar</div></td><td><span class="badge low">Media-baja</span></td><td><span class="badge low">Baja</span></td><td><span class="badge t">TOFU</span></td><td>✅ FAQ dentro del post TOFU</td></tr>
+    <tr><td><div class="kw">patas de gallo tratamiento colombia</div><div class="kw-intent">Problema estético muy buscado por mujeres 35-55 años</div></td><td><span class="badge high">Alta</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU</span></td><td>✅ Post dedicado — TOFU/MOFU puente</td></tr>
+    <tr><td><div class="kw">patas de gallina tratamiento facial</div><div class="kw-intent">Variante — colombia usa ambos términos (gallo/gallina)</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU</span></td><td>✅ Variación a incluir en mismo post</td></tr>
+    <tr><td><div class="kw">cómo eliminar patas de gallo sin cirugía</div><div class="kw-intent">Long-tail con intención específica — muy convertible</div></td><td><span class="badge med">Media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge t">TOFU</span></td><td>✅ H1 o H2 del post de patas de gallo</td></tr>
+    <tr><td><div class="kw">ojeras tratamiento inyectable bogotá</div><div class="kw-intent">Alta intención local — ya decidió el tipo de tratamiento</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge t">TOFU→MOFU</span></td><td>✅ H2 dentro del post de ojeras/párpados</td></tr>
+    <tr><td><div class="kw">cómo quitar ojeras profundas colombia</div><div class="kw-intent">Buscado por personas con ojeras estructurales, no solo cansancio</div></td><td><span class="badge med">Media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge t">TOFU</span></td><td>✅ Puerta de entrada al post de párpados</td></tr>
+    <tr><td><div class="kw">párpados caídos tratamiento sin cirugía colombia</div><div class="kw-intent">Diferenciador único de Juvelook — poca competencia en ESP</div></td><td><span class="badge low">Baja-media</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge t">TOFU</span></td><td>🔥 Quick win — ranking rápido</td></tr>
+    <tr><td><div class="kw">flacidez facial tratamiento colombia</div><div class="kw-intent">Término general — volumen alto, competido por Sculptra y Radiesse</div></td><td><span class="badge high">Alta</span></td><td><span class="badge high">Alta</span></td><td><span class="badge t">TOFU</span></td><td>⚠️ Secundaria — mencionar dentro de posts</td></tr>
+    <tr><td><div class="kw">cómo estimular colágeno en la piel</div><div class="kw-intent">Educativa — atrae tráfico frío que puede convertirse con Juvelook</div></td><td><span class="badge med">Media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge t">TOFU</span></td><td>✅ H2 en post de ¿Qué es Juvelook?</td></tr>
+    <tr><td><div class="kw">tratamiento antiedad colombia sin cirugía</div><div class="kw-intent">Umbrella de antiedad — amplio pero con buena intención</div></td><td><span class="badge high">Alta</span></td><td><span class="badge high">Alta</span></td><td><span class="badge t">TOFU</span></td><td>⚠️ Solo como variación LSI en textos</td></tr>
+    <tr><td><div class="kw">skin booster colombia</div><div class="kw-intent">Anglicismo adoptado — creciendo en Latam, baja competencia local</div></td><td><span class="badge low">Baja-media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge t">TOFU</span></td><td>✅ Mencionar en post TOFU y comparativas</td></tr>
+    <tr><td><div class="kw">rejuvenecimiento periocular sin cirugía</div><div class="kw-intent">Técnico — lo busca el paciente informado o el médico</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge t">TOFU</span></td><td>✅ H2 en post de párpados/ojeras</td></tr>
+    <tr><td><div class="kw">arrugas finas tratamiento inyectable colombia</div><div class="kw-intent">Diferencia arrugas finas (Juvelook) de profundas (Sculptra)</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Baja</span></td><td><span class="badge t">TOFU</span></td><td>✅ Sección en post TOFU + comparativas</td></tr>
+  </table></div>
+
+  <div class="sec-h">Grupo B — MOFU · Consideración y comparación (usuario evalúa opciones)</div>
+  <div class="kw-wrap"><table>
+    <tr><th>Keyword</th><th>Volumen</th><th>Dificultad</th><th>Intención</th><th>Acción</th></tr>
+    <tr><td><div class="kw">juvelook colombia</div><div class="kw-intent">Marca + país — competencia casi cero, posicionamiento inmediato</div></td><td><span class="badge low">Baja creciente</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge m">MOFU</span></td><td>🔥 KW principal página de servicio</td></tr>
+    <tr><td><div class="kw">juvelook vs sculptra</div><div class="kw-intent">Alta búsqueda internacional — Colombia aún sin resultado en ESP</div></td><td><span class="badge med">Media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>🔥 Post dedicado prioritario</td></tr>
+    <tr><td><div class="kw">juvelook vs rejuran</div><div class="kw-intent">Creciendo en Latam — usuarios que comparan skin boosters coreanos</div></td><td><span class="badge med">Media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>🔥 Post dedicado</td></tr>
+    <tr><td><div class="kw">juvelook vs profhilo</div><div class="kw-intent">Profhilo tiene presencia en Colombia — comparativa muy buscada</div></td><td><span class="badge low">Baja-media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ Post dedicado</td></tr>
+    <tr><td><div class="kw">juvelook vs bótox patas de gallo</div><div class="kw-intent">Bótox muy buscado — la comparativa captura tráfico masivo hacia Juvelook</div></td><td><span class="badge med">Media</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ Post dedicado — gran captación</td></tr>
+    <tr><td><div class="kw">juvelook vs radiesse</div><div class="kw-intent">Radiesse muy conocido en Colombia — comparativa orgánica natural</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ Sección dentro de post comparativas</td></tr>
+    <tr><td><div class="kw">juvelook vs harmonyca</div><div class="kw-intent">Ambos son nuevos en Colombia — la comparativa educa al mercado</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ Post futuro (prioridad 3)</td></tr>
+    <tr><td><div class="kw">mejor bioestimulador colombia 2026</div><div class="kw-intent">Intención comparativa directa — quien lo busca está listo para decidir</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ H1 alternativo para un post MOFU</td></tr>
+    <tr><td><div class="kw">mejor bioestimulador para patas de gallo</div><div class="kw-intent">Intención muy específica — alta conversión</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge m">MOFU</span></td><td>🔥 Quick win — incluir en post de patas de gallo</td></tr>
+    <tr><td><div class="kw">bioestimulador híbrido ácido poliláctico hialurónico</div><div class="kw-intent">Técnico — nadie lo busca aún, pero posiciona diferenciación</div></td><td><span class="badge low">Muy baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ H2 dentro del post TOFU</td></tr>
+    <tr><td><div class="kw">sculptra colombia opiniones</div><div class="kw-intent">Busca reseñas — capturar para comparar con Juvelook</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge m">MOFU</span></td><td>✅ Sección en Juvelook vs Sculptra</td></tr>
+    <tr><td><div class="kw">sculptra antes y después colombia</div><div class="kw-intent">Busca evidencia visual — mencionar en comparativa</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge m">MOFU</span></td><td>✅ Sección en Juvelook vs Sculptra</td></tr>
+    <tr><td><div class="kw">diferencia entre relleno y bioestimulador</div><div class="kw-intent">Pregunta frecuente — confunden relleno con bioestimulación</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ FAQ en post TOFU y página de servicio</td></tr>
+    <tr><td><div class="kw">ácido hialurónico vs bioestimulador facial</div><div class="kw-intent">Diferenciación conceptual — muy útil para educar al paciente</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ H2 en post TOFU</td></tr>
+    <tr><td><div class="kw">skin booster vs bioestimulador diferencia</div><div class="kw-intent">Anglicismo — creciente entre pacientes jóvenes y bien informados</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge m">MOFU</span></td><td>✅ FAQ dentro del post TOFU</td></tr>
+  </table></div>
+
+  <div class="sec-h">Grupo C — BOFU · Transaccional (listo para agendar o consultar precio)</div>
+  <div class="kw-wrap"><table>
+    <tr><th>Keyword</th><th>Volumen</th><th>Dificultad</th><th>Intención</th><th>Acción</th></tr>
+    <tr><td><div class="kw">juvelook precio colombia</div><div class="kw-intent">Intención BOFU clara — el que pregunta precio quiere comprar</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge b">BOFU</span></td><td>🔥 H2 obligatorio en página de servicio</td></tr>
+    <tr><td><div class="kw">juvelook clínica bogotá</div><div class="kw-intent">Búsqueda local — quiere encontrar dónde hacérselo en Bogotá</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge b">BOFU</span></td><td>🔥 KW local en página de servicio</td></tr>
+    <tr><td><div class="kw">juvelook clínica medellín</div><div class="kw-intent">Variante local para Medellín</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge b">BOFU</span></td><td>✅ Variación en página de servicio</td></tr>
+    <tr><td><div class="kw">juvelook distribuidor exclusivo colombia</div><div class="kw-intent">El usuario sabe que es exclusivo — argumento de urgencia y confianza</div></td><td><span class="badge low">Muy baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge b">BOFU</span></td><td>🔥 Sección dedicada en página de servicio</td></tr>
+    <tr><td><div class="kw">agendar juvelook colombia</div><div class="kw-intent">Intención máxima — ya decidió, busca cómo reservar</div></td><td><span class="badge low">Muy baja</span></td><td><span class="badge low">Muy baja</span></td><td><span class="badge b">BOFU</span></td><td>🔥 CTA directo en página de servicio</td></tr>
+    <tr><td><div class="kw">bioestimulador facial precio bogotá</div><div class="kw-intent">Captura tráfico que busca precio sin conocer Juvelook aún</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge b">BOFU</span></td><td>✅ H2 en página de servicio</td></tr>
+    <tr><td><div class="kw">lifting inyectable precio colombia 2026</div><div class="kw-intent">Muy transaccional — quiere comparar precios antes de llamar</div></td><td><span class="badge med">Media</span></td><td><span class="badge med">Media</span></td><td><span class="badge b">BOFU</span></td><td>✅ Sección precio comparado en servicio</td></tr>
+    <tr><td><div class="kw">tratamiento patas de gallo precio bogotá</div><div class="kw-intent">Con intención local — alta probabilidad de agendar cita</div></td><td><span class="badge low">Baja</span></td><td><span class="badge low">Baja</span></td><td><span class="badge b">BOFU</span></td><td>✅ FAQ en post de patas de gallo</td></tr>
+  </table></div>
+
+  <div class="sec-h">Grupo D — Long-tail / Preguntas frecuentes (PAA de Google — contenido FAQ)</div>
+  <div class="kw-wrap"><table>
+    <tr><th>Pregunta</th><th>Dónde incluir</th></tr>
+    <tr><td><div class="kw">¿qué es un bioestimulador de colágeno?</div><div class="kw-intent">Pregunta base — captura usuarios que no saben nada del tema</div></td><td>Post TOFU — H2 introductorio</td></tr>
+    <tr><td><div class="kw">¿cuánto dura el efecto de un bioestimulador facial?</div><div class="kw-intent">PAA muy frecuente en Google — respuesta de 2-3 frases con Featured Snippet</div></td><td>FAQ en todos los posts + página servicio</td></tr>
+    <tr><td><div class="kw">¿cuántas sesiones de Juvelook se necesitan?</div><div class="kw-intent">Pregunta de protocolo — ayuda a preparar la expectativa del paciente</div></td><td>FAQ en página servicio y post TOFU</td></tr>
+    <tr><td><div class="kw">¿cómo funciona Juvelook en la piel?</div><div class="kw-intent">Mecanismo de acción — ideal para Featured Snippet de 40-50 palabras</div></td><td>H2 en post TOFU + FAQ en servicio</td></tr>
+    <tr><td><div class="kw">¿Juvelook es seguro?</div><div class="kw-intent">Pregunta de confianza — crítica para conversión. Abordar el caso Lenisna</div></td><td>FAQ en página servicio + sección dedicada</td></tr>
+    <tr><td><div class="kw">¿para qué zonas del rostro sirve Juvelook?</div><div class="kw-intent">Especificidad de área — diferenciador vs Sculptra (que no va en periocular)</div></td><td>H2 en post TOFU + FAQ servicio</td></tr>
+    <tr><td><div class="kw">¿cuándo se ven los resultados de Juvelook?</div><div class="kw-intent">Pregunta de expectativa — fundamental para reducir dudas pre-cita</div></td><td>FAQ en página servicio</td></tr>
+    <tr><td><div class="kw">¿cuál es la diferencia entre Juvelook y Sculptra?</div><div class="kw-intent">Captura tráfico informacional que luego deriva a la comparativa</div></td><td>FAQ en post TOFU + link interno al post Juvelook vs Sculptra</td></tr>
+    <tr><td><div class="kw">¿duele el tratamiento con Juvelook?</div><div class="kw-intent">Pregunta de miedo — abordar para reducir barrera de entrada</div></td><td>FAQ en página servicio</td></tr>
+    <tr><td><div class="kw">¿qué cuidados hay después del tratamiento con Juvelook?</div><div class="kw-intent">Post-tratamiento — ayuda a fidelizar y a posicionar como experto</div></td><td>Sección en página servicio</td></tr>
+    <tr><td><div class="kw">¿Juvelook sirve para hombres?</div><div class="kw-intent">Segmento creciente — hombres buscan tratamientos faciales discretos</div></td><td>Mención dentro del post TOFU</td></tr>
+    <tr><td><div class="kw">¿Juvelook reemplaza al Sculptra?</div><div class="kw-intent">Pregunta de decisión directa — lead al post Juvelook vs Sculptra</div></td><td>FAQ en post Juvelook vs Sculptra</td></tr>
+  </table></div>
+
+  <div class="note yellow" style="margin-top:4px"><div class="note-lbl">⚠️ Keywords a evitar / no atacar</div>
+  <strong>"bioestimulador colágeno"</strong> (demasiado genérico, dominado por marcas y clínicas con años de dominio). <strong>"relleno facial bogotá"</strong> (intención diferente, canibaliza con otras páginas). <strong>"ácido hialurónico bogotá"</strong> (categoría distinta, no es lo que vende Juvelook). Cualquier keyword que no incluya intención de rejuvenecimiento o tratamiento específico.</div>
+</div>
+
+<!-- ===== TAB 2: ARQUITECTURA ===== -->
+<div id="tab-arq" class="panel">
+  <div class="sec-h">Mapa de contenido — 8 piezas en orden de prioridad</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">🎯</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Página de servicio — Juvelook Colombia</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/juvelook/</div>
+        <div style="font-size:11px;color:#888">Página madre de todo el ecosistema. BOFU puro. CTA para agendar + sección de precio + exclusividad.</div>
+        <div class="pills"><span class="pill">juvelook colombia</span><span class="pill">juvelook precio colombia</span><span class="pill">distribuidor exclusivo</span><span class="pill">lifting inyectable bogotá</span></div>
+      </div>
+      <div><span class="badge b">BOFU</span></div>
+      <div style="font-size:11px;color:#f87171;font-weight:700">🔴 P1</div>
+      <div style="font-size:11px;color:#aaa">~1.200 palabras</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">📖</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">¿Qué es Juvelook? El bioestimulador híbrido coreano</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/blog/que-es-juvelook-bioestimulador-hibrido/</div>
+        <div style="font-size:11px;color:#888">Post pilar educativo. Explica el activo (PDLLA + AH), cómo funciona, áreas de aplicación, protocolo, seguridad. Perspectiva cliente y especialista.</div>
+        <div class="pills"><span class="pill">lifting inyectable facial</span><span class="pill">ácido poliláctico facial</span><span class="pill">bioestimulador colágeno colombia</span></div>
+      </div>
+      <div><span class="badge t">TOFU</span></div>
+      <div style="font-size:11px;color:#f87171;font-weight:700">🔴 P1</div>
+      <div style="font-size:11px;color:#aaa">~2.000 palabras</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">🆚</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Juvelook vs Sculptra: comparativa completa 2026</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/blog/juvelook-vs-sculptra/</div>
+        <div style="font-size:11px;color:#888">Comparativa detallada. Tabla, 8 criterios, cuándo elegir uno u otro. Captura tráfico de Sculptra ya conocido en Colombia.</div>
+        <div class="pills"><span class="pill">juvelook vs sculptra</span><span class="pill">sculptra colombia</span><span class="pill">mejor bioestimulador colombia</span></div>
+      </div>
+      <div><span class="badge m">MOFU</span></div>
+      <div style="font-size:11px;color:#f87171;font-weight:700">🔴 P1</div>
+      <div style="font-size:11px;color:#aaa">~2.200 palabras</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">👁</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Patas de gallo, párpados y ojeras: qué es Juvelook y por qué funciona</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/blog/juvelook-patas-de-gallo-parpados-ojeras/</div>
+        <div style="font-size:11px;color:#888">Atacar 3 keywords de alto volumen en un solo post. Diferenciador único de Juvelook vs otros bioestimuladores que NO pueden ir en zona periocular.</div>
+        <div class="pills"><span class="pill">patas de gallo tratamiento</span><span class="pill">ojeras inyectable bogotá</span><span class="pill">párpados caídos sin cirugía</span></div>
+      </div>
+      <div><span class="badge m">MOFU</span></div>
+      <div style="font-size:11px;color:#f87171;font-weight:700">🔴 P1</div>
+      <div style="font-size:11px;color:#aaa">~2.000 palabras</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">🆚</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Juvelook vs Bótox para patas de gallo: cuál elige tu piel</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/blog/juvelook-vs-botox-patas-de-gallo/</div>
+        <div style="font-size:11px;color:#888">Bótox tiene volumen masivo en Colombia. Este post captura ese tráfico y lo convierte con Juvelook. Clave: Bótox relaja, Juvelook regenera.</div>
+        <div class="pills"><span class="pill">bótox patas de gallo</span><span class="pill">bótox vs bioestimulador</span><span class="pill">lifting sin toxina botulínica</span></div>
+      </div>
+      <div><span class="badge m">MOFU</span></div>
+      <div style="font-size:11px;color:#facc15;font-weight:700">🟡 P2</div>
+      <div style="font-size:11px;color:#aaa">~1.800 palabras</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">🆚</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Juvelook vs Rejuran: dos skin boosters coreanos cara a cara</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/blog/juvelook-vs-rejuran/</div>
+        <div style="font-size:11px;color:#888">Rejuran crece en Latam. La comparativa posiciona el "origen coreano" como argumento de calidad y educa sobre PDLLA vs polinucleótidos.</div>
+        <div class="pills"><span class="pill">juvelook vs rejuran</span><span class="pill">skin booster coreano colombia</span><span class="pill">rejuran colombia</span></div>
+      </div>
+      <div><span class="badge m">MOFU</span></div>
+      <div style="font-size:11px;color:#facc15;font-weight:700">🟡 P2</div>
+      <div style="font-size:11px;color:#aaa">~1.800 palabras</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">🆚</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Juvelook vs Profhilo: hidratación profunda vs estimulación de colágeno</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/blog/juvelook-vs-profhilo/</div>
+        <div style="font-size:11px;color:#888">Profhilo presente en Colombia. Diferencia clara: Profhilo hidrata, Juvelook regenera y estimula colágeno. Dura más, hace más.</div>
+        <div class="pills"><span class="pill">juvelook vs profhilo</span><span class="pill">profhilo colombia</span><span class="pill">ácido hialurónico vs bioestimulador</span></div>
+      </div>
+      <div><span class="badge m">MOFU</span></div>
+      <div style="font-size:11px;color:#facc15;font-weight:700">🟡 P2</div>
+      <div style="font-size:11px;color:#aaa">~1.600 palabras</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:36px 1fr 100px 80px 90px;gap:10px;padding:8px 10px;border-radius:7px;background:#111;border:1px solid #1e1e1e;align-items:start">
+      <div style="font-size:20px;padding-top:4px">🆚</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Juvelook vs HarmonyCa: los dos nuevos bioestimuladores en Colombia</div>
+        <div style="font-family:monospace;font-size:11px;color:#555;margin-bottom:4px">/blog/juvelook-vs-harmonyca/</div>
+        <div style="font-size:11px;color:#888">Ambos son novedad. Post que posiciona como los bioestimuladores de nueva generación y explica cuándo elegir uno u otro según el paciente.</div>
+        <div class="pills"><span class="pill">harmonyca colombia</span><span class="pill">juvelook vs harmonyca</span><span class="pill">bioestimuladores nueva generación</span></div>
+      </div>
+      <div><span class="badge m">MOFU</span></div>
+      <div style="font-size:11px;color:#60a5fa;font-weight:700">🔵 P3</div>
+      <div style="font-size:11px;color:#aaa">~1.600 palabras</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 3: BRIEFINGS ===== -->
+<div id="tab-brief" class="panel">
+  <div class="brief-nav">
+    <button class="brief-btn active" onclick="showBrief('b1')">1 · Servicio</button>
+    <button class="brief-btn" onclick="showBrief('b2')">2 · ¿Qué es?</button>
+    <button class="brief-btn" onclick="showBrief('b3')">3 · vs Sculptra</button>
+    <button class="brief-btn" onclick="showBrief('b4')">4 · Patas de gallo</button>
+    <button class="brief-btn" onclick="showBrief('b5')">5 · vs Bótox</button>
+    <button class="brief-btn" onclick="showBrief('b6')">6 · vs Rejuran</button>
+    <button class="brief-btn" onclick="showBrief('b7')">7 · vs Profhilo</button>
+    <button class="brief-btn" onclick="showBrief('b8')">8 · vs HarmonyCa</button>
+  </div>
+
+  <!-- BRIEFING 1 -->
+  <div id="brief-b1" class="brief-panel active">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 1 — Página de servicio Juvelook Colombia (BOFU)</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/juvelook/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">juvelook colombia</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">juvelook precio · distribuidor exclusivo colombia · lifting inyectable bogotá · bioestimulador facial bogotá</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">1.000 – 1.400 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Schema markup</div><div class="meta-val">MedicalProcedure + FAQPage + LocalBusiness</div></div>
+        <div class="meta-box"><div class="meta-label">CTA principal</div><div class="meta-val">Botón WhatsApp "Agenda tu valoración gratuita"</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1 (1 único)</div>
+        <div class="h1-text">Juvelook en Colombia — bioestimulador híbrido exclusivo para rejuvenecer tu rostro</div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Qué es Juvelook y por qué es diferente a cualquier otro tratamiento?</div>
+          <div class="h2-note">→ Explicación breve del activo (PDLLA + AH), mecanismo dual: hidratación inmediata + colágeno progresivo. 150 palabras. Sin tecnicismos innecesarios.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Para qué zonas funciona Juvelook?</div>
+          <div class="h2-note">→ Lista visual: rostro completo, patas de gallo, párpados, ojeras, cuello, surco nasogeniano. Énfasis en zona periocular (diferenciador vs Sculptra).</div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">Patas de gallo y contorno de ojos</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">Mejillas y surco nasogeniano</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">Cuello y escote</div></div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Cómo es el protocolo de tratamiento?</div>
+          <div class="h2-note">→ 2-3 sesiones cada 4 semanas + mantenimiento anual. Tabla visual: Sesión 1 / Sesión 2 / Sesión 3 / Resultado final.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Juvelook precio en Colombia — ¿cuánto cuesta el tratamiento?</div>
+          <div class="h2-note">→ Rango de precio por sesión. No poner precio exacto si varía, sino "desde $X COP según valoración". Incluir comparación con Sculptra (que cuesta más). CTA de valoración gratuita aquí.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Distribuidor exclusivo de Juvelook en Colombia</div>
+          <div class="h2-note">→ Sección de confianza y urgencia. Argumento de escasez legítimo: no todas las clínicas tienen acceso. Esta es una de ellas.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes sobre Juvelook</div>
+          <div class="h2-note">→ Schema FAQPage. Incluir: ¿duele?, ¿cuándo se ven resultados?, ¿cuánto dura el efecto?, ¿es seguro?, ¿qué cuidados hay después?</div>
+        </div>
+      </div>
+      <div class="note green"><div class="note-lbl">✅ Reglas SEO de esta página</div>Title: "Juvelook Colombia — Bioestimulador Híbrido Exclusivo | [Nombre Clínica]" (58 chars). Meta: "Juvelook en Colombia, el bioestimulador coreano PDLLA + ácido hialurónico. Distribuidor exclusivo. Agenda tu valoración." (120 chars). Mínimo 2 imágenes con alt: "tratamiento-juvelook-colombia-resultado" y "juvelook-bioestimulador-hibrido-rostro".</div>
+    </div>
+  </div>
+
+  <!-- BRIEFING 2 -->
+  <div id="brief-b2" class="brief-panel">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 2 — ¿Qué es Juvelook? Post pilar TOFU</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/blog/que-es-juvelook-bioestimulador-hibrido/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">lifting inyectable facial colombia</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">ácido poliláctico facial · qué es bioestimulador colágeno · skin booster colombia · juvelook colombia</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">1.800 – 2.200 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Schema markup</div><div class="meta-val">Article + FAQPage</div></div>
+        <div class="meta-box"><div class="meta-label">Links internos</div><div class="meta-val">→ /juvelook/ (CTA) · → /blog/juvelook-vs-sculptra/ · → /blog/juvelook-patas-de-gallo/</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1</div>
+        <div class="h1-text">Juvelook: el nuevo lifting inyectable que llega a Colombia para rejuvenecer tu piel sin cirugía</div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Qué es un bioestimulador de colágeno y cómo funciona?</div>
+          <div class="h2-note">→ Explicación accesible. Metáfora útil: "el bioestimulador le habla a tu propia piel para que produzca más colágeno, en lugar de rellenar desde afuera". 200 palabras.</div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">Diferencia entre un relleno dérmico y un bioestimulador</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">¿Qué es el ácido hialurónico y qué papel tiene en Juvelook?</div></div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Qué hace a Juvelook diferente? La fórmula híbrida PDLLA + ácido hialurónico</div>
+          <div class="h2-note">→ Aquí se explica el activo. Perspectiva cliente: "dos tratamientos en uno". Perspectiva especialista: PDLLA estimula colágeno en dermis superficial, HA da hidratación inmediata. 250 palabras.</div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">El ácido poliláctico: cómo estimula tu propio colágeno</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">El ácido hialurónico: el resultado que ves el mismo día</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">¿Por qué la combinación es más efectiva que cada uno por separado?</div></div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Para quién está indicado Juvelook?</div>
+          <div class="h2-note">→ Perfiles de paciente: arrugas finas, piel sin volumen, ojeras, patas de gallo, flacidez temprana. También para hombres. Decir quién NO es candidato (inflamación activa, embarazo).</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Zonas del rostro donde se aplica Juvelook</div>
+          <div class="h2-note">→ Listar con detalle. Destacar en negrita: párpados y patas de gallo (diferenciador exclusivo).</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Cómo es una sesión de Juvelook? Paso a paso</div>
+          <div class="h2-note">→ Desmitificar el proceso: limpieza, anestesia tópica, aplicación con microcánula, tiempo total 30-45 min, resultados desde el primer día.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Resultados: ¿cuándo se ven y cuánto duran?</div>
+          <div class="h2-note">→ Inmediatos (AH) vs progresivos (PDLLA). Duración 18-24 meses. Tabla: Semana 1 / Mes 1 / Mes 3 / Mes 6.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Es seguro el tratamiento con Juvelook? Lo que debes saber</div>
+          <div class="h2-note">→ Abordar el caso Lenisna/Juvelook Volume de forma honesta: Juvelook estándar ≠ Juvelook Volume. Importancia de clínica certificada. Convierte el miedo en argumento de autoridad.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes sobre Juvelook</div>
+          <div class="h2-note">→ FAQPage schema. 5-6 preguntas de las identificadas en el keyword research.</div>
+        </div>
+      </div>
+      <div class="note blue"><div class="note-lbl">📌 Nota de redacción</div>Escribir en primera persona plural ("en nuestra clínica...") solo en los CTA. El resto del artículo debe ser informativo y neutral para generar confianza. Incluir la referencia al creador coreano y a Ana María en un bloque de "lo que dicen quienes ya lo probaron". Longitud mínima de cada H2: 150 palabras.</div>
+    </div>
+  </div>
+
+  <!-- BRIEFING 3 -->
+  <div id="brief-b3" class="brief-panel">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 3 — Juvelook vs Sculptra (MOFU) · Comparativa completa</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/blog/juvelook-vs-sculptra/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">juvelook vs sculptra</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">sculptra colombia opiniones · mejor bioestimulador colombia · sculptra antes y después</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">2.000 – 2.400 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Schema markup</div><div class="meta-val">Article + FAQPage + tabla comparativa visible</div></div>
+        <div class="meta-box"><div class="meta-label">Links internos</div><div class="meta-val">→ /juvelook/ · → /blog/que-es-juvelook/ · → /blog/juvelook-patas-de-gallo/</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1</div>
+        <div class="h1-text">Juvelook vs Sculptra: ¿cuál bioestimulador es mejor para ti en Colombia?</div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Qué son Juvelook y Sculptra? Punto de partida</div>
+          <div class="h2-note">→ Presentar los dos tratamientos de forma justa. No demonizar a Sculptra. El objetivo es ayudar al lector a elegir, no solo vender Juvelook.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Composición: PDLLA vs PLLA — una diferencia que importa</div>
+          <div class="h2-note">→ La diferencia técnica en lenguaje sencillo. Juvelook = PDLLA + HA. Sculptra = PLLA puro. Consecuencia práctica: Juvelook da resultado inmediato Y progresivo; Sculptra solo progresivo.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Comparativa completa en 8 criterios</div>
+          <div class="h2-note">→ TABLA OBLIGATORIA: Composición / Resultado inmediato / Resultado a largo plazo / Duración / Número de sesiones / Zonas indicadas / Precio en Colombia / Para quién es ideal.</div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">1. Velocidad de resultados</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">2. Duración del efecto</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">3. Zonas de aplicación — aquí Juvelook gana</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">4. Número de sesiones y protocolo</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">5. Precio comparado en Colombia</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">6. Perfil de paciente ideal para cada uno</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">7. Tiempo de recuperación</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">8. Disponibilidad en Colombia</div></div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Cuándo elegir Juvelook y cuándo elegir Sculptra?</div>
+          <div class="h2-note">→ Sección de decisión. Dos bloques claros: "Elige Juvelook si..." / "Elige Sculptra si...". Lenguaje directo, sin rodeos.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Se pueden combinar Juvelook y Sculptra?</div>
+          <div class="h2-note">→ Respuesta: sí, en casos de flacidez avanzada con pérdida de volumen estructural. Juvelook en superficial, Sculptra en profundo. Upsell sutil.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes: Juvelook vs Sculptra</div>
+          <div class="h2-note">→ FAQPage: ¿Juvelook reemplaza a Sculptra? ¿Cuál dura más? ¿Cuál duele menos? ¿Cuál es más barato en Colombia?</div>
+        </div>
+      </div>
+      <div class="note yellow"><div class="note-lbl">⚠️ Tono de escritura</div>Este post debe ser honesto y balanceado. Si el lector siente que solo le están vendiendo Juvelook, pierde confianza. Presentar Sculptra con sus ventajas reales (volumen profundo, duración mayor) y explicar que Juvelook es superior en zonas finas y en hidratación + colágeno. La objetividad convierte más que la propaganda.</div>
+    </div>
+  </div>
+
+  <!-- BRIEFING 4 -->
+  <div id="brief-b4" class="brief-panel">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 4 — Patas de gallo, párpados y ojeras con Juvelook (MOFU)</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/blog/juvelook-patas-de-gallo-parpados-ojeras/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">patas de gallo tratamiento colombia</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">ojeras tratamiento inyectable bogotá · párpados caídos sin cirugía · cómo eliminar patas de gallo · rejuvenecimiento periocular</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">1.800 – 2.200 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Schema markup</div><div class="meta-val">Article + FAQPage</div></div>
+        <div class="meta-box"><div class="meta-label">Links internos</div><div class="meta-val">→ /juvelook/ · → /blog/juvelook-vs-sculptra/ · → /blog/juvelook-vs-botox-patas-de-gallo/</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1</div>
+        <div class="h1-text">Patas de gallo, ojeras y párpados: cómo Juvelook rejuvenece el contorno de ojos sin cirugía</div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Por qué las patas de gallo son tan difíciles de tratar?</div>
+          <div class="h2-note">→ Empatía con el lector. Explicar que la piel del contorno de ojo es la más delgada del rostro (0,5 mm). La mayoría de bioestimuladores NO puede aplicarse aquí. Juvelook sí.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Juvelook en la zona periocular: lo que ningún otro bioestimulador puede hacer</div>
+          <div class="h2-note">→ Diferenciador clave. Sculptra y Radiesse NO van en zona periocular. Juvelook sí, gracias a su baja concentración de PDLLA y la microcánula. Esto es el argumento de venta más fuerte.</div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">¿Por qué Sculptra y Radiesse no se aplican en el contorno de ojos?</div></div>
+          <div class="h3-block"><div class="h3-tag">H3</div><div class="h3-text">Cómo la microcánula de Juvelook protege la zona delicada</div></div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Tratamiento de patas de gallo con Juvelook: qué esperar</div>
+          <div class="h2-note">→ Descripción del procedimiento, resultados a las 4 semanas, número de sesiones (2-3), fotos antes y después (placeholder).</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Ojeras profundas: Juvelook vs relleno de ácido hialurónico convencional</div>
+          <div class="h2-note">→ Muchos pacientes piden relleno en ojeras. Juvelook estimula el propio colágeno de la zona en vez de agregar volumen ajeno. Menor riesgo de efecto "globo" o Tyndall.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Párpados caídos sin cirugía: cuándo Juvelook puede ayudar</div>
+          <div class="h2-note">→ Aclarar limitaciones: Juvelook mejora la calidad de la piel del párpado y reduce la flacidez superficial, pero no reemplaza la blefaroplastia en ptosis real. Honestidad = confianza.</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">¿Cuántas sesiones necesito y cuánto tiempo duran los resultados?</div>
+        </div>
+        <div class="h2-block">
+          <div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes sobre Juvelook en el contorno de ojos</div>
+        </div>
+      </div>
+      <div class="note red"><div class="note-lbl">⚠️ Alerta seguridad — incluir obligatoriamente</div>Mencionar brevemente que existe una versión de mayor concentración (Juvelook Volume / Lenisna) que NO debe aplicarse en la zona periocular, y que fue la versión involucrada en un caso de complicación ocular en 2025. El Juvelook estándar, aplicado por un especialista certificado, tiene un perfil de seguridad diferente. Esto construye confianza en lugar de generar miedo.</div>
+    </div>
+  </div>
+
+  <!-- BRIEFING 5 -->
+  <div id="brief-b5" class="brief-panel">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 5 — Juvelook vs Bótox para patas de gallo (MOFU)</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/blog/juvelook-vs-botox-patas-de-gallo/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">bótox patas de gallo colombia</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">bótox vs bioestimulador · lifting sin toxina botulínica · tratamiento patas de gallo precio</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">1.600 – 2.000 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Estrategia</div><div class="meta-val">Capturar tráfico masivo de bótox y redirigir hacia Juvelook</div></div>
+        <div class="meta-box"><div class="meta-label">Links internos</div><div class="meta-val">→ /juvelook/ · → /blog/juvelook-patas-de-gallo/ · → /blog/que-es-juvelook/</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1</div>
+        <div class="h1-text">Bótox o Juvelook para patas de gallo: diferencias, resultados y cuál dura más en Colombia</div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Cómo funciona el bótox para patas de gallo?</div><div class="h2-note">→ Explicar la toxina botulínica con respeto. No demonizarla. Funciona paralizando el músculo, reduciendo la arruga dinámica. 150 palabras.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Qué hace Juvelook que el bótox no puede hacer?</div><div class="h2-note">→ Juvelook regenera el tejido. Bótox solo relaja el músculo. Juvelook mejora la textura, hidratación y calidad de la piel. Bótox no. Esta es la diferencia central.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Tabla comparativa: bótox vs Juvelook</div><div class="h2-note">→ Criterios: mecanismo / resultado / duración / sesiones / precio en Colombia / recuperación / para arrugas dinámicas / para arrugas estáticas.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Puedo combinar bótox y Juvelook?</div><div class="h2-note">→ Sí. El bótox relaja, Juvelook regenera. Son complementarios. Protocolo combinado → resultado superior. Oportunidad de doble venta.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Cuánto cuesta el tratamiento de patas de gallo en Colombia?</div><div class="h2-note">→ Rango de precios bótox (desde $400.000) vs Juvelook (mayor inversión, mayor duración y regeneración). Justificar el precio.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes: patas de gallo en Colombia</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRIEFING 6 -->
+  <div id="brief-b6" class="brief-panel">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 6 — Juvelook vs Rejuran (MOFU)</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/blog/juvelook-vs-rejuran/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">juvelook vs rejuran colombia</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">skin booster coreano colombia · rejuran colombia · tratamiento coreano facial</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">1.600 – 2.000 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Ángulo editorial</div><div class="meta-val">"Los dos son coreanos y los dos son buenos — pero para cosas diferentes"</div></div>
+        <div class="meta-box"><div class="meta-label">Links internos</div><div class="meta-val">→ /juvelook/ · → /blog/que-es-juvelook/ · → /blog/juvelook-vs-sculptra/</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1</div>
+        <div class="h1-text">Juvelook vs Rejuran: cuál de los dos tratamientos coreanos es mejor para tu piel en Colombia</div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Qué es Rejuran y cómo funciona?</div><div class="h2-note">→ Polinucleótidos del ADN de salmón. Repara el ambiente interno de la piel. No estimula volumen, sino calidad celular.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Qué es Juvelook y en qué se diferencia?</div><div class="h2-note">→ PDLLA + AH. Estimula colágeno + hidratación. Resultado más estructural que Rejuran.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Comparativa directa: Rejuran vs Juvelook en 6 criterios</div><div class="h2-note">→ Tabla: activo / mecanismo / resultado inmediato / duración / sesiones / precio colombia.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Para quién es Rejuran y para quién es Juvelook?</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Se pueden combinar? El protocolo coreano doble</div><div class="h2-note">→ Muchas clínicas coreanas los combinan. Rejuran primero (repara), Juvelook después (estimula). Argumento de upsell.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRIEFING 7 -->
+  <div id="brief-b7" class="brief-panel">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 7 — Juvelook vs Profhilo (MOFU)</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/blog/juvelook-vs-profhilo/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">juvelook vs profhilo</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">profhilo colombia precio · hidratación profunda facial colombia · bioremodelar piel</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">1.400 – 1.800 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Ángulo editorial</div><div class="meta-val">"Profhilo hidrata. Juvelook regenera y estimula colágeno. Son para objetivos distintos."</div></div>
+        <div class="meta-box"><div class="meta-label">Links internos</div><div class="meta-val">→ /juvelook/ · → /blog/que-es-juvelook/ · → /blog/juvelook-vs-rejuran/</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1</div>
+        <div class="h1-text">Juvelook vs Profhilo: ¿cuál tratamiento es mejor para rejuvenecer la piel facial en Colombia?</div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Qué es Profhilo y para qué sirve?</div><div class="h2-note">→ AH de alta concentración biphasic. Hidrata, mejora elasticidad, estimula algo de colágeno. No rellena. Ideal para piel deshidratada sin volumen perdido.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">La diferencia principal: hidratación vs regeneración de colágeno</div><div class="h2-note">→ Profhilo dura ~6 meses. Juvelook 18-24 meses. Profhilo no modifica estructura, Juvelook sí. Si el objetivo es regeneración real, Juvelook gana.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Tabla comparativa: Profhilo vs Juvelook</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Cuándo elegir Profhilo y cuándo Juvelook?</div><div class="h2-note">→ Profhilo: piel joven con deshidratación leve. Juvelook: piel madura con arrugas finas, patas de gallo, flacidez temprana.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Precio de Profhilo vs Juvelook en Colombia</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRIEFING 8 -->
+  <div id="brief-b8" class="brief-panel">
+    <div class="brief-card">
+      <div class="brief-title">📄 BRIEFING 8 — Juvelook vs HarmonyCa (MOFU · P3)</div>
+      <div class="brief-meta">
+        <div class="meta-box"><div class="meta-label">URL</div><div class="meta-val mono">/blog/juvelook-vs-harmonyca/</div></div>
+        <div class="meta-box"><div class="meta-label">KW principal</div><div class="meta-val">juvelook vs harmonyca colombia</div></div>
+        <div class="meta-box"><div class="meta-label">KW secundarias</div><div class="meta-val">harmonyca colombia · bioestimuladores nueva generación · lifting inyectable opciones</div></div>
+        <div class="meta-box"><div class="meta-label">Longitud objetivo</div><div class="meta-val">1.400 – 1.600 palabras</div></div>
+        <div class="meta-box"><div class="meta-label">Cuándo publicar</div><div class="meta-val">Cuando HarmonyCa gane búsquedas en Colombia (Q3 2026 estimado)</div></div>
+        <div class="meta-box"><div class="meta-label">Links internos</div><div class="meta-val">→ /juvelook/ · → /blog/que-es-juvelook/ · → /blog/juvelook-vs-sculptra/</div></div>
+      </div>
+      <div class="h-tree">
+        <div class="h1-tag">H1</div>
+        <div class="h1-text">Juvelook vs HarmonyCa: cuál de los dos nuevos bioestimuladores funciona mejor en Colombia</div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Qué es HarmonyCa y en qué se diferencia de otros bioestimuladores?</div><div class="h2-note">→ AH + Hidroxiapatita de calcio. Combina relleno + biostimulación pero es más voluminizador que Juvelook.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Comparativa: Juvelook (calidad de piel) vs HarmonyCa (volumen + estructura)</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">¿Para quién es cada uno?</div><div class="h2-note">→ Juvelook: piel fina, periocular, textura. HarmonyCa: volumen perdido, pómulos, contorno.</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Disponibilidad en Colombia y precio comparado</div></div>
+        <div class="h2-block"><div class="h2-tag">H2</div><div class="h2-text">Preguntas frecuentes</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 4: COMPETENCIA ===== -->
+<div id="tab-comp" class="panel">
+  <div class="sec-h">Análisis de competencia — ¿quién está posicionado hoy?</div>
+  <div class="note blue" style="margin-bottom:14px"><div class="note-lbl">📌 Ventaja competitiva</div>Juvelook no tiene competencia real en español para Colombia aún. Las clínicas que lo ofrecen no tienen contenido SEO dedicado. Esta es la ventana de oportunidad.</div>
+
+  <div style="background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:14px;margin-bottom:12px">
+    <div class="comp-row" style="border-bottom:1px solid #222">
+      <div class="comp-label" style="color:#555;font-size:10px;font-weight:800;text-transform:uppercase">Keyword</div>
+      <div class="comp-a" style="color:#555;font-size:10px;font-weight:800;text-transform:uppercase">Quién posiciona hoy</div>
+      <div class="comp-b" style="color:#555;font-size:10px;font-weight:800;text-transform:uppercase">Debilidad del competidor</div>
+    </div>
+    <div class="comp-row"><div class="comp-label">juvelook colombia</div><div class="comp-a">Casi nadie — resultados en inglés o de Chile/México</div><div class="comp-b">Sin contenido en español adaptado a Colombia</div></div>
+    <div class="comp-row"><div class="comp-label">juvelook vs sculptra</div><div class="comp-a">Clínicas de Corea, Tailandia y EE.UU. en inglés</div><div class="comp-b">Sin resultado en español. Oportunidad inmediata.</div></div>
+    <div class="comp-row"><div class="comp-label">patas de gallo tratamiento colombia</div><div class="comp-a">Clinicasesteticas.com.co, blogs de dermatólogos</div><div class="comp-b">No mencionan Juvelook. Contenido genérico de bótox.</div></div>
+    <div class="comp-row"><div class="comp-label">bioestimulador bogotá</div><div class="comp-a">Dermosalud, Naturalness, páginas de clínicas</div><div class="comp-b">No posicionan Juvelook específicamente. Solo Sculptra/Radiesse.</div></div>
+    <div class="comp-row"><div class="comp-label">lifting sin cirugía bogotá</div><div class="comp-a">Clínicas de cirugía plástica, Liftera, Ultherapy</div><div class="comp-b">Hablan de tecnología láser/ultrasonido, no inyectables bioestimuladores.</div></div>
+    <div class="comp-row"><div class="comp-label">sculptra colombia opiniones</div><div class="comp-a">TikTok @tuverdaderabelleza, Dra. Luz Marina Díaz</div><div class="comp-b">Contenido en video, no texto. Google favorece texto para estas búsquedas.</div></div>
+    <div class="comp-row" style="border-bottom:none"><div class="comp-label">párpados caídos sin cirugía</div><div class="comp-a">Páginas de blefaroplastia. No hay contenido inyectable.</div><div class="comp-b">El nicho de párpados sin cirugía con inyectable está desierto en ESP.</div></div>
+  </div>
+
+  <div class="note green"><div class="note-lbl">🎯 Recomendación de velocidad</div>Los posts de "juvelook vs sculptra", "patas de gallo juvelook" y "párpados caídos sin cirugía colombia" son los que más rápido van a posicionarse. Son keyword con intención clara y sin competencia real en español. Atacarlos en los primeros 30 días.</div>
+</div>
+
+<!-- ===== TAB 5: REGLAS SEO ===== -->
+<div id="tab-rules" class="panel">
+  <div class="sec-h">Reglas SEO on-page — aplicar en cada pieza</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="note green"><div class="note-lbl">✅ Title tag</div>Máx. 60 caracteres. Formato: "Keyword principal | Nombre Clínica". Incluir siempre la keyword en el title. Nunca duplicar titles entre páginas.</div>
+    <div class="note green"><div class="note-lbl">✅ Meta description</div>120–155 caracteres. Debe incluir: keyword + beneficio + CTA. Ejemplo: "Juvelook en Colombia, el bioestimulador coreano que regenera tu piel. Distribuidor exclusivo. Agenda tu valoración."</div>
+    <div class="note green"><div class="note-lbl">✅ H1 único</div>Solo uno por página. Incluir la keyword principal de forma natural. Nunca igual al title tag.</div>
+    <div class="note green"><div class="note-lbl">✅ URL semántica</div>Solo minúsculas, sin stopwords (el, la, de, en, y), con guiones. Máx. 5-6 palabras. Ej: /blog/juvelook-vs-sculptra/</div>
+    <div class="note green"><div class="note-lbl">✅ Imágenes</div>Nombre de archivo con keyword: "juvelook-patas-de-gallo-resultado-colombia.webp". Alt text: descripción + keyword secundaria. Formato WebP, peso <100kb.</div>
+    <div class="note green"><div class="note-lbl">✅ Links internos</div>Mínimo 2-3 por pieza. Usar anchor text descriptivo, no "clic aquí". Crear red: TOFU → MOFU → BOFU.</div>
+    <div class="note green"><div class="note-lbl">✅ Schema markup</div>Article en posts. FAQPage en secciones de preguntas. MedicalProcedure + LocalBusiness en página de servicio. JSON-LD en el &lt;head&gt;.</div>
+    <div class="note green"><div class="note-lbl">✅ Longitud mínima</div>Página de servicio: 1.000 palabras. Posts TOFU: 1.800+ palabras. Comparativas: 1.600+ palabras. Menos de eso no posiciona en medicina estética.</div>
+    <div class="note yellow"><div class="note-lbl">⚠️ No duplicar keywords</div>Cada URL ataca UNA keyword principal diferente. Ninguna keyword se repite como principal en dos páginas distintas. Usar las secundarias para darle contexto semántico.</div>
+    <div class="note yellow"><div class="note-lbl">⚠️ Mayúsculas</div>Solo al inicio de párrafo o título. Jamás mayúsculas intermedias en nombres de tratamientos dentro del texto corrido. "Juvelook" con J mayúscula como nombre propio.</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+function showBrief(name){
+  document.querySelectorAll('.brief-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.brief-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('brief-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

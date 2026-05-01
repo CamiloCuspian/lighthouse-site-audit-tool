@@ -281,6 +281,56 @@ function pageCard(result, index) {
   </div>`;
 }
 
+// ── ANALYTICS FILTER SECTION ─────────────────────────────────────────────────
+
+function analyticsFilterSection() {
+  return `
+<section class="report-section" id="analytics-config">
+  <h2 class="section-heading">🛡️ Configuración de filtros Analytics</h2>
+  <div style="padding:1.2rem 1.5rem">
+    <p style="font-size:.84rem;color:#475569;margin-bottom:1rem;">
+      Esta auditoría usó el User-Agent <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:.8rem;">LighthouseAuditBot/1.0</code>.
+      Para excluir estas visitas de tus reportes de analítica, crea los siguientes filtros:
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;">
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;">
+        <h3 style="font-size:.85rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">Google Analytics 4 (GA4)</h3>
+        <ol style="font-size:.78rem;color:#475569;margin-left:1.1rem;line-height:1.8;">
+          <li>Admin → Propiedad → <strong>Filtros de datos</strong></li>
+          <li>Crear filtro → Tipo: <strong>Excluir</strong></li>
+          <li>Campo: Dispositivo → <strong>Agente de usuario</strong></li>
+          <li>Condición: contiene <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">LighthouseAuditBot</code></li>
+        </ol>
+      </div>
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;">
+        <h3 style="font-size:.85rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">Universal Analytics (UA)</h3>
+        <ol style="font-size:.78rem;color:#475569;margin-left:1.1rem;line-height:1.8;">
+          <li>Admin → Vista → <strong>Filtros</strong> → + Agregar filtro</li>
+          <li>Tipo: Personalizado → <strong>Excluir</strong></li>
+          <li>Campo: <strong>Agente de usuario</strong></li>
+          <li>Patrón: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">LighthouseAuditBot</code></li>
+        </ol>
+      </div>
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;">
+        <h3 style="font-size:.85rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">Cloudflare</h3>
+        <p style="font-size:.78rem;color:#475569;line-height:1.6;">
+          Firewall → Reglas → crear regla con:<br>
+          <em>User Agent contiene "LighthouseAuditBot" → Omitir</em>
+        </p>
+      </div>
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;">
+        <h3 style="font-size:.85rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">Otras plataformas</h3>
+        <p style="font-size:.78rem;color:#475569;line-height:1.6;">
+          Hotjar, Clarity, Matomo, Plausible y similares:<br>
+          busca en <strong>Configuración → Exclusiones</strong> y agrega:<br>
+          <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">LighthouseAuditBot</code>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>`;
+}
+
 // ── CSV DATA (inyectado en el HTML para descarga sin servidor) ────────────────
 
 function buildCsvData(results, brokenLinks) {
@@ -342,6 +392,262 @@ function buildCsvData(results, brokenLinks) {
     .join('\n');
 }
 
+// ── INFORME PARA CLIENTE (generado en Node.js) ────────────────────────────────
+
+function buildClientReportHtml(results, brokenLinks, siteName, date) {
+  const total = results.length;
+
+  function avg(key) {
+    return Math.round(results.reduce((s, r) => s + r.scores[key], 0) / total);
+  }
+  const avgP = avg('performance');
+  const avgS = avg('seo');
+  const avgA = avg('accessibility');
+  const avgB = avg('bestPractices');
+  const overall = Math.round((avgP + avgS + avgA + avgB) / 4);
+
+  function e(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function sem(score) {
+    if (score >= 90) return { color: '#16a34a', bg: '#f0fdf4', border: '#86efac', emoji: '🟢', label: 'Bien' };
+    if (score >= 50) return { color: '#d97706', bg: '#fffbeb', border: '#fcd34d', emoji: '🟡', label: 'Mejorable' };
+    return { color: '#dc2626', bg: '#fff5f5', border: '#fca5a5', emoji: '🔴', label: 'Crítico' };
+  }
+
+  function bar(score) {
+    const s = sem(score);
+    return `<div style="display:inline-flex;align-items:center;gap:.4rem;">
+      <div style="width:90px;height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;">
+        <div style="width:${score}%;height:100%;background:${s.color};border-radius:4px;"></div>
+      </div>
+      <span style="font-size:.8rem;font-weight:700;color:${s.color};">${score}</span>
+    </div>`;
+  }
+
+  function scoreSpan(score) {
+    const s = sem(score);
+    return `<span style="font-size:.78rem;font-weight:700;color:${s.color};">${score}</span>`;
+  }
+
+  const ov = sem(overall);
+
+  const critical  = results.filter(r => Math.min(r.scores.performance, r.scores.seo, r.scores.accessibility, r.scores.bestPractices) < 50);
+  const attention = results.filter(r => !critical.includes(r) && Math.min(r.scores.performance, r.scores.seo, r.scores.accessibility, r.scores.bestPractices) < 90);
+  const good      = results.filter(r => !critical.includes(r) && !attention.includes(r));
+
+  const topOpps = results
+    .flatMap(r => (r.opportunities || []).map(o => ({ ...o, page: r.url })))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 5);
+
+  const seoIssueMap = {};
+  results.forEach(r => {
+    (r.meta?.issues || []).forEach(issue => {
+      const key = issue.msg;
+      if (!seoIssueMap[key]) seoIssueMap[key] = { msg: issue.msg, type: issue.type, count: 0 };
+      seoIssueMap[key].count++;
+    });
+  });
+  const seoIssues = Object.values(seoIssueMap).sort((a, b) => {
+    const order = { error: 0, warning: 1, info: 2 };
+    return (order[a.type] ?? 3) - (order[b.type] ?? 3);
+  });
+
+  let h = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Informe del sitio — ${e(siteName)}</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;padding:1.5rem}
+    .container{max-width:860px;margin:0 auto}
+    h1{font-size:1.5rem;font-weight:800;margin-bottom:.2rem}
+    h2{font-size:1rem;font-weight:700;margin-bottom:.6rem}
+    section{background:white;border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .pillar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-top:.75rem}
+    .pillar{border-radius:10px;padding:1rem;border:1px solid}
+    @media print{body{background:white}section{box-shadow:none;border:1px solid #e2e8f0}}
+    @media(max-width:600px){.pillar-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<div class="container">`;
+
+  // CABECERA
+  h += `<section style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+      <div>
+        <h1 style="color:white;">Informe de estado del sitio web</h1>
+        <p style="font-size:.82rem;opacity:.75;margin-top:.2rem;">${e(siteName)} &nbsp;·&nbsp; ${e(date)}</p>
+      </div>
+      <div style="text-align:center;background:${ov.bg};border-radius:12px;padding:.75rem 1.25rem;border:2px solid ${ov.border};">
+        <div style="font-size:2.2rem;font-weight:800;color:${ov.color};">${overall}</div>
+        <div style="font-size:.72rem;font-weight:700;color:${ov.color};">${ov.label}</div>
+        <div style="font-size:.65rem;color:#94a3b8;margin-top:.15rem;">Promedio general</div>
+      </div>
+    </div>
+    ${overall >= 90
+      ? `<p style="margin-top:1rem;font-size:.84rem;font-weight:600;color:#86efac;">El sitio está en muy buen estado. Hay pequeños ajustes que lo pueden llevar al siguiente nivel.</p>`
+      : overall >= 50
+      ? `<p style="margin-top:1rem;font-size:.84rem;font-weight:600;color:#fcd34d;">El sitio funciona bien en varios aspectos, pero hay oportunidades de mejora que vale la pena atender.</p>`
+      : `<p style="margin-top:1rem;font-size:.84rem;font-weight:600;color:#fca5a5;">Encontramos varios puntos críticos que conviene resolver pronto para mejorar la experiencia de los visitantes y el posicionamiento en Google.</p>`
+    }
+  </section>`;
+
+  // 4 PILARES
+  h += `<section>
+    <h2>Los cuatro pilares de un sitio saludable</h2>
+    <p style="font-size:.84rem;color:#475569;margin-bottom:.75rem;">Estos son los cuatro aspectos que Google y otras herramientas evalúan en cada página.</p>
+    <div class="pillar-grid">`;
+
+  const pillars = [
+    { key: 'performance', score: avgP, label: 'Velocidad de carga',
+      desc: 'Qué tan rápido carga el sitio para los visitantes. Un sitio lento pierde usuarios antes de que vean el contenido.' },
+    { key: 'seo', score: avgS, label: 'Visibilidad en Google',
+      desc: 'Qué tan bien está configurado el sitio para aparecer en los resultados de búsqueda de Google.' },
+    { key: 'accessibility', score: avgA, label: 'Accesibilidad',
+      desc: 'Qué tan fácil es usar el sitio para todas las personas, incluyendo quienes usan lectores de pantalla.' },
+    { key: 'bestPractices', score: avgB, label: 'Buenas prácticas',
+      desc: 'Si el sitio sigue los estándares técnicos modernos de seguridad y funcionamiento.' },
+  ];
+
+  pillars.forEach(p => {
+    const s = sem(p.score);
+    h += `<div class="pillar" style="background:${s.bg};border-color:${s.border};">
+      <div style="font-size:.65rem;font-weight:700;color:${s.color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;">${s.emoji} ${s.label.toUpperCase()}</div>
+      <div style="font-size:1.9rem;font-weight:800;color:${s.color};line-height:1;">${p.score}</div>
+      <div style="font-size:.7rem;font-weight:600;color:${s.color};margin-bottom:.5rem;">${s.label}</div>
+      <p style="font-size:.72rem;color:#475569;line-height:1.5;">${p.desc}</p>
+      ${bar(p.score)}
+    </div>`;
+  });
+  h += `</div></section>`;
+
+  // PÁGINAS CRÍTICAS
+  if (critical.length > 0) {
+    h += `<section style="border:1px solid #fca5a5;">
+      <h2 style="color:#dc2626;">🚨 Páginas que necesitan atención urgente</h2>
+      <p style="font-size:.84rem;color:#475569;margin-bottom:.75rem;">Estas páginas tienen al menos un indicador por debajo de 50, lo que puede afectar directamente la experiencia de los visitantes y el posicionamiento en Google.</p>`;
+    critical.forEach(r => {
+      const path = r.url.replace(/^https?:\/\/[^/]+/, '') || '/';
+      h += `<div style="border:1px solid #fca5a5;border-radius:8px;padding:.75rem;margin-bottom:.5rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;">
+        <a href="${e(r.url)}" target="_blank" style="font-size:.82rem;color:#3b82f6;text-decoration:none;flex:1;min-width:180px;">${e(path)}</a>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <span style="font-size:.72rem;">Velocidad: ${scoreSpan(r.scores.performance)}</span>
+          <span style="font-size:.72rem;">SEO: ${scoreSpan(r.scores.seo)}</span>
+          <span style="font-size:.72rem;">Accesib.: ${scoreSpan(r.scores.accessibility)}</span>
+          <span style="font-size:.72rem;">Seguridad: ${scoreSpan(r.scores.bestPractices)}</span>
+        </div>
+      </div>`;
+    });
+    h += `</section>`;
+  }
+
+  // ENLACES ROTOS
+  if (brokenLinks.length > 0) {
+    h += `<section style="border:1px solid #fca5a5;">
+      <h2 style="color:#dc2626;">💀 Enlaces rotos (${brokenLinks.length})</h2>
+      <p style="font-size:.84rem;color:#475569;margin-bottom:.75rem;">Un enlace roto es como una puerta que no abre. Google los detecta y los penaliza. Aquí están los que encontramos:</p>
+      <div style="overflow-x:auto;"><table style="width:100%;font-size:.77rem;border-collapse:collapse;">
+        <thead><tr style="background:#fef2f2;">
+          <th style="padding:.4rem .65rem;text-align:left;border-bottom:2px solid #fca5a5;color:#991b1b;">URL rota</th>
+          <th style="padding:.4rem .65rem;text-align:center;border-bottom:2px solid #fca5a5;color:#991b1b;white-space:nowrap;">Estado</th>
+          <th style="padding:.4rem .65rem;text-align:left;border-bottom:2px solid #fca5a5;color:#991b1b;">Encontrado en</th>
+        </tr></thead>
+        <tbody>`;
+    brokenLinks.forEach(b => {
+      h += `<tr style="border-bottom:1px solid #fee2e2;">
+        <td style="padding:.38rem .65rem;color:#64748b;word-break:break-all;">${e(b.url)}</td>
+        <td style="padding:.38rem .65rem;text-align:center;font-weight:700;color:#dc2626;">${e(String(b.status))}</td>
+        <td style="padding:.38rem .65rem;color:#64748b;word-break:break-all;">${e(b.foundOn || '')}</td>
+      </tr>`;
+    });
+    h += `</tbody></table></div></section>`;
+  }
+
+  // AJUSTES SEO
+  if (seoIssues.length > 0) {
+    h += `<section>
+      <h2>Ajustes de contenido pendientes</h2>
+      <p style="font-size:.87rem;color:#475569;margin-bottom:.9rem;">Estos son detalles del contenido o la estructura de las páginas que, si se corrigen, ayudan a que Google entienda mejor de qué trata cada página y las posicione más arriba en los resultados de búsqueda.</p>`;
+    seoIssues.forEach(issue => {
+      const c = issue.type === 'error'   ? { bg:'#fee2e2', color:'#991b1b', label:'Urgente'     } :
+                issue.type === 'warning' ? { bg:'#fef3c7', color:'#92400e', label:'Mejorar'      } :
+                                           { bg:'#dbeafe', color:'#1e40af', label:'Información'  };
+      h += `<div style="display:flex;align-items:flex-start;gap:.7rem;padding:.55rem 0;border-bottom:1px solid #f1f5f9;">
+        <span style="background:${c.bg};color:${c.color};font-size:.67rem;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:2px;">${c.label}</span>
+        <div><p style="font-size:.85rem;color:#1e293b;margin-bottom:.1rem;">${e(issue.msg)}</p>
+        <p style="font-size:.74rem;color:#94a3b8;margin:0;">Presente en ${issue.count} página${issue.count !== 1 ? 's' : ''}</p></div>
+      </div>`;
+    });
+    h += `</section>`;
+  }
+
+  // PROXIMOS PASOS
+  h += `<section style="background:#f0fdf4;border:1px solid #bbf7d0;">
+    <h2 style="color:#14532d;">¿Qué hacemos ahora?</h2>
+    <p style="font-size:.87rem;color:#166534;margin-bottom:1rem;">Basándonos en lo que encontramos, estas son las acciones más importantes, ordenadas de mayor a menor impacto:</p>
+    <ol style="margin:0 0 0 1.25rem;color:#334155;">`;
+  if (brokenLinks.length > 0)
+    h += `<li style="margin-bottom:.65rem;font-size:.88rem;"><strong>Corregir los ${brokenLinks.length} enlace${brokenLinks.length !== 1 ? 's' : ''} roto${brokenLinks.length !== 1 ? 's' : ''}.</strong> Es lo más rápido de resolver y tiene impacto inmediato tanto en la experiencia de los usuarios como en el SEO.</li>`;
+  if (critical.some(r => r.scores.performance < 50))
+    h += `<li style="margin-bottom:.65rem;font-size:.88rem;"><strong>Mejorar la velocidad de carga</strong> de las páginas marcadas como críticas. El paso más efectivo suele ser comprimir las imágenes y reducir el código JavaScript que no se está usando.</li>`;
+  if (seoIssues.some(i => i.type === 'error'))
+    h += `<li style="margin-bottom:.65rem;font-size:.88rem;"><strong>Completar los títulos, descripciones y encabezados</strong> que faltan. Son los textos que Google lee para saber de qué trata cada página.</li>`;
+  if (topOpps.length > 0)
+    h += `<li style="margin-bottom:.65rem;font-size:.88rem;"><strong>Aplicar las optimizaciones de rendimiento identificadas.</strong> Las principales son: ${topOpps.slice(0, 3).map(o => e(o.title) + (o.displayValue ? ` (${e(o.displayValue)})` : '')).join(', ')}.</li>`;
+  if (avgS < 90)
+    h += `<li style="margin-bottom:.65rem;font-size:.88rem;"><strong>Revisar el SEO de todas las páginas</strong> para asegurarnos de que cada una tenga su título, descripción y encabezado principal completos.</li>`;
+  h += `<li style="margin-bottom:.65rem;font-size:.88rem;"><strong>Repetir esta auditoría en 30 días</strong> para medir el avance y detectar nuevas oportunidades de mejora.</li>`;
+  h += `</ol></section>`;
+
+  // RESUMEN DE PÁGINAS
+  h += `<section>
+    <h2>Resumen de las páginas revisadas</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem;">
+      <div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:10px;padding:1rem;text-align:center;"><div style="font-size:1.9rem;font-weight:800;color:#dc2626;">${critical.length}</div><div style="font-size:.75rem;color:#991b1b;font-weight:600;margin-top:.15rem;">Críticas</div></div>
+      <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:1rem;text-align:center;"><div style="font-size:1.9rem;font-weight:800;color:#d97706;">${attention.length}</div><div style="font-size:.75rem;color:#92400e;font-weight:600;margin-top:.15rem;">Con observaciones</div></div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:1rem;text-align:center;"><div style="font-size:1.9rem;font-weight:800;color:#16a34a;">${good.length}</div><div style="font-size:.75rem;color:#166534;font-weight:600;margin-top:.15rem;">En buen estado</div></div>
+    </div>
+    <details style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+      <summary style="padding:.7rem 1rem;background:#f8fafc;font-size:.82rem;font-weight:700;color:#475569;cursor:pointer;">Ver todas las páginas (${total})</summary>
+      <div style="overflow-x:auto;"><table style="font-size:.77rem;width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#f8fafc;">
+          <th style="padding:.4rem .65rem;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;">Página</th>
+          <th style="padding:.4rem .65rem;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;">Velocidad</th>
+          <th style="padding:.4rem .65rem;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;">SEO</th>
+          <th style="padding:.4rem .65rem;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;">Accesib.</th>
+          <th style="padding:.4rem .65rem;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;">Seguridad</th>
+        </tr></thead>
+        <tbody>`;
+  results.forEach(r => {
+    const rowBg = critical.includes(r) ? 'background:#fff5f5;' : attention.includes(r) ? 'background:#fffcf0;' : '';
+    const path  = r.url.replace(/^https?:\/\/[^/]+/, '') || '/';
+    h += `<tr style="border-bottom:1px solid #f1f5f9;${rowBg}">
+      <td style="padding:.38rem .65rem;word-break:break-all;max-width:280px;"><a href="${e(r.url)}" target="_blank" style="color:#3b82f6;text-decoration:none;">${e(path)}</a></td>
+      <td style="padding:.38rem .65rem;text-align:center;">${scoreSpan(r.scores.performance)}</td>
+      <td style="padding:.38rem .65rem;text-align:center;">${scoreSpan(r.scores.seo)}</td>
+      <td style="padding:.38rem .65rem;text-align:center;">${scoreSpan(r.scores.accessibility)}</td>
+      <td style="padding:.38rem .65rem;text-align:center;">${scoreSpan(r.scores.bestPractices)}</td>
+    </tr>`;
+  });
+  h += `</tbody></table></div></details>
+  </section>`;
+
+  // FOOTER
+  h += `<div style="text-align:center;padding:1.2rem;color:#94a3b8;font-size:.74rem;">
+    <p style="margin-bottom:.2rem;">Informe generado con <strong>Lighthouse Reporter</strong> &nbsp;&middot;&nbsp; ${e(date)}</p>
+    <p>Los puntajes son generados por Google Lighthouse, la herramienta oficial de Google para auditar sitios web.</p>
+  </div>`;
+
+  h += `</div></body></html>`;
+  return h;
+}
+
 // ── EXPORT PRINCIPAL ──────────────────────────────────────────────────────────
 
 export function generateReport(results, brokenLinks, outputDir, siteName, prevResults = null) {
@@ -392,7 +698,7 @@ export function generateReport(results, brokenLinks, outputDir, siteName, prevRe
   }
 
   const csvData = buildCsvData(results, brokenLinks);
-  const csvEscaped = csvData.replace(/\\/g, '\\\\').replace(/`/g, '\\`');
+  const csvJson = JSON.stringify(csvData).replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
 
   const html = `<!DOCTYPE html>
 <html lang="es">
@@ -416,6 +722,8 @@ export function generateReport(results, brokenLinks, outputDir, siteName, prevRe
     .header-actions{margin-top:1rem}
     .btn-csv{background:#3b82f6;color:white;border:none;padding:.45rem 1.1rem;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
     .btn-csv:hover{background:#2563eb}
+    .btn-report{background:#10b981;color:white;padding:.45rem 1.1rem;border-radius:6px;font-size:.8rem;font-weight:600;margin-left:.5rem}
+    .btn-report:hover{background:#059669}
 
     /* SUMMARY */
     .summary{display:flex;gap:1rem;padding:1.2rem 2.5rem;background:white;border-bottom:1px solid #e2e8f0;flex-wrap:wrap;align-items:center}
@@ -507,6 +815,7 @@ export function generateReport(results, brokenLinks, outputDir, siteName, prevRe
 
 <nav class="topnav">
   <a href="#summary">📊 Resumen</a>
+  <a href="#analytics-config">🛡️ Filtros Analytics</a>
   <a href="#meta-tags">🏷️ Meta Tags</a>
   <a href="#broken-links">💀 Links Rotos</a>
   <a href="#audits">🔦 Audits</a>
@@ -517,6 +826,7 @@ export function generateReport(results, brokenLinks, outputDir, siteName, prevRe
   <p>${escHtml(siteName)} · ${total} página${total !== 1 ? 's' : ''} auditada${total !== 1 ? 's' : ''} · ${date}</p>
   <div class="header-actions">
     <button class="btn-csv" onclick="downloadCSV()">⬇ Exportar CSV</button>
+    <a class="btn-report" href="./client-report.html" target="_blank" style="text-decoration:none;display:inline-block;line-height:1.5;">📄 Reporte para Cliente</a>
   </div>
 </header>
 
@@ -562,6 +872,7 @@ export function generateReport(results, brokenLinks, outputDir, siteName, prevRe
   }
 </div>
 
+${analyticsFilterSection()}
 ${metaTagsTable(results)}
 ${brokenLinksSection(brokenLinks)}
 
@@ -575,7 +886,7 @@ ${brokenLinksSection(brokenLinks)}
 <footer>Generado con Lighthouse Reporter v0.2.0 · ${date}</footer>
 
 <script>
-const CSV_DATA = \`${csvEscaped}\`;
+const CSV_DATA = ${csvJson};
 
 function downloadCSV() {
   const blob = new Blob([CSV_DATA], { type: 'text/csv;charset=utf-8;' });
@@ -670,6 +981,9 @@ function scoreColor(score) {
 
   const outFile = join(outputDir, 'index.html');
   writeFileSync(outFile, html, 'utf-8');
+
+  const clientReportFile = join(outputDir, 'client-report.html');
+  writeFileSync(clientReportFile, buildClientReportHtml(results, brokenLinks, siteName, date), 'utf-8');
 
   const jsonFile = join(outputDir, 'results.json');
   writeFileSync(

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reporte de Auditoría — www.zoomforth.com</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Georgia,serif;background:#f5f7fa;color:#1a1a2e;line-height:1.7}
+  .page{max-width:860px;margin:2rem auto;background:white;padding:2.5rem 3rem;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+  h1{font-size:1.6rem;font-weight:bold;margin-bottom:.4rem}
+  h2{margin-bottom:.75rem}
+  p{margin-bottom:.8rem;color:#334155}
+  section{margin-bottom:2rem}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{background:#f8fafc;color:#64748b;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:.55rem 1rem;text-align:left;border-bottom:2px solid #e2e8f0}
+  td{padding:.55rem 1rem;border-bottom:1px solid #f1f5f9;color:#334155}
+  tr:hover td{background:#f8fafc}
+  a{color:#3b82f6;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .crit{background:#fff5f5;border:1px solid #fca5a5;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+  .warn{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:1rem;margin-bottom:.75rem}
+  .opp{border:1px solid #e2e8f0;border-radius:8px;padding:1rem;margin-bottom:.7rem;background:white}
+  .tag{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;display:inline-block;margin-top:2px}
+  .issue-row{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 0;border-bottom:1px solid #f1f5f9}
+  .next-steps{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:1.5rem}
+  .next-steps ol{margin-left:1.5rem}
+  .next-steps li{margin-bottom:.7rem;font-size:.92rem;color:#334155}
+  footer{text-align:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:.78rem}
+  @media(max-width:600px){.page{padding:1.5rem 1rem}}
+  @media print{body{background:white}.page{box-shadow:none;margin:0;border-radius:0}}
+</style>
+</head>
+<body>
+<div class="page">
+<div style="text-align:center;border-bottom:3px solid #1a1a2e;padding-bottom:1.5rem;margin-bottom:2rem;">
+  <p style="font-size:.78rem;color:#94a3b8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem;">Documento interno de uso del equipo</p>
+  <h1>REPORTE DE AUDITORÍA TÉCNICA WEB</h1>
+  <p style="color:#64748b;font-size:.9rem;">Sitio: <strong>www.zoomforth.com</strong> &nbsp;·&nbsp; Fecha: 30/4/2026, 6:13:50 p. m.</p>
+  <p style="color:#64748b;font-size:.85rem;">30 páginas auditadas &nbsp;·&nbsp; Herramienta: Google Lighthouse</p>
+</div>
+<section>
+<h2 style="font-size:1.1rem;font-weight:bold;color:#1a1a2e;border-left:4px solid #3b82f6;padding-left:.75rem;margin-bottom:.75rem;">Resumen Ejecutivo</h2>
+<p>Hola equipo, les compartimos los resultados de la auditoría técnica que corrimos sobre <strong>www.zoomforth.com</strong>. Analizamos un total de <strong>30 páginas</strong> usando Google Lighthouse, la misma herramienta que usa Google para evaluar los sitios web.</p>
+<p>El puntaje general del sitio quedó en <strong style="color:#92400e">76/100</strong> — lo que significa que el sitio está en buen estado general, pero hay áreas de mejora que conviene atender pronto.</p>
+<div style="background:#f8fafc;border-radius:8px;padding:1rem 1.25rem;margin-bottom:.85rem;">
+<p style="font-size:.85rem;color:#64748b;margin-bottom:.4rem;font-weight:700;">En resumen:</p><ul style="margin-left:1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.25rem;"><span style="color:#991b1b;font-weight:700;">⚠ 27 páginas con problemas críticos</span></li>
+<li style="margin-bottom:.25rem;"><span style="color:#92400e;">3 páginas con observaciones</span></li>
+<li style="margin-bottom:.25rem;"><span style="color:#991b1b;font-weight:700;">💀 3 enlaces rotos</span></li>
+<li style="margin-bottom:.25rem;"><span style="color:#92400e;">23 problemas de SEO on-page</span></li>
+</ul></div>
+</section>
+<section>
+<h2 style="font-size:1.1rem;font-weight:bold;color:#1a1a2e;border-left:4px solid #3b82f6;padding-left:.75rem;margin-bottom:.75rem;">Puntajes por Categoría</h2>
+<p style="color:#475569;font-size:.9rem;">Promedios de todas las páginas auditadas. Por encima de 90 es óptimo, entre 50 y 90 es mejorable, por debajo de 50 es crítico.</p>
+<table><thead><tr><th>Categoría</th><th>Puntaje</th><th>Estado</th><th>Qué mide</th></tr></thead><tbody>
+<tr><td style="font-weight:600;">Performance</td><td><span style="background:#fee2e2;color:#991b1b;font-weight:700;padding:3px 12px;border-radius:20px;font-size:.88rem;">41/100</span></td><td style="color:#991b1b;font-weight:600;">Crítico — atención urgente</td><td style="color:#64748b;font-size:.82rem;">Velocidad de carga del sitio</td></tr>
+<tr><td style="font-weight:600;">SEO</td><td><span style="background:#fef3c7;color:#92400e;font-weight:700;padding:3px 12px;border-radius:20px;font-size:.88rem;">84/100</span></td><td style="color:#92400e;font-weight:600;">Requiere atención</td><td style="color:#64748b;font-size:.82rem;">Visibilidad en buscadores como Google</td></tr>
+<tr><td style="font-weight:600;">Accesibilidad</td><td><span style="background:#dcfce7;color:#166534;font-weight:700;padding:3px 12px;border-radius:20px;font-size:.88rem;">95/100</span></td><td style="color:#166534;font-weight:600;">Óptimo</td><td style="color:#64748b;font-size:.82rem;">Usabilidad para todos los usuarios</td></tr>
+<tr><td style="font-weight:600;">Mejores Prácticas</td><td><span style="background:#fef3c7;color:#92400e;font-weight:700;padding:3px 12px;border-radius:20px;font-size:.88rem;">85/100</span></td><td style="color:#92400e;font-weight:600;">Requiere atención</td><td style="color:#64748b;font-size:.82rem;">Seguridad y estándares web modernos</td></tr>
+</tbody></table></section>
+<section>
+<h2 style="font-size:1.1rem;font-weight:bold;color:#991b1b;border-left:4px solid #ef4444;padding-left:.75rem;margin-bottom:.75rem;">🔴 Problemas Críticos — Atención Inmediata</h2>
+<p style="color:#64748b;font-size:.9rem;">Las páginas de abajo tienen uno o más puntajes por debajo de 50. Hay que atenderlas primero porque impactan directamente la experiencia del usuario y el posicionamiento en Google.</p>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/request-demo" target="_blank">https://www.zoomforth.com/request-demo</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (47/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,500 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 267 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Avoid serving legacy JavaScript to modern browsers <em style="color:#10b981;">(ahorro estimado: Est savings of 0 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/platform-key-features" target="_blank">https://www.zoomforth.com/platform-key-features</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (34/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Preconnect to required origins <em style="color:#10b981;">(ahorro estimado: Est savings of 450 ms)</em></li>
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 310 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 334 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/platform-site-editor" target="_blank">https://www.zoomforth.com/platform-site-editor</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (35/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 150 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 342 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 280 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/platform-security-features" target="_blank">https://www.zoomforth.com/platform-security-features</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (38/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,360 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 410 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 261 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/platform-data-analytics" target="_blank">https://www.zoomforth.com/platform-data-analytics</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (36/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,440 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 330 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 1,303 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/platform-integrations" target="_blank">https://www.zoomforth.com/platform-integrations</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (36/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,570 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 362 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Defer offscreen images <em style="color:#10b981;">(ahorro estimado: Est savings of 532 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/platform-support-services" target="_blank">https://www.zoomforth.com/platform-support-services</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (37/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,550 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 435 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 782 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/learning" target="_blank">https://www.zoomforth.com/learning</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (40/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 740 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 283 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 474 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/recruiting" target="_blank">https://www.zoomforth.com/recruiting</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (36/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 300 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 256 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 599 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/sales" target="_blank">https://www.zoomforth.com/sales</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (35/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 150 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 249 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 479 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/campaign-microsite" target="_blank">https://www.zoomforth.com/campaign-microsite</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (36/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Preconnect to required origins <em style="color:#10b981;">(ahorro estimado: Est savings of 380 ms)</em></li>
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 450 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 394 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/creative-agencies" target="_blank">https://www.zoomforth.com/creative-agencies</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (42/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,510 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 315 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 169 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/recruitment-agencies" target="_blank">https://www.zoomforth.com/recruitment-agencies</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (42/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,480 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 253 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 1,592 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/lead-generation" target="_blank">https://www.zoomforth.com/lead-generation</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (41/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,110 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 225 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 495 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/sales-enablement" target="_blank">https://www.zoomforth.com/sales-enablement</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (43/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,260 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 256 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 713 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/customer-success" target="_blank">https://www.zoomforth.com/customer-success</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (42/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Defer offscreen images <em style="color:#10b981;">(ahorro estimado: Est savings of 145 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,370 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 256 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/account-based-marketing" target="_blank">https://www.zoomforth.com/account-based-marketing</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (42/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,220 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 218 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 852 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/content-marketing" target="_blank">https://www.zoomforth.com/content-marketing</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (41/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,430 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 256 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 1,271 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/contest-microsite" target="_blank">https://www.zoomforth.com/contest-microsite</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (41/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,220 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 285 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 849 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/product-microsite" target="_blank">https://www.zoomforth.com/product-microsite</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (40/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,360 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 305 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 832 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/inspiration" target="_blank">https://www.zoomforth.com/inspiration</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (41/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,090 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 274 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 1,999 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/academy" target="_blank">https://www.zoomforth.com/academy</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (47/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 850 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 228 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Avoid serving legacy JavaScript to modern browsers <em style="color:#10b981;">(ahorro estimado: Est savings of 0 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/case-studies" target="_blank">https://www.zoomforth.com/case-studies</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (37/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,440 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 238 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 13,365 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/events" target="_blank">https://www.zoomforth.com/events</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (48/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,420 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 258 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Defer offscreen images <em style="color:#10b981;">(ahorro estimado: Est savings of 43 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/faq" target="_blank">https://www.zoomforth.com/faq</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (46/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,450 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 215 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Avoid serving legacy JavaScript to modern browsers <em style="color:#10b981;">(ahorro estimado: Est savings of 0 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/whitepapers" target="_blank">https://www.zoomforth.com/whitepapers</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (41/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,110 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 263 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Defer offscreen images <em style="color:#10b981;">(ahorro estimado: Est savings of 43 KiB)</em></li>
+</ul></div>
+</div>
+<div class="crit">
+<p style="font-weight:700;margin-bottom:.6rem;font-size:.9rem;word-break:break-all;"><span style="background:#ef4444;color:white;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;">CRÍTICO</span><a href="https://www.zoomforth.com/design-services" target="_blank">https://www.zoomforth.com/design-services</a></p>
+<ul style="margin:.4rem 0 .6rem 1.2rem;font-size:.88rem;">
+<li style="margin-bottom:.4rem;"><strong>Performance (40/100):</strong> El tiempo de carga es muy alto. Los usuarios pueden abandonar antes de que cargue, y Google lo penaliza.</li>
+</ul>
+<div style="background:white;border-radius:6px;padding:.75rem 1rem;">
+<p style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:.35rem;">¿Qué se puede hacer?</p>
+<ul style="margin-left:1.1rem;font-size:.82rem;">
+<li style="margin-bottom:.25rem;">Eliminate render-blocking resources <em style="color:#10b981;">(ahorro estimado: Est savings of 1,390 ms)</em></li>
+<li style="margin-bottom:.25rem;">Reduce unused JavaScript <em style="color:#10b981;">(ahorro estimado: Est savings of 187 KiB)</em></li>
+<li style="margin-bottom:.25rem;">Properly size images <em style="color:#10b981;">(ahorro estimado: Est savings of 2,572 KiB)</em></li>
+</ul></div>
+</div>
+</section>
+<section>
+<h2 style="font-size:1.1rem;font-weight:bold;color:#92400e;border-left:4px solid #f59e0b;padding-left:.75rem;margin-bottom:.75rem;">🟡 Páginas que Requieren Atención</h2>
+<p style="color:#64748b;font-size:.9rem;">No están en estado crítico, pero tienen oportunidades de mejora que pueden subir su ranking en Google.</p>
+<div class="warn">
+<p style="font-weight:700;margin-bottom:.35rem;font-size:.88rem;word-break:break-all;"><span style="background:#fef3c7;color:#92400e;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;font-weight:700;">ATENCIÓN</span><a href="https://www.zoomforth.com" target="_blank">https://www.zoomforth.com</a></p>
+<p style="font-size:.84rem;color:#92400e;margin-bottom:.3rem;font-weight:600;">Puntajes a mejorar: Performance: 55/100 · SEO: 85/100</p>
+</div>
+<div class="warn">
+<p style="font-weight:700;margin-bottom:.35rem;font-size:.88rem;word-break:break-all;"><span style="background:#fef3c7;color:#92400e;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;font-weight:700;">ATENCIÓN</span><a href="https://www.zoomforth.com/marketing" target="_blank">https://www.zoomforth.com/marketing</a></p>
+<p style="font-size:.84rem;color:#92400e;margin-bottom:.3rem;font-weight:600;">Puntajes a mejorar: Performance: 50/100 · SEO: 85/100 · Mejores Prácticas: 71/100</p>
+<ul style="margin:.25rem 0 0 1.1rem;font-size:.83rem;color:#78350f;">
+<li style="margin-bottom:.2rem;">Meta description muy larga (163 chars, máximo 160)</li>
+</ul>
+</div>
+<div class="warn">
+<p style="font-weight:700;margin-bottom:.35rem;font-size:.88rem;word-break:break-all;"><span style="background:#fef3c7;color:#92400e;font-size:.68rem;padding:2px 7px;border-radius:4px;margin-right:.5rem;font-weight:700;">ATENCIÓN</span><a href="https://www.zoomforth.com/blog" target="_blank">https://www.zoomforth.com/blog</a></p>
+<p style="font-size:.84rem;color:#92400e;margin-bottom:.3rem;font-weight:600;">Puntajes a mejorar: Performance: 54/100 · SEO: 54/100</p>
+<ul style="margin:.25rem 0 0 1.1rem;font-size:.83rem;color:#78350f;">
+<li style="margin-bottom:.2rem;">Meta description muy larga (170 chars, máximo 160)</li>
+<li style="margin-bottom:.2rem;">Sin H1</li>
+<li style="margin-bottom:.2rem;">Robots: noindex,follow</li>
+</ul>
+</div>
+</section>
+<section>
+<h2 style="font-size:1.1rem;font-weight:bold;color:#991b1b;border-left:4px solid #ef4444;padding-left:.75rem;margin-bottom:.75rem;">💀 Enlaces Rotos</h2>
+<p style="color:#64748b;font-size:.9rem;">Encontramos 3 enlaces que no funcionan correctamente. Los usuarios llegan a una página de error, lo que genera mala experiencia y afecta el SEO.</p>
+<table><thead><tr><th>URL rota</th><th>Código</th><th>Encontrado en</th></tr></thead><tbody>
+<tr><td style="color:#991b1b;word-break:break-all;"><a href="https://www.zoomforth.com/assets/img/icon-180x180.png" target="_blank">https://www.zoomforth.com/assets/img/icon-180x180.png</a></td><td style="font-weight:700;text-align:center;">404</td><td style="color:#64748b;word-break:break-all;">https://www.zoomforth.com</td></tr>
+<tr><td style="color:#991b1b;word-break:break-all;"><a href="https://www.zoomforth.com/assets/img/icon-32x32.png" target="_blank">https://www.zoomforth.com/assets/img/icon-32x32.png</a></td><td style="font-weight:700;text-align:center;">404</td><td style="color:#64748b;word-break:break-all;">https://www.zoomforth.com</td></tr>
+<tr><td style="color:#991b1b;word-break:break-all;"><a href="https://www.zoomforth.com/assets/img/icon-16x16.png" target="_blank">https://www.zoomforth.com/assets/img/icon-16x16.png</a></td><td style="font-weight:700;text-align:center;">404</td><td style="color:#64748b;word-break:break-all;">https://www.zoomforth.com</td></tr>
+</tbody></table></section>
+<section>
+<h2 style="font-size:1.1rem;font-weight:bold;color:#1a1a2e;border-left:4px solid #3b82f6;padding-left:.75rem;margin-bottom:.75rem;">🔧 Optimizaciones Recomendadas</h2>
+<p style="color:#64748b;font-size:.9rem;">Estas son las acciones con mayor impacto potencial, ordenadas por cuántas páginas afectan.</p>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#1</span>Eliminate render-blocking resources <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Est savings of 960 ms</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Resources are blocking the first paint of your page. Consider delivering critical JS/CSS inline and deferring all non-critical JS/styles. [Learn how to eliminate render-blocking resources](https://developer.chrome.com/docs/lightho...</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>30</strong> páginas del sitio</p></div>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#2</span>Reduce unused JavaScript <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Est savings of 312 KiB</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn how to reduce unused JavaScript](https://developer.chrome.com/docs/lighthouse/performance/unused-jav...</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>30</strong> páginas del sitio</p></div>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#3</span>Avoid serving legacy JavaScript to modern browsers <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Est savings of 6 KiB</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/basel...</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>30</strong> páginas del sitio</p></div>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#4</span>Serve images in next-gen formats <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Est savings of 230 KiB</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more about modern image formats](https://developer.chrome.com/docs/lighthouse/perfo...</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>27</strong> páginas del sitio</p></div>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#5</span>Properly size images <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Est savings of 14,750 KiB</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Serve images that are appropriately-sized to save cellular data and improve load time. [Learn how to size images](https://developer.chrome.com/docs/lighthouse/performance/uses-responsive-images/).</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>25</strong> páginas del sitio</p></div>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#6</span>Defer offscreen images <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Est savings of 792 KiB</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Consider lazy-loading offscreen and hidden images after all critical resources have finished loading to lower time to interactive. [Learn how to defer offscreen images](https://developer.chrome.com/docs/lighthouse/performance/offs...</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>20</strong> páginas del sitio</p></div>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#7</span>Preconnect to required origins <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Est savings of 450 ms</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Consider adding `preconnect` or `dns-prefetch` resource hints to establish early connections to important third-party origins. [Learn how to preconnect to required origins](https://developer.chrome.com/docs/lighthouse/performance/...</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>2</strong> páginas del sitio</p></div>
+<div class="opp"><p style="font-weight:700;color:#1e293b;margin-bottom:.3rem;font-size:.9rem;"><span style="background:#dbeafe;color:#1e40af;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:.5rem;">#8</span>Reduce initial server response time <span style="color:#10b981;font-size:.8rem;font-weight:600;"> → ahorro estimado: Root document took 720 ms</span></p>
+<p style="font-size:.84rem;color:#64748b;margin-bottom:.3rem;line-height:1.55;">Keep the server response time for the main document short because all other requests depend on it. [Learn more about the Time to First Byte metric](https://developer.chrome.com/docs/lighthouse/performance/time-to-first-byte/).</p>
+<p style="font-size:.78rem;color:#94a3b8;">Afecta <strong>1</strong> página del sitio</p></div>
+</section>
+<section>
+<h2 style="font-size:1.1rem;font-weight:bold;color:#1a1a2e;border-left:4px solid #3b82f6;padding-left:.75rem;margin-bottom:.75rem;">🏷️ Problemas de SEO On-Page</h2>
+<p style="color:#64748b;font-size:.9rem;">Problemas en el contenido o estructura de las páginas que afectan cómo Google las lee. Los "Error" son los más urgentes.</p>
+<div class="issue-row"><span class="tag" style="background:#fee2e2;color:#991b1b;">Error</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Sin H1</p><p style="font-size:.78rem;color:#94a3b8;">1 página afectada</p></div></div>
+<div class="issue-row"><span class="tag" style="background:#fef3c7;color:#92400e;">Advertencia</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Título muy corto (24 chars, mínimo 30)</p><p style="font-size:.78rem;color:#94a3b8;">8 páginas afectadas</p></div></div>
+<div class="issue-row"><span class="tag" style="background:#fef3c7;color:#92400e;">Advertencia</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Meta description corta (47 chars, mínimo 70)</p><p style="font-size:.78rem;color:#94a3b8;">3 páginas afectadas</p></div></div>
+<div class="issue-row"><span class="tag" style="background:#fef3c7;color:#92400e;">Advertencia</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Contenido escaso (~210 palabras, recomendado 300+)</p><p style="font-size:.78rem;color:#94a3b8;">1 página afectada</p></div></div>
+<div class="issue-row"><span class="tag" style="background:#fef3c7;color:#92400e;">Advertencia</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Título muy largo (63 chars, máximo 60)</p><p style="font-size:.78rem;color:#94a3b8;">1 página afectada</p></div></div>
+<div class="issue-row"><span class="tag" style="background:#fef3c7;color:#92400e;">Advertencia</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Meta description muy larga (183 chars, máximo 160)</p><p style="font-size:.78rem;color:#94a3b8;">7 páginas afectadas</p></div></div>
+<div class="issue-row"><span class="tag" style="background:#fef3c7;color:#92400e;">Advertencia</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Robots: noindex,follow</p><p style="font-size:.78rem;color:#94a3b8;">1 página afectada</p></div></div>
+<div class="issue-row"><span class="tag" style="background:#dbeafe;color:#1e40af;">Información</span><div><p style="font-size:.88rem;color:#1e293b;margin-bottom:.15rem;">Canonical apunta a URL diferente: https://www.zoomforth.com/design-agency</p><p style="font-size:.78rem;color:#94a3b8;">1 página afectada</p></div></div>
+</section>
+<div class="next-steps"><h2 style="font-size:1.1rem;font-weight:bold;color:#1a1a2e;margin-bottom:.75rem;">📋 ¿Qué hacemos ahora? — Próximos Pasos</h2>
+<p style="margin-bottom:1rem;color:#475569;font-size:.9rem;">Basándonos en lo que encontramos, recomendamos trabajar en este orden de prioridad:</p><ol>
+<li>Corregir los 3 enlaces rotos — impacto inmediato en UX y SEO.</li>
+<li>Mejorar la velocidad de carga en páginas críticas — optimizar imágenes, reducir JavaScript no usado, activar caché en servidor.</li>
+<li>Corregir los errores de SEO on-page — títulos, meta descriptions y etiquetas H1 faltantes.</li>
+<li>Implementar las 3 principales optimizaciones de rendimiento listadas arriba.</li>
+<li>Revisar la configuración SEO en todas las páginas — asegurar metadata completa y correcta.</li>
+<li>Programar una nueva auditoría en 30 días para medir el progreso.</li>
+</ol></div>
+<footer><p>Reporte generado con <strong>Lighthouse Reporter v0.3.0</strong> &nbsp;·&nbsp; 30/4/2026, 6:13:50 p. m.</p><p>Datos generados por Google Lighthouse, herramienta oficial de auditoría de Google Chrome.</p></footer>
+</div></body></html>

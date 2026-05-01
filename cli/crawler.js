@@ -5,6 +5,7 @@
  */
 
 import fetch from 'node-fetch';
+import chalk from 'chalk';
 
 // ── REGEX HELPERS ────────────────────────────────────────────────────────────
 
@@ -70,17 +71,83 @@ function estimateWordCount(html) {
   return clean.split(' ').filter((w) => w.length > 1).length;
 }
 
+// ── LECTOR DE SITEMAP ────────────────────────────────────────────────────────
+
+/**
+ * Lee un sitemap.xml (o sitemap index) y devuelve todas las URLs encontradas.
+ * Soporta sitemap index con múltiples sub-sitemaps.
+ */
+async function readSitemap(sitemapUrl, depth = 0) {
+  if (depth > 3) return []; // evitar bucles infinitos
+  const urls = [];
+  try {
+    const res = await fetch(sitemapUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LighthouseAuditBot/1.0; +bot)' },
+      signal: AbortSignal.timeout(10000),
+      redirect: 'follow',
+    });
+    if (!res.ok) return urls;
+    const text = await res.text();
+
+    // ¿Es un sitemap index? (<sitemapindex>)
+    const isSitemapIndex = /<sitemapindex/i.test(text);
+    if (isSitemapIndex) {
+      // Extraer URLs de sub-sitemaps
+      const subRegex = /<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>/gi;
+      let m;
+      const subFetches = [];
+      while ((m = subRegex.exec(text)) !== null) {
+        subFetches.push(readSitemap(m[1].trim(), depth + 1));
+      }
+      const results = await Promise.all(subFetches);
+      results.forEach((r) => urls.push(...r));
+    } else {
+      // Sitemap estándar — extraer todas las <loc>
+      const locRegex = /<loc>([^<]+)<\/loc>/gi;
+      let m;
+      while ((m = locRegex.exec(text)) !== null) {
+        urls.push(m[1].trim());
+      }
+    }
+  } catch {
+    /* sitemap no disponible o error de red — continuar sin él */
+  }
+  return urls;
+}
+
 // ── CRAWL PRINCIPAL ──────────────────────────────────────────────────────────
 
-export async function crawlSite(baseUrl, maxPages = 50) {
+export async function crawlSite(baseUrl, maxPages = 500) {
   const visited = new Set();
   const queue = [{ url: baseUrl, foundOn: null }];
   const pages = []; // { url, meta }
   const brokenLinks = []; // { url, status, foundOn }
 
   const origin = new URL(baseUrl).origin;
+  const unlimited = !isFinite(maxPages);
 
-  console.log(`\n🔍 Crawleando ${baseUrl} (máximo ${maxPages} páginas)...\n`);
+  console.log(`\n🔍 Crawleando ${baseUrl} (${unlimited ? 'sin límite de páginas' : 'máximo ' + maxPages + ' páginas'})...\n`);
+
+  // ── Sembrar queue con URLs del sitemap.xml ─────────────────────────────────
+  const sitemapUrl = new URL('/sitemap.xml', baseUrl).href;
+  console.log(`  📄 Buscando sitemap.xml en ${sitemapUrl}...`);
+  const sitemapUrls = await readSitemap(sitemapUrl);
+  if (sitemapUrls.length > 0) {
+    console.log(`  ✓ Sitemap encontrado: ${sitemapUrls.length} URL(s) descubiertas\n`);
+    for (const sUrl of sitemapUrls) {
+      try {
+        const parsed = new URL(sUrl);
+        if (parsed.origin !== origin) continue;
+        if (!['http:', 'https:'].includes(parsed.protocol)) continue;
+        const normalized = sUrl.split('?')[0].split('#')[0].replace(/\/$/, '') || baseUrl;
+        if (!queue.find((q) => q.url === normalized)) {
+          queue.push({ url: normalized, foundOn: 'sitemap.xml' });
+        }
+      } catch { /* URL inválida en el sitemap */ }
+    }
+  } else {
+    console.log(`  ℹ No se encontró sitemap.xml — el crawl se basará en los links del HTML\n`);
+  }
 
   while (queue.length > 0 && pages.length < maxPages) {
     const { url: rawUrl, foundOn } = queue.shift();
@@ -92,7 +159,7 @@ export async function crawlSite(baseUrl, maxPages = 50) {
     let res;
     try {
       res = await fetch(cleanUrl, {
-        headers: { 'User-Agent': 'LighthouseReporter/0.1 (audit bot)' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LighthouseAuditBot/1.0; +bot)' },
         signal: AbortSignal.timeout(10000),
         redirect: 'follow',
       });
@@ -166,7 +233,10 @@ export async function crawlSite(baseUrl, maxPages = 50) {
     }
   }
 
-  console.log(`\n📋 Total páginas: ${pages.length} | Links rotos: ${brokenLinks.length}\n`);
+  const limitedMsg = (!unlimited && pages.length >= maxPages)
+    ? chalk.yellow(` (límite de ${maxPages} alcanzado — usa --all para auditar todo)`)
+    : '';
+  console.log(`\n📋 Total páginas: ${pages.length}${limitedMsg} | Links rotos: ${brokenLinks.length}\n`);
   return { pages, brokenLinks };
 }
 
