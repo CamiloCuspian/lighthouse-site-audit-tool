@@ -653,7 +653,8 @@ function buildClientReportHtml(results, brokenLinks, siteName, date) {
 export function generateReport(results, brokenLinks, outputDir, siteName, prevResults = null) {
   mkdirSync(outputDir, { recursive: true });
 
-  const date = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  const now = new Date();
+  const date = now.toLocaleString('es-CO', { timeZone: 'America/Bogota' });
   const total = results.length;
   const avgPerf = Math.round(results.reduce((s, r) => s + r.scores.performance, 0) / total);
   const avgAcc = Math.round(results.reduce((s, r) => s + r.scores.accessibility, 0) / total);
@@ -993,7 +994,7 @@ function scoreColor(score) {
   );
 
   // Guardar en historial
-  const timestamp = date.replace(/:/g, '-').replace(/ /g, 'T').slice(0, 19);
+  const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const historyFile = join(outputDir, 'history', `${timestamp}.json`);
   writeFileSync(
     historyFile,

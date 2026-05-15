@@ -4,7 +4,7 @@
  * Listo para subir a Google Search Console.
  */
 
-import { writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 export function generateSitemap(pages, outputDir) {
@@ -28,6 +28,7 @@ ${urls}
 </urlset>`;
 
   const outFile = join(outputDir, 'sitemap.xml');
+  mkdirSync(outputDir, { recursive: true });
   writeFileSync(outFile, xml, 'utf-8');
   return outFile;
 }

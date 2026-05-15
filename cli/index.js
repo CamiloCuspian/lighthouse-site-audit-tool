@@ -213,7 +213,11 @@ function colorScore(s) {
   return chalk.bold.red(s);
 }
 
-main().catch((err) => {
-  console.error(chalk.red('\n✗ Error inesperado:'), err);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error(chalk.red('\n✗ Error inesperado:'), err);
+    process.exit(1);
+  });
