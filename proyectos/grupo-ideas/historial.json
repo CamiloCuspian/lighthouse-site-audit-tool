@@ -1,0 +1,15 @@
+[
+  {
+    "fecha": "2026-08-13T20:45:13.401Z",
+    "paginasAuditadas": 41,
+    "promedios": {
+      "performance": 100,
+      "accessibility": 93,
+      "bestPractices": 100,
+      "seo": 100
+    },
+    "linksRotos": 0,
+    "problemasSEO": 21,
+    "carpetaReporte": "grupo-ideas/2026-08-13T20-45-13"
+  }
+]

@@ -152,11 +152,12 @@ async function main() {
   const sitemapPath = generateSitemap(pages, outputDir);
   console.log(chalk.gray(`     → ${sitemapPath}`));
 
-  // 5. Generar reporte HTML
-  console.log(chalk.blue('\n📊 Generando reporte HTML...'));
+  // 5. Generar reportes
+  console.log(chalk.blue('\n📊 Generando reportes...'));
   const siteName = new URL(siteUrl).hostname;
-  const reportPath = generateReport(auditResults, brokenLinks, outputDir, siteName, prevResults);
+  const { reportPath, mdPath } = generateReport(auditResults, brokenLinks, outputDir, siteName, prevResults);
   console.log(chalk.gray(`     → ${reportPath}`));
+  console.log(chalk.gray(`     → ${mdPath}`));
 
   // 6. Resumen final
   const avgPerf = Math.round(
@@ -173,6 +174,7 @@ async function main() {
 
   console.log(chalk.bold.green('\n✔ ¡Todo listo!\n'));
   console.log(chalk.white(`  📄 Reporte  : ${reportPath}`));
+  console.log(chalk.white(`  🤖 IA report : ${mdPath}`));
   console.log(chalk.white(`  🗺  Sitemap  : ${sitemapPath}`));
   console.log('');
   console.log(chalk.bold('  Promedios:'));

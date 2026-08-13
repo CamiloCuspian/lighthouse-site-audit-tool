@@ -1,0 +1,55 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base titulo="Nuevo proyecto — Lighthouse Reporter">
+  <div class="page-header">
+    <a class="volver" href="/">← Todos los proyectos</a>
+    <h1>Nuevo proyecto</h1>
+    <p>Crea el espacio de un cliente para empezar a llevarle el historial de auditorías.</p>
+  </div>
+
+  <form id="form-proyecto" class="formulario">
+    <label>
+      Nombre del cliente
+      <input type="text" name="nombre" required placeholder="Ej: Zoomforth" />
+    </label>
+    <label>
+      Dominio a auditar
+      <input type="url" name="dominio" required placeholder="https://tucliente.com" />
+    </label>
+    <p id="error-proyecto" class="error-texto" hidden></p>
+    <button type="submit" id="btn-crear" class="boton boton-primario">Crear proyecto</button>
+  </form>
+</Base>
+
+<script>
+  const form = document.getElementById('form-proyecto');
+  const btn = document.getElementById('btn-crear');
+  const error = document.getElementById('error-proyecto');
+
+  form?.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    error.hidden = true;
+    btn.disabled = true;
+    btn.textContent = 'Creando…';
+
+    try {
+      const datos = new FormData(form);
+      const res = await fetch('/api/proyectos', { method: 'POST', body: datos });
+      const resultado = await res.json();
+
+      if (!res.ok || !resultado.ok) {
+        throw new Error(resultado.error ?? `El servidor respondió ${res.status}`);
+      }
+
+      // Navegamos nosotros mismos al proyecto ya creado, en vez de depender
+      // de que el navegador siga una redirección del servidor.
+      window.location.href = `/proyectos/${resultado.slug}`;
+    } catch (err) {
+      error.textContent = `No se pudo crear el proyecto: ${err.message}`;
+      error.hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Crear proyecto';
+    }
+  });
+</script>

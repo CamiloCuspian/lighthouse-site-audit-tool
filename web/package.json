@@ -1,0 +1,17 @@
+{
+  "name": "lighthouse-reporter-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Interfaz local (Astro) para lighthouse-site-audit-tool: un espacio por proyecto/cliente con historial de salud SEO/performance.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "start": "node ./dist/server/entry.mjs"
+  },
+  "dependencies": {
+    "@astrojs/node": "^11.1.1",
+    "astro": "^7.2.1"
+  }
+}

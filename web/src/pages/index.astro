@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import { listarProyectos } from '../lib/projects.js';
+
+const proyectos = await listarProyectos();
+
+function claseSalud(score) {
+  if (score == null) return 'sin-datos';
+  if (score >= 90) return 'salud-buena';
+  if (score >= 50) return 'salud-media';
+  return 'salud-critica';
+}
+
+function saludPromedio(ultima) {
+  if (!ultima) return null;
+  const p = ultima.promedios;
+  return Math.round((p.performance + p.accessibility + p.bestPractices + p.seo) / 4);
+}
+---
+<Base titulo="Proyectos — Lighthouse Reporter">
+  <div class="page-header">
+    <h1>Tus proyectos</h1>
+    <p>Salud de performance, SEO y accesibilidad de cada cliente, auditoría tras auditoría.</p>
+  </div>
+
+  {proyectos.length === 0 && (
+    <div class="vacio">
+      <p>Todavía no tienes proyectos creados.</p>
+      <a class="boton boton-primario" href="/proyectos/nuevo">Crear el primero</a>
+    </div>
+  )}
+
+  <div class="grid-proyectos">
+    {proyectos.map((p) => {
+      const salud = saludPromedio(p.ultima);
+      const auditando = p.estado === 'crawleando' || p.estado === 'auditando';
+      return (
+        <a class={`tarjeta ${claseSalud(salud)}`} href={`/proyectos/${p.slug}`}>
+          <div class="tarjeta-top">
+            <h2>{p.nombre}</h2>
+            <span class="badge">{salud != null ? salud : '—'}</span>
+          </div>
+          <p class="dominio">{p.dominio}</p>
+          {p.ultima ? (
+            <p class="fecha">Última auditoría: {new Date(p.ultima.fecha).toLocaleDateString('es-CO')}</p>
+          ) : (
+            <p class="fecha">Sin auditorías todavía</p>
+          )}
+          {auditando && <span class="pill pill-corriendo">Auditando ahora…</span>}
+        </a>
+      );
+    })}
+  </div>
+</Base>

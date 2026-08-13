@@ -117,7 +117,7 @@ async function readSitemap(sitemapUrl, depth = 0) {
 
 // ── CRAWL PRINCIPAL ──────────────────────────────────────────────────────────
 
-export async function crawlSite(baseUrl, maxPages = 500) {
+export async function crawlSite(baseUrl, maxPages = 500, onProgress) {
   const visited = new Set();
   const queue = [{ url: baseUrl, foundOn: null }];
   const pages = []; // { url, meta }
@@ -204,6 +204,7 @@ export async function crawlSite(baseUrl, maxPages = 500) {
 
     pages.push({ url: cleanUrl, meta });
     console.log(`  ✓ [${pages.length}] ${cleanUrl}`);
+    onProgress?.(pages.length, cleanUrl);
 
     // ── Descubrir más links ────────────────────────────────────────────────
     const hrefs = extractLinks(html);

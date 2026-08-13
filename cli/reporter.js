@@ -10,6 +10,7 @@
 
 import { writeFileSync, mkdirSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { buildMarkdownReport } from './markdown-reporter.js';
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -993,6 +994,10 @@ function scoreColor(score) {
     'utf-8'
   );
 
+  // Reporte Markdown para IA
+  const mdFile = join(outputDir, 'ai-report.md');
+  writeFileSync(mdFile, buildMarkdownReport(results, brokenLinks, siteName, date), 'utf-8');
+
   // Guardar en historial
   const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const historyFile = join(outputDir, 'history', `${timestamp}.json`);
@@ -1003,5 +1008,5 @@ function scoreColor(score) {
   );
   previousReports.unshift(timestamp);
 
-  return outFile;
+  return { reportPath: outFile, mdPath: mdFile };
 }

@@ -1,0 +1,351 @@
+:root {
+  --fondo: #0b0f14;
+  --panel: #121824;
+  --panel-borde: #1f2937;
+  --texto: #e5e9f0;
+  --texto-suave: #8b96a8;
+  --acento: #22d3a5;
+  --acento-suave: rgba(34, 211, 165, 0.12);
+  --bueno: #22d3a5;
+  --medio: #f5a623;
+  --critico: #f0546a;
+  --radio: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--panel-borde);
+  position: sticky;
+  top: 0;
+  background: rgba(11, 15, 20, 0.9);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.marca {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.contenedor {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 4px 0 6px;
+  font-size: 1.7rem;
+}
+
+.page-header p {
+  color: var(--texto-suave);
+  margin: 0;
+}
+
+.page-header.con-accion {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.volver {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.volver:hover {
+  color: var(--acento);
+}
+
+/* Botones */
+.boton {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid var(--panel-borde);
+  background: var(--panel);
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.boton:hover {
+  border-color: var(--acento);
+}
+
+.boton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.boton-primario {
+  background: var(--acento);
+  color: #06231b;
+  border-color: var(--acento);
+}
+
+.boton-secundario {
+  background: transparent;
+}
+
+/* Grid de proyectos */
+.grid-proyectos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.tarjeta {
+  display: block;
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--panel-borde);
+  border-radius: var(--radio);
+  border-left: 4px solid var(--panel-borde);
+  transition: transform 0.12s ease, border-color 0.15s ease;
+}
+
+.tarjeta:hover {
+  transform: translateY(-2px);
+  border-color: var(--acento);
+}
+
+.tarjeta.salud-buena { border-left-color: var(--bueno); }
+.tarjeta.salud-media { border-left-color: var(--medio); }
+.tarjeta.salud-critica { border-left-color: var(--critico); }
+.tarjeta.sin-datos { border-left-color: var(--panel-borde); }
+
+.tarjeta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tarjeta-top h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.badge {
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: var(--acento-suave);
+  color: var(--acento);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.dominio {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  margin: 8px 0 4px;
+  word-break: break-all;
+}
+
+.fecha {
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.pill {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.pill-corriendo {
+  background: rgba(245, 166, 35, 0.15);
+  color: var(--medio);
+}
+
+.vacio {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--texto-suave);
+}
+
+/* Formulario */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+}
+
+.error-texto {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(240, 84, 106, 0.12);
+  color: var(--critico);
+  font-size: 0.85rem;
+}
+
+.formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.formulario input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-borde);
+  background: var(--fondo);
+  color: var(--texto);
+  font-size: 0.95rem;
+}
+
+.formulario input:focus {
+  outline: none;
+  border-color: var(--acento);
+}
+
+/* Estado de auditoría en curso */
+.estado-caja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--panel-borde);
+  border-radius: var(--radio);
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--panel-borde);
+  border-top-color: var(--acento);
+  animation: girar 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+/* Resumen de la última auditoría */
+.resumen {
+  margin-top: 24px;
+}
+
+.scores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.score-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-borde);
+  border-radius: var(--radio);
+  padding: 18px;
+  text-align: center;
+}
+
+.score-card .numero {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--acento);
+}
+
+.score-card .etiqueta {
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+}
+
+.metadatos {
+  margin-top: 14px;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.metadatos p {
+  margin: 4px 0;
+}
+
+.descargas a {
+  color: var(--acento);
+}
+
+.descargas a:hover {
+  text-decoration: underline;
+}
+
+/* Tendencia histórica */
+.tendencia {
+  margin-top: 36px;
+}
+
+.tendencia h2 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.sparkline {
+  width: 100%;
+  max-width: 400px;
+  height: 60px;
+  background: var(--panel);
+  border: 1px solid var(--panel-borde);
+  border-radius: var(--radio);
+  padding: 8px;
+}
+
+.tabla-historial {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 0.85rem;
+}
+
+.tabla-historial th,
+.tabla-historial td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--panel-borde);
+}
+
+.tabla-historial th {
+  color: var(--texto-suave);
+  font-weight: 600;
+}

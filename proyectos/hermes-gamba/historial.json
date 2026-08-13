@@ -1,0 +1,15 @@
+[
+  {
+    "fecha": "2026-08-13T21:14:49.183Z",
+    "paginasAuditadas": 160,
+    "promedios": {
+      "performance": 89,
+      "accessibility": 96,
+      "bestPractices": 100,
+      "seo": 100
+    },
+    "linksRotos": 0,
+    "problemasSEO": 118,
+    "carpetaReporte": "hermes-gamba/2026-08-13T21-14-49"
+  }
+]

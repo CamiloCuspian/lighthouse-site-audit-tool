@@ -6,6 +6,10 @@ Audita **todas las páginas** de tu sitio web con Google Lighthouse y genera un 
 ![Node](https://img.shields.io/badge/node-%3E%3D18-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
+> 📓 ¿Vas a seguir modificando esta herramienta? Antes de empezar, lee
+> [`BITACORA.md`](./BITACORA.md) — ahí está qué se hizo, por qué, y qué
+> quedó pendiente de la última sesión de trabajo.
+
 ---
 
 ## ✨ ¿Qué hace?

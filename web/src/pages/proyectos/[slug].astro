@@ -1,0 +1,191 @@
+---
+import Base from '../../layouts/Base.astro';
+import { leerMeta, leerHistorial } from '../../lib/projects.js';
+
+const { slug } = Astro.params;
+
+let meta, historial;
+try {
+  meta = await leerMeta(slug);
+  historial = await leerHistorial(slug);
+} catch {
+  return Astro.redirect('/');
+}
+
+function salud(registro) {
+  const p = registro.promedios;
+  return Math.round((p.performance + p.accessibility + p.bestPractices + p.seo) / 4);
+}
+
+const ultima = historial.at(-1) ?? null;
+
+// Sparkline SVG del histórico de salud general — no necesita ninguna
+// librería de gráficas, es solo una polilínea calculada en el servidor.
+const puntos = historial.map(salud);
+const ANCHO = 360;
+const ALTO = 60;
+const ruta =
+  puntos.length > 1
+    ? puntos
+        .map((v, i) => {
+          const x = (i / (puntos.length - 1)) * ANCHO;
+          const y = ALTO - (v / 100) * (ALTO - 8) - 4;
+          return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+        })
+        .join(' ')
+    : '';
+---
+<Base titulo={`${meta.nombre} — Lighthouse Reporter`}>
+  <div class="page-header con-accion">
+    <div>
+      <a class="volver" href="/">← Todos los proyectos</a>
+      <h1>{meta.nombre}</h1>
+      <p><a href={meta.dominio} target="_blank" rel="noopener">{meta.dominio}</a></p>
+    </div>
+    <button id="btn-auditar" class="boton boton-primario">Auditar ahora</button>
+  </div>
+
+  <div id="estado-auditoria" class="estado-caja" hidden>
+    <div class="spinner"></div>
+    <span id="estado-mensaje">Iniciando…</span>
+  </div>
+
+  {ultima ? (
+    <>
+      <section class="resumen">
+        <div class="scores">
+          <div class="score-card"><span class="numero">{ultima.promedios.performance}</span><span class="etiqueta">Performance</span></div>
+          <div class="score-card"><span class="numero">{ultima.promedios.seo}</span><span class="etiqueta">SEO</span></div>
+          <div class="score-card"><span class="numero">{ultima.promedios.accessibility}</span><span class="etiqueta">Accesibilidad</span></div>
+          <div class="score-card"><span class="numero">{ultima.promedios.bestPractices}</span><span class="etiqueta">Best Practices</span></div>
+        </div>
+        <div class="metadatos">
+          <p>{ultima.paginasAuditadas} páginas auditadas · {ultima.linksRotos} links rotos · {ultima.problemasSEO} problemas SEO</p>
+          <p>{new Date(ultima.fecha).toLocaleString('es-CO')}</p>
+          {ultima.carpetaReporte && (
+            <p class="descargas">
+              <a href={`/reportes/${ultima.carpetaReporte}/index.html`} target="_blank">Ver reporte completo</a>
+              {' · '}
+              <a href={`/reportes/${ultima.carpetaReporte}/client-report.html`} target="_blank">Reporte para el cliente</a>
+              {' · '}
+              <a href={`/reportes/${ultima.carpetaReporte}/ai-report.md`} target="_blank">Reporte para IA</a>
+              {' · '}
+              <a href={`/reportes/${ultima.carpetaReporte}/sitemap.xml`} target="_blank">sitemap.xml</a>
+            </p>
+          )}
+        </div>
+      </section>
+
+      {puntos.length > 1 && (
+        <section class="tendencia">
+          <h2>Evolución de la salud general</h2>
+          <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} class="sparkline" preserveAspectRatio="none">
+            <path d={ruta} fill="none" stroke="#22d3a5" stroke-width="2" />
+          </svg>
+
+          <table class="tabla-historial">
+            <thead>
+              <tr><th>Fecha</th><th>Salud</th><th>Perf</th><th>SEO</th><th>Access</th><th>BP</th><th>Links rotos</th></tr>
+            </thead>
+            <tbody>
+              {[...historial].reverse().map((h) => (
+                <tr>
+                  <td>{new Date(h.fecha).toLocaleDateString('es-CO')}</td>
+                  <td>{salud(h)}</td>
+                  <td>{h.promedios.performance}</td>
+                  <td>{h.promedios.seo}</td>
+                  <td>{h.promedios.accessibility}</td>
+                  <td>{h.promedios.bestPractices}</td>
+                  <td>{h.linksRotos}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+    </>
+  ) : (
+    <div class="vacio">
+      <p>Todavía no hay auditorías para este proyecto. Dale clic a "Auditar ahora".</p>
+    </div>
+  )}
+</Base>
+
+<script define:vars={{ slug }}>
+  const btn = document.getElementById('btn-auditar');
+  const caja = document.getElementById('estado-auditoria');
+  const mensaje = document.getElementById('estado-mensaje');
+  let intervalo = null;
+
+  async function consultarEstado() {
+    const res = await fetch(`/api/estado?slug=${encodeURIComponent(slug)}`);
+    const estado = await res.json();
+
+    if (estado.estado === 'crawleando' || estado.estado === 'auditando') {
+      caja.hidden = false;
+      btn.disabled = true;
+      const progreso = estado.paginasTotal ? ` (${estado.paginasHechas}/${estado.paginasTotal})` : '';
+      mensaje.textContent = `${estado.mensaje ?? 'Trabajando…'}${progreso}`;
+      if (!intervalo) intervalo = setInterval(consultarEstado, 3000);
+    } else if (estado.estado === 'listo') {
+      if (intervalo) clearInterval(intervalo);
+      intervalo = null;
+
+      // estado.json se queda en "listo" en disco después de terminar (a
+      // propósito, para que quien no vio la auditoría en vivo sepa que la
+      // última corrida sí completó). Sin este control, cada vez que se
+      // carga la página se vuelve a ver "listo" y se recarga otra vez sin
+      // parar. Solo recargamos una vez por cada auditoría (identificada por
+      // su timestamp "actualizado"), usando sessionStorage para recordarlo
+      // incluso después del propio reload.
+      const claveVisto = `lh-audit-vista-${slug}`;
+      if (sessionStorage.getItem(claveVisto) === estado.actualizado) {
+        caja.hidden = true;
+        btn.disabled = false;
+        return;
+      }
+      sessionStorage.setItem(claveVisto, estado.actualizado);
+
+      caja.hidden = false;
+      mensaje.textContent = '¡Auditoría completada! Recargando…';
+      setTimeout(() => location.reload(), 1200);
+    } else if (estado.estado === 'error') {
+      if (intervalo) clearInterval(intervalo);
+      intervalo = null;
+      caja.hidden = false;
+      mensaje.textContent = `Ocurrió un error: ${estado.mensaje}`;
+      btn.disabled = false;
+    } else {
+      if (intervalo) clearInterval(intervalo);
+      intervalo = null;
+      caja.hidden = true;
+      btn.disabled = false;
+    }
+  }
+
+  btn?.addEventListener('click', async () => {
+    btn.disabled = true;
+    caja.hidden = false;
+    mensaje.textContent = 'Iniciando auditoría…';
+    try {
+      const res = await fetch('/api/auditar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+      if (!res.ok) {
+        const texto = await res.text();
+        throw new Error(`El servidor respondió ${res.status}: ${texto.slice(0, 200)}`);
+      }
+    } catch (err) {
+      mensaje.textContent = `No se pudo iniciar la auditoría: ${err.message}`;
+      btn.disabled = false;
+      return;
+    }
+    consultarEstado();
+  });
+
+  // Si ya había una auditoría corriendo (la dejó alguien más del equipo, o
+  // se recargó la página), la detectamos apenas carga.
+  consultarEstado();
+</script>

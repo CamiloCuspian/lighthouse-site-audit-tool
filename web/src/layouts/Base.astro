@@ -1,0 +1,21 @@
+---
+import '../styles/global.css';
+const { titulo = 'Lighthouse Reporter' } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="marca" href="/">🔦 Lighthouse Reporter</a>
+      <a class="boton boton-secundario" href="/proyectos/nuevo">+ Nuevo proyecto</a>
+    </header>
+    <main class="contenedor">
+      <slot />
+    </main>
+  </body>
+</html>

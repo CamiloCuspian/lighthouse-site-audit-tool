@@ -1,8 +1,16 @@
 # Dependencias
 node_modules/
 
-# Reportes generados (cada quien genera los suyos)
+# Reportes generados (cada quien genera los suyos, no se versionan)
 reports/
+
+# Interfaz web (Astro) — build local
+web/dist/
+web/.astro/
+
+# Estado transitorio de auditorías en curso (sí se versiona el historial.json,
+# pero no el estado.json de la corrida activa)
+proyectos/*/estado.json
 
 # Logs
 *.log
