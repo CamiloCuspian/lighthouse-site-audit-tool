@@ -116,6 +116,36 @@ a {
   background: transparent;
 }
 
+.boton-peligro {
+  background: transparent;
+  color: var(--critico);
+  border-color: var(--critico);
+}
+
+.boton-peligro:hover {
+  background: rgba(240, 84, 106, 0.12);
+  border-color: var(--critico);
+}
+
+.boton-peligro-suave {
+  background: transparent;
+  color: var(--critico);
+  border-color: var(--panel-borde);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.boton-peligro-suave:hover {
+  border-color: var(--critico);
+}
+
+.acciones-header {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* Grid de proyectos */
 .grid-proyectos {
   display: grid;

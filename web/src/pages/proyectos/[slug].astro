@@ -42,12 +42,16 @@ const ruta =
       <h1>{meta.nombre}</h1>
       <p><a href={meta.dominio} target="_blank" rel="noopener">{meta.dominio}</a></p>
     </div>
-    <button id="btn-auditar" class="boton boton-primario">Auditar ahora</button>
+    <div class="acciones-header">
+      <button id="btn-auditar" class="boton boton-primario">Auditar ahora</button>
+      <button id="btn-borrar" class="boton boton-peligro">Borrar proyecto</button>
+    </div>
   </div>
 
   <div id="estado-auditoria" class="estado-caja" hidden>
-    <div class="spinner"></div>
+    <div id="estado-spinner" class="spinner"></div>
     <span id="estado-mensaje">Iniciando…</span>
+    <button id="btn-cancelar" class="boton boton-peligro-suave" hidden>Cancelar auditoría</button>
   </div>
 
   {ultima ? (
@@ -113,9 +117,18 @@ const ruta =
 
 <script define:vars={{ slug }}>
   const btn = document.getElementById('btn-auditar');
+  const btnCancelar = document.getElementById('btn-cancelar');
+  const btnBorrar = document.getElementById('btn-borrar');
   const caja = document.getElementById('estado-auditoria');
   const mensaje = document.getElementById('estado-mensaje');
   let intervalo = null;
+  // true desde que se pide cancelar hasta que el estado deja de ser
+  // "crawleando"/"auditando" — evita que el poll de cada 3s pise el botón
+  // de vuelta a "Cancelar auditoría" mientras la cancelación todavía no
+  // surte efecto en el servidor (el punto de control más cercano puede
+  // tardar unos segundos, sobre todo si hay una carga de Lighthouse en
+  // curso para la página actual).
+  let cancelando = false;
 
   async function consultarEstado() {
     const res = await fetch(`/api/estado?slug=${encodeURIComponent(slug)}`);
@@ -124,8 +137,18 @@ const ruta =
     if (estado.estado === 'crawleando' || estado.estado === 'auditando') {
       caja.hidden = false;
       btn.disabled = true;
+      btnBorrar.disabled = true;
+      btnCancelar.hidden = false;
       const progreso = estado.paginasTotal ? ` (${estado.paginasHechas}/${estado.paginasTotal})` : '';
-      mensaje.textContent = `${estado.mensaje ?? 'Trabajando…'}${progreso}`;
+      if (cancelando) {
+        btnCancelar.disabled = true;
+        btnCancelar.textContent = 'Cancelando…';
+        mensaje.textContent = `Cancelando… (esto puede tardar unos segundos si hay una página de Lighthouse en curso) — ${estado.mensaje ?? 'Trabajando…'}${progreso}`;
+      } else {
+        btnCancelar.disabled = false;
+        btnCancelar.textContent = 'Cancelar auditoría';
+        mensaje.textContent = `${estado.mensaje ?? 'Trabajando…'}${progreso}`;
+      }
       if (!intervalo) intervalo = setInterval(consultarEstado, 3000);
     } else if (estado.estado === 'listo') {
       if (intervalo) clearInterval(intervalo);
@@ -142,24 +165,57 @@ const ruta =
       if (sessionStorage.getItem(claveVisto) === estado.actualizado) {
         caja.hidden = true;
         btn.disabled = false;
+        btnBorrar.disabled = false;
+        btnCancelar.hidden = true;
+        cancelando = false;
         return;
       }
       sessionStorage.setItem(claveVisto, estado.actualizado);
 
       caja.hidden = false;
+      btnCancelar.hidden = true;
+      cancelando = false;
       mensaje.textContent = '¡Auditoría completada! Recargando…';
       setTimeout(() => location.reload(), 1200);
+    } else if (estado.estado === 'cancelado') {
+      if (intervalo) clearInterval(intervalo);
+      intervalo = null;
+      caja.hidden = false;
+      btnCancelar.hidden = true;
+      cancelando = false;
+      mensaje.textContent = estado.mensaje ?? 'Auditoría cancelada.';
+      btn.disabled = false;
+      btnBorrar.disabled = false;
     } else if (estado.estado === 'error') {
       if (intervalo) clearInterval(intervalo);
       intervalo = null;
       caja.hidden = false;
+      btnCancelar.hidden = true;
+      cancelando = false;
       mensaje.textContent = `Ocurrió un error: ${estado.mensaje}`;
       btn.disabled = false;
+      btnBorrar.disabled = false;
+    } else if (estado.estado === 'interrumpido') {
+      // El servidor detectó un estado.json fantasma (auditoría que quedó
+      // a medias por un reinicio del servidor) y lo corrigió solo — no
+      // hay nada corriendo de verdad, así que no tiene sentido ofrecer
+      // "Cancelar auditoría" aquí.
+      if (intervalo) clearInterval(intervalo);
+      intervalo = null;
+      caja.hidden = false;
+      btnCancelar.hidden = true;
+      cancelando = false;
+      mensaje.textContent = estado.mensaje ?? 'Esta auditoría se quedó a medias. Dale clic a "Auditar ahora" para lanzarla de nuevo.';
+      btn.disabled = false;
+      btnBorrar.disabled = false;
     } else {
       if (intervalo) clearInterval(intervalo);
       intervalo = null;
       caja.hidden = true;
+      btnCancelar.hidden = true;
+      cancelando = false;
       btn.disabled = false;
+      btnBorrar.disabled = false;
     }
   }
 
@@ -183,6 +239,64 @@ const ruta =
       return;
     }
     consultarEstado();
+  });
+
+  btnCancelar?.addEventListener('click', async () => {
+    if (!confirm('¿Cancelar la auditoría en curso? El progreso hecho hasta ahora no se guardará.')) return;
+    btnCancelar.disabled = true;
+    btnCancelar.textContent = 'Cancelando…';
+    try {
+      const res = await fetch('/api/cancelar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+      const datos = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(`El servidor respondió ${res.status}: ${JSON.stringify(datos).slice(0, 200)}`);
+      }
+      if (datos.ok === false) {
+        // El servidor respondió pero no había nada que cancelar (por
+        // ejemplo, la auditoría ya había terminado justo antes del clic).
+        throw new Error(datos.mensaje ?? 'No se pudo cancelar.');
+      }
+      // A partir de aquí, cancelando=true evita que el poll de /api/estado
+      // (cada 3s) pise el botón mientras el servidor todavía no llega al
+      // próximo punto de control. El propio poll lo apaga cuando el
+      // estado deja de ser "crawleando"/"auditando".
+      cancelando = true;
+    } catch (err) {
+      mensaje.textContent = `No se pudo cancelar: ${err.message}`;
+      btnCancelar.disabled = false;
+      btnCancelar.textContent = 'Cancelar auditoría';
+    }
+  });
+
+  btnBorrar?.addEventListener('click', async () => {
+    if (
+      !confirm(
+        '¿Borrar este proyecto por completo? Se eliminará su historial y sus reportes guardados. Esta acción no se puede deshacer.'
+      )
+    )
+      return;
+    btnBorrar.disabled = true;
+    btnBorrar.textContent = 'Borrando…';
+    try {
+      const res = await fetch('/api/borrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+      const datos = await res.json().catch(() => ({}));
+      if (!res.ok || datos.ok === false) {
+        throw new Error(datos.error ?? `El servidor respondió ${res.status}`);
+      }
+      location.href = '/';
+    } catch (err) {
+      alert(`No se pudo borrar el proyecto: ${err.message}`);
+      btnBorrar.disabled = false;
+      btnBorrar.textContent = 'Borrar proyecto';
+    }
   });
 
   // Si ya había una auditoría corriendo (la dejó alguien más del equipo, o

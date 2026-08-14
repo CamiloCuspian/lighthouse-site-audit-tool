@@ -9,8 +9,9 @@ web/dist/
 web/.astro/
 
 # Estado transitorio de auditorías en curso (sí se versiona el historial.json,
-# pero no el estado.json de la corrida activa)
+# pero no el estado.json de la corrida activa ni la señal de cancelación)
 proyectos/*/estado.json
+proyectos/*/cancelar.flag
 
 # Logs
 *.log

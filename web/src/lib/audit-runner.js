@@ -25,18 +25,137 @@ import { crawlSite } from '../../../cli/crawler.js';
 import { launchChrome, killChrome, auditPage } from '../../../cli/auditor.js';
 import { generateReport } from '../../../cli/reporter.js';
 import { generateSitemap } from '../../../cli/sitemap.js';
-import { leerMeta, appendHistorial, writeEstado } from './projects.js';
+import {
+  leerMeta,
+  appendHistorial,
+  writeEstado,
+  leerEstado,
+  pedirCancelacion,
+  hayCancelacionPedida,
+  limpiarCancelacion,
+} from './projects.js';
 
 const LOTE = 50; // páginas por lote antes de reiniciar Chrome
 const enCurso = new Set();
+
+/** Señal interna para cortar una auditoría en curso de forma limpia. */
+class AuditoriaCancelada extends Error {}
 
 export function auditoriaEnCurso(slug) {
   return enCurso.has(slug);
 }
 
+/**
+ * Lee estado.json pero corrige un caso concreto: si dice "crawleando" o
+ * "auditando" pero NINGÚN proceso de este servidor tiene realmente esa
+ * auditoría corriendo (`enCurso`), es un estado fantasma — casi siempre
+ * porque el servidor de desarrollo se reinició (Ctrl+C) a mitad de una
+ * auditoría, y el proceso viejo murió sin llegar a escribir su estado
+ * final ("listo"/"error"/"cancelado"). Sin esta corrección, la interfaz
+ * se queda mostrando "auditando…" para siempre, y "Cancelar auditoría" no
+ * tiene ninguna auditoría real con la que hablar — el clic no hace nada
+ * porque, literalmente, no hay nada corriendo que cancelar.
+ *
+ * Se usa tanto para responder /api/estado (así la interfaz se autocorrige
+ * sola en el siguiente poll) como dentro de cancelarAuditoria.
+ */
+export async function estadoEfectivo(slug) {
+  const estado = await leerEstado(slug);
+  if ((estado.estado === 'crawleando' || estado.estado === 'auditando') && !enCurso.has(slug)) {
+    console.log(
+      `[auditoria] "${slug}": estado.json dice "${estado.estado}" pero no hay ninguna auditoría corriendo en este proceso — seguramente el servidor se reinició a mitad de la auditoría anterior. Corrigiendo a "interrumpido".`
+    );
+    const corregido = {
+      estado: 'interrumpido',
+      mensaje:
+        'Esta auditoría se quedó a medias (probablemente el servidor se reinició o se cerró mientras corría). Dale clic a "Auditar ahora" para lanzarla de nuevo.',
+      actualizado: new Date().toISOString(),
+    };
+    await writeEstado(slug, corregido);
+    await limpiarCancelacion(slug).catch(() => {});
+    return corregido;
+  }
+  return estado;
+}
+
+/**
+ * Pide cancelar una auditoría en curso: escribe la señal en disco (ver
+ * pedirCancelacion en projects.js — a propósito NO es una variable en
+ * memoria, para que funcione sin importar qué instancia del módulo la
+ * escribió o la está leyendo). Se detiene en el próximo punto de control
+ * (entre páginas del crawl o entre páginas de Lighthouse), nunca a la
+ * fuerza a mitad de una carga de Lighthouse, para no dejar Chrome en un
+ * estado raro ni corromper el reporte parcial.
+ * Devuelve false si, en realidad, esa auditoría no está corriendo ahora
+ * mismo (nada que cancelar) — incluyendo el caso de un estado fantasma
+ * (ver estadoEfectivo), que de paso corrige.
+ */
+export async function cancelarAuditoria(slug) {
+  const estado = await estadoEfectivo(slug);
+  if (estado.estado !== 'crawleando' && estado.estado !== 'auditando') {
+    console.log(`[cancelar] "${slug}": no hay auditoría en curso (estado actual: "${estado.estado}"). No se hace nada.`);
+    return false;
+  }
+  await pedirCancelacion(slug);
+  console.log(`[cancelar] "${slug}": señal de cancelación escrita en disco. Se aplicará en el próximo punto de control.`);
+  return true;
+}
+
+async function verificarCancelacion(slug) {
+  if (await hayCancelacionPedida(slug)) {
+    console.log(`[cancelar] "${slug}": señal de cancelación detectada, deteniendo la auditoría.`);
+    await limpiarCancelacion(slug);
+    throw new AuditoriaCancelada();
+  }
+}
+
+const CANCELADO = Symbol('cancelado');
+
+/**
+ * Vigila en segundo plano (cada 800ms) si pidieron cancelar, mientras una
+ * página de Lighthouse está corriendo. A propósito NO espera a que esa
+ * página termine sola: el chequeo normal (verificarCancelacion) solo
+ * corre ENTRE páginas, y una sola página de Lighthouse puede tardar
+ * fácilmente 30-90+ segundos (más aún con throttling simulado), así que
+ * cancelar podía sentirse "roto" aunque técnicamente funcionara — solo
+ * que tardaba lo que le faltara a la página actual. Con esto, apenas se
+ * detecta la señal se cierra Chrome de inmediato (aborta la conexión que
+ * Lighthouse tiene abierta con el navegador), en vez de esperar.
+ */
+function vigilarCancelacionDurante(slug) {
+  let detenido = false;
+  let temporizador = null;
+
+  const promesa = new Promise((resolve) => {
+    const revisar = async () => {
+      if (detenido) return;
+      if (await hayCancelacionPedida(slug)) {
+        detenido = true;
+        resolve(CANCELADO);
+        return;
+      }
+      if (!detenido) temporizador = setTimeout(revisar, 800);
+    };
+    temporizador = setTimeout(revisar, 800);
+  });
+
+  return {
+    promesa,
+    detener() {
+      detenido = true;
+      if (temporizador) clearTimeout(temporizador);
+    },
+  };
+}
+
 export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
   if (enCurso.has(slug)) return;
   enCurso.add(slug);
+  // Por si quedó una señal de una cancelación anterior que no se limpió
+  // (por ejemplo, si la auditoría terminó en error antes de llegar a
+  // revisarla) — si no se limpia, esta auditoría nueva se cancelaría sola
+  // en el primer punto de control.
+  await limpiarCancelacion(slug);
 
   try {
     const meta = await leerMeta(slug);
@@ -55,19 +174,32 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
     // Durante el crawl (antes de que arranque Lighthouse) también se
     // reporta progreso — si no, la pantalla se queda con el mismo mensaje
     // estático varios minutos en sitios grandes y parece congelada.
-    const { pages, brokenLinks } = await crawlSite(siteUrl, maxPaginas, (encontradas, url) => {
-      writeEstado(slug, {
-        estado: 'crawleando',
-        paginasHechas: 0,
-        paginasTotal: 0,
-        paginasEncontradas: encontradas,
-        urlActual: url,
-        mensaje: `Descubriendo páginas del sitio… (${encontradas} encontradas hasta ahora)`,
-        actualizado: new Date().toISOString(),
-      }).catch(() => {
-        /* si falla una escritura de progreso no se detiene el crawl por eso */
-      });
-    });
+    //
+    // El punto de control de cancelación va en onStep (4º argumento), NO
+    // en onProgress: onProgress solo se llama cuando el crawler encuentra
+    // una página HTML válida, así que en un sitio con muchos links rotos,
+    // redirects o URLs ya visitadas entre una página válida y la
+    // siguiente, cancelar podía tardar mucho en surtir efecto (o no
+    // notarse nunca si el crawl terminaba antes). onStep se llama en CADA
+    // vuelta del loop del crawler, sin excepción.
+    const { pages, brokenLinks } = await crawlSite(
+      siteUrl,
+      maxPaginas,
+      (encontradas, url) => {
+        writeEstado(slug, {
+          estado: 'crawleando',
+          paginasHechas: 0,
+          paginasTotal: 0,
+          paginasEncontradas: encontradas,
+          urlActual: url,
+          mensaje: `Descubriendo páginas del sitio… (${encontradas} encontradas hasta ahora)`,
+          actualizado: new Date().toISOString(),
+        }).catch(() => {
+          /* si falla una escritura de progreso no se detiene el crawl por eso */
+        });
+      },
+      () => verificarCancelacion(slug) // crawlSite hace `await onStep?.()`
+    );
 
     if (pages.length === 0) {
       await writeEstado(slug, {
@@ -92,6 +224,10 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
 
     try {
       for (let i = 0; i < pages.length; i++) {
+        // Punto de control entre páginas: nunca corta a media auditoría de
+        // Lighthouse, solo antes de arrancar la siguiente página.
+        await verificarCancelacion(slug);
+
         if (i > 0 && i % LOTE === 0) {
           try {
             await killChrome();
@@ -102,11 +238,53 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
         }
 
         const { url, meta: pageMeta } = pages[i];
+        const inicio = Date.now();
+        console.log(`[auditoria] "${slug}": página ${i + 1}/${pages.length} — empieza Lighthouse en ${url}`);
+
+        const vigilante = vigilarCancelacionDurante(slug);
+        const promesaAudit = auditPage(url);
+        // Si perdemos la carrera de abajo (nos cancelan) y por eso matamos
+        // Chrome, esta promesa va a terminar rechazando sola más tarde
+        // (Lighthouse pierde la conexión) — este catch vacío evita que
+        // Node se queje de un "unhandled rejection" por una promesa que
+        // decidimos dejar de esperar a propósito.
+        promesaAudit.catch(() => {});
 
         try {
-          const result = await auditPage(url);
-          auditResults.push({ ...result, meta: pageMeta });
+          const resultado = await Promise.race([promesaAudit, vigilante.promesa]);
+          vigilante.detener();
+
+          if (resultado === CANCELADO) {
+            console.log(
+              `[cancelar] "${slug}": señal detectada mientras Lighthouse auditaba ${url} (llevaba ${Math.round((Date.now() - inicio) / 1000)}s) — cerrando Chrome para cortar de inmediato en vez de esperar a que esa página termine.`
+            );
+            try {
+              await killChrome();
+            } catch {
+              /* EPERM esperado en Windows al forzar el cierre — no bloquea */
+            }
+            await limpiarCancelacion(slug);
+            throw new AuditoriaCancelada();
+          }
+
+          console.log(`[auditoria] "${slug}": página ${i + 1}/${pages.length} terminada en ${Math.round((Date.now() - inicio) / 1000)}s.`);
+          auditResults.push({ ...resultado, meta: pageMeta });
         } catch (err) {
+          vigilante.detener();
+          if (err instanceof AuditoriaCancelada) throw err;
+
+          // auditPage() puede rechazar porque Chrome se cerró a la fuerza
+          // (por nuestra propia cancelación, justo cuando perdimos la
+          // carrera de arriba por un pelo) o por un error real de esa
+          // página. Si de verdad hay una cancelación pedida, es lo
+          // primero — no lo tratamos como "página con error".
+          if (await hayCancelacionPedida(slug)) {
+            await limpiarCancelacion(slug);
+            console.log(`[cancelar] "${slug}": Chrome se cerró por la cancelación mientras auditaba ${url}.`);
+            throw new AuditoriaCancelada();
+          }
+
+          console.log(`[auditoria] "${slug}": página ${i + 1}/${pages.length} falló tras ${Math.round((Date.now() - inicio) / 1000)}s — ${err.message}`);
           auditResults.push({
             url,
             meta: pageMeta,
@@ -134,6 +312,12 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
         /* EPERM en Windows — ignorar */
       }
     }
+
+    // Último punto de control: si cancelaron mientras se auditaba la
+    // ÚLTIMA página, el loop de arriba ya no vuelve a pasar por su propio
+    // chequeo (no hay siguiente iteración) y seguiría de largo generando
+    // el reporte como si nada. Este chequeo extra evita ese caso.
+    await verificarCancelacion(slug);
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const carpetaRelativa = `${slug}/${timestamp}`;
@@ -163,13 +347,26 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
       actualizado: new Date().toISOString(),
     });
   } catch (err) {
-    await writeEstado(slug, {
-      estado: 'error',
-      mensaje: err.message,
-      actualizado: new Date().toISOString(),
-    });
+    if (err instanceof AuditoriaCancelada) {
+      console.log(`[auditoria] "${slug}": cancelada por el usuario.`);
+      await writeEstado(slug, {
+        estado: 'cancelado',
+        mensaje: 'Auditoría cancelada por el usuario.',
+        actualizado: new Date().toISOString(),
+      });
+    } else {
+      console.error(`[auditoria] "${slug}": error —`, err);
+      await writeEstado(slug, {
+        estado: 'error',
+        mensaje: err.message,
+        actualizado: new Date().toISOString(),
+      });
+    }
   } finally {
     enCurso.delete(slug);
+    await limpiarCancelacion(slug).catch(() => {
+      /* si no había flag que limpiar, no pasa nada */
+    });
   }
 }
 

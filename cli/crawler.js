@@ -117,7 +117,7 @@ async function readSitemap(sitemapUrl, depth = 0) {
 
 // ── CRAWL PRINCIPAL ──────────────────────────────────────────────────────────
 
-export async function crawlSite(baseUrl, maxPages = 500, onProgress) {
+export async function crawlSite(baseUrl, maxPages = 500, onProgress, onStep) {
   const visited = new Set();
   const queue = [{ url: baseUrl, foundOn: null }];
   const pages = []; // { url, meta }
@@ -150,6 +150,16 @@ export async function crawlSite(baseUrl, maxPages = 500, onProgress) {
   }
 
   while (queue.length > 0 && pages.length < maxPages) {
+    // Punto de control en CADA vuelta del loop, sin importar si esta URL
+    // termina siendo una página válida, un link roto, un redirect o algo
+    // ya visitado. Es a propósito distinto de onProgress (que solo se
+    // llama cuando se encuentra una página válida): en sitios con muchos
+    // links rotos o redirects entre una página válida y la siguiente,
+    // onProgress solo puede tardar bastante en volver a llamarse, y quien
+    // esté esperando a cancelar la auditoría no debería tener que esperar
+    // tanto.
+    await onStep?.();
+
     const { url: rawUrl, foundOn } = queue.shift();
     const cleanUrl = rawUrl.split('?')[0].split('#')[0].replace(/\/$/, '') || baseUrl;
 
