@@ -120,6 +120,14 @@ async function readSitemap(sitemapUrl, depth = 0) {
 export async function crawlSite(baseUrl, maxPages = 500, onProgress, onStep) {
   const visited = new Set();
   const queue = [{ url: baseUrl, foundOn: null }];
+  // Set con las URLs ya encoladas — antes se chequeaba con
+  // `queue.find(...)` en cada URL nueva, que es O(n) por llamada y hacía
+  // el crawl cuadrático (O(n²)) en sitios grandes con muchos links
+  // internos: con miles de URLs candidatas, esa sola comprobación podía
+  // tardar minutos y hacer parecer "colgada" la auditoría (o dejarla
+  // corriendo tanto tiempo de fondo que aumentaba el riesgo de toparse con
+  // que la máquina se suspenda o el servidor se caiga antes de terminar).
+  const enCola = new Set([baseUrl]);
   const pages = []; // { url, meta }
   const brokenLinks = []; // { url, status, foundOn }
 
@@ -140,7 +148,8 @@ export async function crawlSite(baseUrl, maxPages = 500, onProgress, onStep) {
         if (parsed.origin !== origin) continue;
         if (!['http:', 'https:'].includes(parsed.protocol)) continue;
         const normalized = sUrl.split('?')[0].split('#')[0].replace(/\/$/, '') || baseUrl;
-        if (!queue.find((q) => q.url === normalized)) {
+        if (!enCola.has(normalized)) {
+          enCola.add(normalized);
           queue.push({ url: normalized, foundOn: 'sitemap.xml' });
         }
       } catch { /* URL inválida en el sitemap */ }
@@ -235,7 +244,8 @@ export async function crawlSite(baseUrl, maxPages = 500, onProgress, onStep) {
         if (!['http:', 'https:'].includes(linkParsed.protocol)) continue;
 
         const normalized = absolute.split('?')[0].split('#')[0].replace(/\/$/, '');
-        if (!visited.has(normalized) && !queue.find((q) => q.url === normalized)) {
+        if (!visited.has(normalized) && !enCola.has(normalized)) {
+          enCola.add(normalized);
           queue.push({ url: normalized, foundOn: cleanUrl });
         }
       } catch {

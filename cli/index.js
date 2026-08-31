@@ -95,8 +95,9 @@ async function main() {
 
   // 2. Lanzar Chrome una sola vez
   console.log(chalk.gray('  Iniciando Chrome...\n'));
+  let chrome;
   try {
-    await launchChrome();
+    chrome = await launchChrome();
   } catch (err) {
     console.error(chalk.red(`\n✗ No se pudo lanzar Chrome: ${err.message}`));
     console.error(chalk.yellow('  Asegúrate de tener Google Chrome instalado.'));
@@ -113,7 +114,7 @@ async function main() {
       const spinner = ora(`[${i + 1}/${pages.length}] Auditando ${url}`).start();
 
       try {
-        const result = await auditPage(url, extraHeaders);
+        const result = await auditPage(chrome, url, extraHeaders);
         // Combinar resultado de Lighthouse con meta tags del crawler
         auditResults.push({ ...result, meta });
 
@@ -134,7 +135,7 @@ async function main() {
     }
   } finally {
     try {
-      await killChrome();
+      await killChrome(chrome);
     } catch {
       /* EPERM Windows — ignorar */
     }

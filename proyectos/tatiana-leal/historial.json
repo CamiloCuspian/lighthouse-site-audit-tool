@@ -24,5 +24,18 @@
     "linksRotos": 2,
     "problemasSEO": 292,
     "carpetaReporte": "tatiana-leal/2026-08-15T02-32-21"
+  },
+  {
+    "fecha": "2026-08-26T15:38:33.823Z",
+    "paginasAuditadas": 308,
+    "promedios": {
+      "performance": 43,
+      "accessibility": 71,
+      "bestPractices": 50,
+      "seo": 79
+    },
+    "linksRotos": 2,
+    "problemasSEO": 14,
+    "carpetaReporte": "tatiana-leal/2026-08-26T15-38-33"
   }
 ]

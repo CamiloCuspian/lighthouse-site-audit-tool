@@ -1,0 +1,15 @@
+[
+  {
+    "fecha": "2026-08-28T20:52:52.566Z",
+    "paginasAuditadas": 89,
+    "promedios": {
+      "performance": 73,
+      "accessibility": 95,
+      "bestPractices": 99,
+      "seo": 98
+    },
+    "linksRotos": 162,
+    "problemasSEO": 230,
+    "carpetaReporte": "shopify-globaltoolscompaniaferretera/2026-08-28T20-52-52"
+  }
+]

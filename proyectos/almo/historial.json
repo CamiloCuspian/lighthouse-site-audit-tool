@@ -11,5 +11,18 @@
     "linksRotos": 2,
     "problemasSEO": 288,
     "carpetaReporte": "almo/2026-08-22T19-31-56"
+  },
+  {
+    "fecha": "2026-08-26T15:53:18.125Z",
+    "paginasAuditadas": 356,
+    "promedios": {
+      "performance": 47,
+      "accessibility": 74,
+      "bestPractices": 51,
+      "seo": 79
+    },
+    "linksRotos": 3,
+    "problemasSEO": 287,
+    "carpetaReporte": "almo/2026-08-26T15-53-17"
   }
 ]

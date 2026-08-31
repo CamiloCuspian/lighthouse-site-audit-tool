@@ -394,3 +394,127 @@ compartida (cada quien corre la herramienta en su máquina, el historial
 compacto se sincroniza por `git push`/`git pull`). Esta decisión es la que
 llevó a construir la interfaz en Astro descrita en la sesión del
 2026-08-14, en vez de una app desplegada.
+
+### 2026-08-28 — Bug crítico: Chrome compartido entre auditorías concurrentes (causa real de lentitud, "Iniciando…" pegado y cancelar que no funciona)
+
+El usuario reportó tres síntomas juntos: la herramienta muy lenta, el
+mensaje "Iniciando…" pegado sin avanzar al entrar a un proyecto (el bug
+del 14-ago nunca se había resuelto), y no poder cancelar dos auditorías
+que tenía corriendo en ese momento.
+
+**Causa raíz encontrada:** en `cli/auditor.js`, `chromeInstance` era una
+variable **global del módulo**, compartida por todo el proceso del
+servidor. Eso era seguro para el CLI (una sola auditoría a la vez), pero
+la interfaz web puede recibir auditorías de dos proyectos distintos
+corriendo al mismo tiempo (dos personas del equipo, o el mismo usuario
+auditando dos clientes seguidos sin esperar). La segunda auditoría que
+llamaba a `launchChrome()` pisaba esa variable global, dejando a la
+primera apuntando a un Chrome que ya no controlaba nadie: por eso se
+quedaba pegada sin avanzar, cancelar mataba el Chrome equivocado (o
+ninguno), y quedaban procesos de Chrome headless huérfanos consumiendo
+CPU/RAM de fondo — la causa real de la lentitud general.
+
+**Corregido:** `launchChrome()`, `killChrome()` y `auditPage()` ya no usan
+una instancia global — cada auditoría (`iniciarAuditoria()` en
+`web/src/lib/audit-runner.js`, y el CLI en `cli/index.js`) lanza y pasa su
+propia instancia de Chrome explícitamente. Dos auditorías concurrentes
+ahora son seguras: cada una tiene su propio Chrome en su propio puerto.
+
+También se agregó `matarChromeHuerfano()` en `cli/auditor.js`: cuando
+`estadoEfectivo()` detecta un estado fantasma ("crawleando"/"auditando"
+en disco sin ninguna auditoría real corriendo — típicamente por un
+reinicio del servidor a mitad de una auditoría), además de corregir el
+estado a "interrumpido" ahora también intenta matar (best-effort, nunca
+lanza si falla) cualquier Chrome headless huérfano identificable por la
+huella única en su user-agent (`LighthouseAuditBot`), para no dejarlo
+vivo indefinidamente.
+
+Validado con `node --check` en los tres archivos tocados
+(`cli/auditor.js`, `cli/index.js`, `web/src/lib/audit-runner.js`) — sin
+errores de sintaxis. **Falta la prueba real en `npm run dev`** con dos
+auditorías corriendo a la vez, igual que el pendiente de la sesión del
+14-ago.
+
+**Importante para el usuario — acción manual pendiente esta vez:** el fix
+evita que esto vuelva a pasar, pero NO mata los procesos que ya quedaron
+huérfanos de las dos auditorías que estaban corriendo hoy. Hay que
+cerrar la terminal donde corre `npm run dev`, revisar el Administrador
+de tareas por procesos `chrome.exe` sin ventana visible (huérfanos de
+esta herramienta) y cerrarlos, y volver a correr `npm run dev`.
+
+**Hallazgo aparte (no relacionado con el bug de arriba):** el repo tenía
+un `.git/index.lock` bloqueando git (de una prueba de `git stash` de una
+sesión anterior, ya documentada el 14-ago) y un archivo basura `nul` en
+la raíz — se borraron los dos. También hay ~10 archivos con el working
+tree completo convertido de CRLF a LF (sin cambios de contenido reales,
+confirmado con `git diff -b`) que quedaron sin commitear — no se tocaron,
+pero conviene que el usuario revise `git status` y decida si los
+commitea tal cual (el cambio de fin de línea es inofensivo) o los
+descarta.
+
+**Pendiente para "que se vea más profesional" (diagnóstico, no
+implementado a fondo esta sesión):** se agregó un favicon (`web/public/favicon.svg`)
+y meta description en `web/src/layouts/Base.astro` como primer paso. La
+identidad visual sigue siendo solo un emoji 🔦 + texto, y las acciones
+destructivas (cancelar, borrar proyecto) usan `confirm()`/`alert()`
+nativos del navegador, que rompen la consistencia visual del resto de la
+interfaz (que sí tiene un sistema de diseño propio con variables CSS,
+tema oscuro). Recomendado para una próxima sesión: reemplazar esos
+diálogos nativos por modales propios, y definir una identidad de marca
+mínima (nombre + logo simple) en vez del emoji genérico.
+
+### 2026-08-28 (2) — El servidor se cae solo a mitad de una auditoría larga: nunca se ha podido terminar una
+
+El usuario reportó que, en algún punto de una auditoría larga, el
+servidor (`npm run dev`) se apaga por completo y hay que reiniciarlo —
+perdiendo la auditoría. Dice que nunca ha logrado terminar una auditoría
+completa.
+
+**Diagnóstico:** Node, por defecto, TERMINA todo el proceso ante una
+excepción no capturada o una promesa rechazada sin manejar (comportamiento
+estándar desde Node 15) — y en este proyecto no había ningún manejador
+global para eso. Una auditoría de 300-500 páginas corre horas; basta con
+que Chrome se caiga inesperadamente en una sola página (memoria, timeout
+profundo del protocolo de depuración, una página rara) para que ese error
+escape de los try/catch normales y tumbe TODO el servidor, no solo esa
+auditoría — coincide exactamente con "se para el servidor y finaliza".
+
+También se encontró (separado, pero agravante) que `crawlSite()` en
+`cli/crawler.js` comprobaba si una URL ya estaba en cola con
+`queue.find(...)`, O(n) por cada URL nueva candidata — en sitios grandes
+con muchos links internos esto vuelve el crawl cuadrático (O(n²)), puede
+tardar mucho más de lo necesario y mantiene la auditoría corriendo (y por
+lo tanto expuesta a cualquier fallo) mucho más tiempo del necesario.
+
+**Corregido:**
+1. `web/src/lib/audit-runner.js` ahora instala `process.on('uncaughtException')`
+   y `process.on('unhandledRejection')` — el error se registra en consola
+   pero el servidor sigue vivo.
+2. Como eso solo evita la caída total, pero la auditoría afectada podía
+   quedar fantasma (marcada "auditando" en `enCurso` para siempre, sin que
+   nada la esté avanzando), se agregó un vigilante (`setInterval` cada
+   30s) que rastrea la última escritura de progreso real de cada
+   auditoría (`ultimaActividad`); si una auditoría lleva más de 8 minutos
+   sin ninguna señal de vida, se da por muerta: libera `enCurso`, intenta
+   matar el Chrome huérfano asociado, y deja `estado.json` en "error" con
+   un mensaje claro para reintentar — en vez de quedar pegada para
+   siempre.
+3. `cli/crawler.js`: se reemplazó `queue.find(...)` por un `Set` (`enCola`)
+   para la comprobación de duplicados — de O(n) a O(1) por URL, el crawl
+   de sitios grandes debería ser notablemente más rápido.
+
+Validado con `node --check` en los cuatro archivos tocados
+(`cli/auditor.js`, `cli/index.js`, `cli/crawler.js`,
+`web/src/lib/audit-runner.js`) — sin errores de sintaxis. **Sigue
+pendiente la prueba real con `npm run dev`** corriendo una auditoría
+completa de principio a fin en la máquina del usuario — nunca se ha
+completado una, así que esta es la prueba de fuego real de todos los
+cambios de hoy (el bug de Chrome compartido de la sesión anterior y estos).
+
+**Importante — causa no descartable fuera del código:** si la laptop del
+usuario tiene configurado que se suspenda (sleep) tras un tiempo de
+inactividad, eso también apagaría el servidor a mitad de una auditoría de
+horas, y ningún cambio de código lo evita. Se le recomendó revisar
+Configuración → Sistema → Energía y batería → Pantalla y suspensión, y
+desactivar la suspensión automática (al menos con el cargador conectado)
+mientras corre una auditoría larga.

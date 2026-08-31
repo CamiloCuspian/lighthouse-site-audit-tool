@@ -22,7 +22,7 @@
 
 import { join } from 'node:path';
 import { crawlSite } from '../../../cli/crawler.js';
-import { launchChrome, killChrome, auditPage } from '../../../cli/auditor.js';
+import { launchChrome, killChrome, auditPage, matarChromeHuerfano } from '../../../cli/auditor.js';
 import { generateReport } from '../../../cli/reporter.js';
 import { generateSitemap } from '../../../cli/sitemap.js';
 import {
@@ -37,6 +37,94 @@ import {
 
 const LOTE = 50; // páginas por lote antes de reiniciar Chrome
 const enCurso = new Set();
+
+// ─────────────────────────────────────────────────────────────────────────
+// Red de seguridad: nunca dejar que el proceso del servidor se caiga por
+// completo por un error que nadie capturó explícitamente.
+//
+// Node, por defecto, TERMINA el proceso entero ante una excepción no
+// capturada o una promesa rechazada sin manejar (comportamiento estándar
+// desde Node 15). Esto es lo que más probablemente explica el reporte del
+// usuario de "en determinado tiempo se para el servidor y finaliza, toca
+// volverlo a iniciar": una auditoría de 300-500 páginas corre horas, y
+// basta con que Chrome se caiga inesperadamente en UNA sola página (una
+// página rara, sin memoria, un timeout profundo dentro de chrome-launcher
+// o del protocolo de depuración de Chrome) para que ese error escape de
+// los try/catch normales y tumbe TODO el servidor — no solo esa
+// auditoría, sino la interfaz completa para todo el equipo.
+//
+// Con este manejador, ese mismo error se registra en la consola pero el
+// servidor sigue vivo. La auditoría afectada puede quedar en un estado
+// raro (por eso también existe estadoEfectivo(), que se autocorrige en el
+// siguiente poll), pero ya no hace falta reiniciar todo a mano.
+function instalarRedDeSeguridad() {
+  if (globalThis.__lhRedDeSeguridadInstalada) return;
+  globalThis.__lhRedDeSeguridadInstalada = true;
+
+  process.on('unhandledRejection', (err) => {
+    console.error('[servidor] Promesa rechazada sin capturar (el servidor sigue corriendo):', err);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error('[servidor] Excepción no capturada (el servidor sigue corriendo):', err);
+  });
+}
+instalarRedDeSeguridad();
+
+// Última vez que cada auditoría en curso dio señales de vida reales (cada
+// escritura de progreso a estado.json). Si el error de arriba ocurre
+// FUERA de la cadena de promesas que audita normalmente (por ejemplo, un
+// evento tardío del proceso de Chrome que ya no está siendo esperado por
+// ningún `await`), el `try/finally` de iniciarAuditoria() nunca llega a
+// correr: el proceso sigue vivo gracias a la red de seguridad, pero esa
+// auditoría puntual queda fantasma — "auditando" en disco y en `enCurso`
+// para siempre, sin que nada la esté avanzando de verdad.
+const ultimaActividad = new Map();
+
+/** Envuelve writeEstado(slug, ...) marcando también la señal de vida. */
+async function marcarProgreso(slug, estado) {
+  ultimaActividad.set(slug, Date.now());
+  return writeEstado(slug, estado);
+}
+
+const SIN_ACTIVIDAD_MAX_MS = 8 * 60 * 1000; // 8 min sin ninguna escritura de progreso = zombi
+
+/**
+ * Vigilante en segundo plano: cada 30s revisa si alguna auditoría que
+ * `enCurso` cree que sigue viva lleva demasiado tiempo sin dar señales de
+ * vida reales, y si es así, la da por muerta — libera `enCurso`, intenta
+ * matar cualquier Chrome huérfano asociado, y dejar estado.json en
+ * "error" para que la interfaz ofrezca reintentar en vez de quedarse
+ * pegada mostrando progreso que ya no existe.
+ */
+function iniciarVigilante() {
+  if (globalThis.__lhVigilanteInstalado) return;
+  globalThis.__lhVigilanteInstalado = true;
+
+  setInterval(() => {
+    const ahora = Date.now();
+    for (const slug of enCurso) {
+      const ultima = ultimaActividad.get(slug) ?? ahora;
+      if (ahora - ultima <= SIN_ACTIVIDAD_MAX_MS) continue;
+
+      console.log(
+        `[vigilante] "${slug}": sin señales de vida hace más de ${Math.round(
+          SIN_ACTIVIDAD_MAX_MS / 60000
+        )} min — probablemente un error interno la interrumpió sin que nadie la limpiara. Marcando como error.`
+      );
+      enCurso.delete(slug);
+      ultimaActividad.delete(slug);
+      matarChromeHuerfano().catch(() => {});
+      writeEstado(slug, {
+        estado: 'error',
+        mensaje:
+          'La auditoría se interrumpió por un error interno inesperado y dejó de avanzar. Dale clic en "Auditar ahora" para reintentar.',
+        actualizado: new Date().toISOString(),
+      }).catch(() => {});
+      limpiarCancelacion(slug).catch(() => {});
+    }
+  }, 30000).unref();
+}
+iniciarVigilante();
 
 /** Señal interna para cortar una auditoría en curso de forma limpia. */
 class AuditoriaCancelada extends Error {}
@@ -73,6 +161,11 @@ export async function estadoEfectivo(slug) {
     };
     await writeEstado(slug, corregido);
     await limpiarCancelacion(slug).catch(() => {});
+    // Best-effort: si el servidor se reinició a mitad de la auditoría, el
+    // Chrome headless que esa corrida había lanzado puede seguir vivo de
+    // fondo (huérfano, sin nada que lo controle) — lo intentamos matar
+    // aquí para no dejarlo consumiendo CPU/RAM indefinidamente.
+    matarChromeHuerfano().catch(() => {});
     return corregido;
   }
   return estado;
@@ -161,7 +254,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
     const meta = await leerMeta(slug);
     const siteUrl = meta.dominio.endsWith('/') ? meta.dominio.slice(0, -1) : meta.dominio;
 
-    await writeEstado(slug, {
+    await marcarProgreso(slug, {
       estado: 'crawleando',
       paginasHechas: 0,
       paginasTotal: 0,
@@ -186,7 +279,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
       siteUrl,
       maxPaginas,
       (encontradas, url) => {
-        writeEstado(slug, {
+        marcarProgreso(slug, {
           estado: 'crawleando',
           paginasHechas: 0,
           paginasTotal: 0,
@@ -210,7 +303,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
       return;
     }
 
-    await writeEstado(slug, {
+    await marcarProgreso(slug, {
       estado: 'auditando',
       paginasHechas: 0,
       paginasTotal: pages.length,
@@ -219,7 +312,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
       actualizado: new Date().toISOString(),
     });
 
-    await launchChrome();
+    let chrome = await launchChrome();
     const auditResults = [];
 
     try {
@@ -230,11 +323,11 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
 
         if (i > 0 && i % LOTE === 0) {
           try {
-            await killChrome();
+            await killChrome(chrome);
           } catch {
             /* EPERM en Windows al limpiar el perfil temporal — no bloquea, se ignora */
           }
-          await launchChrome();
+          chrome = await launchChrome();
         }
 
         const { url, meta: pageMeta } = pages[i];
@@ -242,7 +335,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
         console.log(`[auditoria] "${slug}": página ${i + 1}/${pages.length} — empieza Lighthouse en ${url}`);
 
         const vigilante = vigilarCancelacionDurante(slug);
-        const promesaAudit = auditPage(url);
+        const promesaAudit = auditPage(chrome, url);
         // Si perdemos la carrera de abajo (nos cancelan) y por eso matamos
         // Chrome, esta promesa va a terminar rechazando sola más tarde
         // (Lighthouse pierde la conexión) — este catch vacío evita que
@@ -259,7 +352,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
               `[cancelar] "${slug}": señal detectada mientras Lighthouse auditaba ${url} (llevaba ${Math.round((Date.now() - inicio) / 1000)}s) — cerrando Chrome para cortar de inmediato en vez de esperar a que esa página termine.`
             );
             try {
-              await killChrome();
+              await killChrome(chrome);
             } catch {
               /* EPERM esperado en Windows al forzar el cierre — no bloquea */
             }
@@ -296,7 +389,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
           });
         }
 
-        await writeEstado(slug, {
+        await marcarProgreso(slug, {
           estado: 'auditando',
           paginasHechas: i + 1,
           paginasTotal: pages.length,
@@ -307,7 +400,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
       }
     } finally {
       try {
-        await killChrome();
+        await killChrome(chrome);
       } catch {
         /* EPERM en Windows — ignorar */
       }
@@ -364,6 +457,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
     }
   } finally {
     enCurso.delete(slug);
+    ultimaActividad.delete(slug);
     await limpiarCancelacion(slug).catch(() => {
       /* si no había flag que limpiar, no pasa nada */
     });
