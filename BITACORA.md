@@ -15,17 +15,6 @@ resolvió, agrega lo que quedó abierto.
 
 ## Pendientes activos
 
-- [ ] **Limpieza manual pendiente en la máquina de Camilo:** durante la
-      sesión del 2026-08-13 se intentó validar el build (`npm run build` /
-      `npm run dev`) desde el entorno de Claude, y un `git stash` de prueba
-      dejó dos archivos sueltos de 0 bytes que Claude no pudo borrar por
-      permisos del puente (bridge) con el escritorio:
-      `.git/index.lock` y `_to_delete_gitlock_index.lock` (en la raíz del
-      repo). **Hay que borrarlos a mano** (Explorador de Windows o
-      `del .git\index.lock` / `del _to_delete_gitlock_index.lock` desde una
-      terminal en la carpeta del proyecto) antes de volver a usar git ahí —
-      si no, git puede quejarse de "Another git process seems to be
-      running". No afecta nada más del repo ni de los archivos de trabajo.
 - [ ] **Bug viejo "Iniciando repetido" — probablemente ya resuelto de rebote,
       falta confirmar.** Al entrar a la página de un proyecto sin hacer clic
       en nada, aparecía el mensaje "Iniciando" repetidamente sin parar. En
@@ -40,11 +29,27 @@ resolvió, agrega lo que quedó abierto.
       quedarse pegado en "Iniciando" para siempre, sino corregirse solo al
       siguiente poll. Falta confirmar con Camilo que de verdad no vuelve a
       pasar.
+- [ ] **URGENTE — falta correr `git push` en la máquina de Camilo.**
+      El 2026-09-02 se descubrió que `reports/` estuvo en `.gitignore`
+      desde el primer commit del repo, por lo que ningún reporte
+      generado localmente llegaba nunca al remoto ni a los compañeros
+      (ver sesión 2026-09-02 abajo). Se quitó la regla y se hizo el
+      commit "Versionar reports/ en git para compartir auditorías con el
+      equipo", pero el `git push` no se pudo completar desde el sandbox
+      de Claude (sin credenciales de GitHub) — **Camilo tiene que correr
+      `git push` desde su terminal real** para que el compañero por fin
+      reciba los reportes.
 - [ ] Ningún cambio de `web/` ni de `cli/crawler.js` se ha subido a git
       todavía — todo está como cambios locales sin commitear. Falta decidir
       cuándo y cómo se hace el primer commit (ver "Cómo usar git en este
       proyecto" más abajo). Esto ahora incluye también los cambios de
       cancelar/borrar proyecto de la sesión del 2026-08-13.
+- [ ] Hay cambios sin commitear en `README.md`, `cli/reporter.js`,
+      `cli/sitemap.js`, `package.json`, `.prettierrc`, etc. donde
+      inserciones y eliminaciones son casi idénticas línea por línea —
+      huele a diferencia de fin de línea (CRLF/LF), no a contenido real.
+      Falta revisar si es solo eso o hay cambios reales mezclados antes
+      de commitear.
 - [ ] Falta probar la interfaz en las otras 2 máquinas del equipo (`npm
       install` + `npm run dev` en `web/`).
 - [ ] Falta decidir si el flujo de `git add/commit/push` de `proyectos/`
@@ -115,6 +120,40 @@ Flujo sugerido para las 3 personas del equipo:
 ---
 
 ## Historial de sesiones
+
+### 2026-09-02 — `reports/` nunca llegaba al compañero: estaba en .gitignore desde el inicio
+
+Camilo reportó que los reportes generados con la herramienta no le
+llegaban a su compañero de trabajo aunque él hacía `git push`. Se revisó
+el repo directo en su máquina (vía el puente de Cowork) y se confirmó
+que `reports/` estaba en `.gitignore` desde el primer commit del repo
+(14-abr-2026), con el comentario original "cada quien genera los suyos,
+no se versionan". No era un problema de sincronización: git nunca veía
+esos archivos como cambios, así que jamás se subían.
+
+`proyectos/*/historial.json` y `meta.json` sí se estaban versionando y
+llegando bien al remoto — solo `reports/` estaba excluido.
+
+Fix aplicado:
+- Se quitó la regla `reports/` de `.gitignore`.
+- Se commitearon los 76 archivos de reportes existentes (~21 MB):
+  `ai-report.md`, `client-report.html`, `results.json`, `index.html`,
+  `sitemap.xml` por proyecto/timestamp (almo, grupo-herramientas,
+  hermes-gamba, tatiana-leal, shopify-globaltoolscompaniaferretera).
+- De paso se limpió un `.git/index.lock` de 0 bytes que estaba colgado
+  y habría bloqueado cualquier commit ("Another git process seems to be
+  running") — esta vez sí se pudo borrar pidiendo permiso de borrado por
+  el puente de Cowork.
+
+**Pendiente:** el `git push` de ese commit no se pudo hacer desde el
+sandbox de Claude (no tiene credenciales de GitHub cacheadas) —
+**Camilo debe correr `git push` desde su terminal real** para que el
+compañero reciba por fin los reportes.
+
+Si `reports/` crece demasiado con el tiempo, considerar versionar solo
+`client-report.html` (el entregable final) y dejar fuera `results.json`
+e `index.html`, que son los archivos más pesados por auditoría.
+
 
 ### 2026-08-13 (5) — Causa raíz real: estado.json fantasma tras reiniciar el server
 
