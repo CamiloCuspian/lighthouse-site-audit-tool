@@ -1,8 +1,8 @@
 # Dependencias
 node_modules/
 
-# Reportes generados (cada quien genera los suyos, no se versionan)
-reports/
+# Reportes generados: SI se versionan a partir de sep-2026 para compartir con el equipo
+# (antes estaban ignorados; ver BITACORA.md)
 
 # Interfaz web (Astro) — build local
 web/dist/
