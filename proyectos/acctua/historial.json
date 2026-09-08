@@ -1,0 +1,15 @@
+[
+  {
+    "fecha": "2026-09-04T14:20:07.427Z",
+    "paginasAuditadas": 128,
+    "promedios": {
+      "performance": 42,
+      "accessibility": 94,
+      "bestPractices": 73,
+      "seo": 99
+    },
+    "linksRotos": 177,
+    "problemasSEO": 204,
+    "carpetaReporte": "acctua/2026-09-04T14-20-07"
+  }
+]

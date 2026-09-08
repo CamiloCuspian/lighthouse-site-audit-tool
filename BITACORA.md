@@ -557,3 +557,58 @@ horas, y ningún cambio de código lo evita. Se le recomendó revisar
 Configuración → Sistema → Energía y batería → Pantalla y suspensión, y
 desactivar la suspensión automática (al menos con el cargador conectado)
 mientras corre una auditoría larga.
+
+### 2026-09-03 — "JavaScript heap out of memory": el servidor sigue reventando a mitad de una auditoría larga
+
+El usuario reportó que la auditoría de un sitio de 122 páginas se
+detuvo sola en la página 58/122 con `FATAL ERROR: Ineffective
+mark-compacts near heap limit Allocation failed - JavaScript heap out of
+memory`, tumbando `npm run dev` (el servidor Astro) para todo el equipo.
+El heap del proceso Node había crecido hasta ~4.1 GB antes de reventar.
+
+**Diagnóstico:** el reinicio de Chrome cada `LOTE` (50) páginas —
+implementado el 2026-08-28/29 para no degradar métricas por reusar el
+navegador demasiado tiempo (guía oficial de Lighthouse) — mata el
+proceso de **Chrome**, pero el loop de auditoría (`for` en
+`iniciarAuditoria`) seguía corriendo dentro del mismo proceso de Node del
+servidor web, llamando a `lighthouse()` decenas de veces en el mismo
+proceso. Es un leak conocido de Lighthouse/CDP en el proceso Node que
+LLAMA a `lighthouse()` repetidamente (no en Chrome) — reiniciar Chrome no
+libera esa memoria porque nunca estuvo en el proceso de Chrome. El
+resultado: cada auditoría deja memoria retenida en el proceso que sirve
+la interfaz a todo el equipo, y auditorías grandes (o varias seguidas)
+terminan agotando el heap por defecto de Node y tumbando el servidor
+completo — no solo esa auditoría.
+
+**Corregido:** cada lote de `LOTE` páginas ahora corre en su **propio
+proceso hijo** (`cli/audit-worker.js`, lanzado con
+`child_process.fork()` desde `web/src/lib/audit-runner.js`), no dentro
+del proceso del servidor. El worker lanza su propia instancia de Chrome
+(igual que antes, reutilizada dentro del lote por fiabilidad de
+métricas), audita sus páginas, manda progreso por IPC (`process.send`) y
+termina (`process.exit(0)`) al acabar el lote — devolviendo toda su
+memoria al sistema operativo. Si un worker revienta (p. ej. por quedarse
+sin memoria de verdad) antes de mandar su mensaje final, el padre lo
+detecta en el evento `exit` del proceso hijo, marca solo las páginas de
+ESE lote como fallidas (con el mensaje de error correspondiente) y
+continúa con el siguiente lote — un lote reventado ya no puede tumbar el
+servidor completo. La cancelación de auditoría (`cancelarAuditoria`)
+sigue funcionando igual desde la interfaz: ahora se reenvía al worker por
+IPC (`{tipo:'cancelar'}`) y el worker cierra su Chrome de inmediato,
+cortando la página en curso sin esperar a que termine.
+
+Archivos tocados: `cli/audit-worker.js` (nuevo), `web/src/lib/audit-runner.js`
+(el loop de auditoría ahora orquesta workers en vez de llamar a
+`auditPage` directamente). `cli/auditor.js` no cambió — el CLI (`cli/index.js`)
+sigue auditando en el mismo proceso, porque ahí cada ejecución YA es un
+proceso de Node desechable (se cierra solo al terminar), así que el leak
+nunca se acumulaba entre auditorías distintas como sí pasaba en el
+servidor web de larga duración.
+
+Validado con `node --check` en ambos archivos y una prueba manual del
+fork/IPC (worker recibe el lote, audita, manda progreso y "fin"; si
+revienta antes de terminar, el padre lo detecta vía el evento `exit`).
+**Sigue pendiente la prueba real con `npm run dev`** completando una
+auditoría de 100+ páginas de punta a punta sin que el servidor se caiga
+— esa es la prueba de fuego, porque el heap de 4+ GB solo se reproduce
+con un volumen de páginas real.

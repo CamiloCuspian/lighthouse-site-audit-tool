@@ -4,25 +4,50 @@
  * existe en cli/ (crawler, auditor, reporter, sitemap) — no se reescribe
  * nada de eso, solo se le pone una interfaz encima.
  *
- * Dos decisiones importantes, a propósito:
+ * Decisiones importantes, a propósito:
  *
  * 1. El bloqueo de scripts de Analytics/GTM/Meta Pixel/etc. vive en
  *    cli/auditor.js (auditPage) y NO se toca aquí — se sigue usando tal
  *    cual, así que las visitas de la auditoría se siguen sin registrar en
  *    Analytics ni Search Console.
  *
- * 2. Chrome se reinicia cada LOTE páginas en vez de una sola vez al final.
- *    Esto es puramente por fiabilidad de los números: la documentación
- *    oficial de Lighthouse dice que reutilizar una sola instancia de Chrome
- *    por encima de ~100 cargas degrada la precisión de las métricas
- *    (queda estado acumulado del navegador). No cambia nada de lo que se
- *    mide por URL — cada página sigue recibiendo su propia corrida
- *    completa de Lighthouse con su propio Core Web Vitals.
+ * 2. Cada lote de LOTE páginas se audita en un PROCESO HIJO aparte
+ *    (cli/audit-worker.js, vía child_process.fork), no dentro de este
+ *    mismo proceso del servidor web. Antes (hasta sep-2026) el loop de
+ *    Lighthouse corría aquí mismo, reutilizando Chrome pero dentro del
+ *    proceso de `astro dev`/`node entry.mjs` — y auditorías de 100+
+ *    páginas terminaban tumbando el servidor entero con "JavaScript heap
+ *    out of memory" (visto en una auditoría real que murió en la página
+ *    58/122). Reiniciar Chrome cada LOTE páginas ya se hacía por
+ *    fiabilidad de las métricas (ver punto 3) pero NO arreglaba el
+ *    crash: el leak de memoria es del proceso de Node que llama a
+ *    lighthouse() repetidamente (bug conocido de Lighthouse/CDP), no del
+ *    proceso de Chrome — así que aunque Chrome se reinicie, la memoria ya
+ *    retenida en el proceso de Node nunca se liberaba, y auditoría tras
+ *    auditoría se iba acumulando en el mismo proceso que sirve la
+ *    interfaz a todo el equipo. La única forma fiable de recuperar esa
+ *    memoria es que el sistema operativo se la lleve al terminar un
+ *    proceso — de ahí el fork por lote. Efecto adicional: si un lote
+ *    agota memoria de verdad, revienta y muere SOLO ese proceso hijo (el
+ *    padre lo detecta en 'exit' y sigue con el siguiente lote marcando
+ *    esas páginas como fallidas), en vez de tumbar el servidor completo
+ *    para todos.
+ *
+ * 3. Dentro de cada lote se reutiliza una sola instancia de Chrome (la
+ *    lanza el propio worker). Esto es puramente por fiabilidad de los
+ *    números: la documentación oficial de Lighthouse dice que reutilizar
+ *    una sola instancia de Chrome por encima de ~100 cargas degrada la
+ *    precisión de las métricas (queda estado acumulado del navegador).
+ *    No cambia nada de lo que se mide por URL — cada página sigue
+ *    recibiendo su propia corrida completa de Lighthouse con su propio
+ *    Core Web Vitals.
  */
 
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { fork } from 'node:child_process';
 import { crawlSite } from '../../../cli/crawler.js';
-import { launchChrome, killChrome, auditPage, matarChromeHuerfano } from '../../../cli/auditor.js';
+import { matarChromeHuerfano } from '../../../cli/auditor.js';
 import { generateReport } from '../../../cli/reporter.js';
 import { generateSitemap } from '../../../cli/sitemap.js';
 import {
@@ -35,7 +60,10 @@ import {
   limpiarCancelacion,
 } from './projects.js';
 
-const LOTE = 50; // páginas por lote antes de reiniciar Chrome
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const AUDIT_WORKER_PATH = join(__dirname, '../../../cli/audit-worker.js');
+
+const LOTE = 50; // páginas por lote — cada lote corre en su propio proceso hijo (ver comentario arriba)
 const enCurso = new Set();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -202,43 +230,112 @@ async function verificarCancelacion(slug) {
   }
 }
 
-const CANCELADO = Symbol('cancelado');
+function resultadoVacio(url, meta, mensajeError) {
+  return {
+    url,
+    meta,
+    scores: { performance: 0, accessibility: 0, bestPractices: 0, seo: 0 },
+    metrics: {},
+    opportunities: [],
+    diagnostics: [],
+    error: mensajeError,
+  };
+}
 
 /**
- * Vigila en segundo plano (cada 800ms) si pidieron cancelar, mientras una
- * página de Lighthouse está corriendo. A propósito NO espera a que esa
- * página termine sola: el chequeo normal (verificarCancelacion) solo
- * corre ENTRE páginas, y una sola página de Lighthouse puede tardar
- * fácilmente 30-90+ segundos (más aún con throttling simulado), así que
- * cancelar podía sentirse "roto" aunque técnicamente funcionara — solo
- * que tardaba lo que le faltara a la página actual. Con esto, apenas se
- * detecta la señal se cierra Chrome de inmediato (aborta la conexión que
- * Lighthouse tiene abierta con el navegador), en vez de esperar.
+ * Audita un lote de páginas en un proceso hijo (cli/audit-worker.js) y
+ * resuelve cuando ese lote termina, se cancela, o el worker muere
+ * inesperadamente (por ejemplo, por quedarse sin memoria).
+ *
+ * Nunca rechaza: un worker que revienta es un lote fallido, no un error
+ * que deba tumbar toda la auditoría — sus páginas quedan marcadas con
+ * error y la auditoría sigue con el siguiente lote.
  */
-function vigilarCancelacionDurante(slug) {
-  let detenido = false;
-  let temporizador = null;
+function ejecutarLoteEnWorker(slug, lotePages, offsetGlobal, totalPaginas) {
+  return new Promise((resolve) => {
+    const child = fork(AUDIT_WORKER_PATH, [], { stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
 
-  const promesa = new Promise((resolve) => {
-    const revisar = async () => {
-      if (detenido) return;
-      if (await hayCancelacionPedida(slug)) {
-        detenido = true;
-        resolve(CANCELADO);
-        return;
-      }
-      if (!detenido) temporizador = setTimeout(revisar, 800);
+    let terminado = false;
+    let vigilanciaTimer = null;
+    let cancelacionEnviada = false;
+
+    const terminar = (resultado) => {
+      if (terminado) return;
+      terminado = true;
+      if (vigilanciaTimer) clearInterval(vigilanciaTimer);
+      resolve(resultado);
     };
-    temporizador = setTimeout(revisar, 800);
-  });
 
-  return {
-    promesa,
-    detener() {
-      detenido = true;
-      if (temporizador) clearTimeout(temporizador);
-    },
-  };
+    child.on('message', (msg) => {
+      if (!msg || typeof msg !== 'object') return;
+
+      if (msg.tipo === 'progreso') {
+        const i = offsetGlobal + msg.indice;
+        marcarProgreso(slug, {
+          estado: 'auditando',
+          paginasHechas: i + 1,
+          paginasTotal: totalPaginas,
+          urlActual: lotePages[msg.indice]?.url ?? '',
+          mensaje: `Auditando con Lighthouse (${i + 1}/${totalPaginas})…`,
+          actualizado: new Date().toISOString(),
+        }).catch(() => {
+          /* si falla una escritura de progreso no se detiene la auditoría por eso */
+        });
+      } else if (msg.tipo === 'fin') {
+        terminar({ resultados: msg.resultados ?? [], cancelado: !!msg.cancelado });
+      } else if (msg.tipo === 'error-fatal') {
+        console.error(`[auditoria] "${slug}": el proceso de auditoría avisó un error fatal antes de morir — ${msg.mensaje}`);
+      }
+    });
+
+    child.on('exit', (code) => {
+      if (terminado) return;
+      // El worker murió sin llegar a mandar "fin" — probablemente se
+      // quedó sin memoria a media auditoría de este lote (exactamente el
+      // caso que este diseño existe para contener). Se marcan como
+      // fallidas solo las páginas de ESTE lote y la auditoría general
+      // continúa con el siguiente lote, en vez de tumbar todo el
+      // servidor como pasaba antes.
+      console.error(
+        `[auditoria] "${slug}": el proceso de auditoría terminó inesperadamente (código ${code}) — probablemente sin memoria. Se marcan sus páginas como fallidas y se continúa con el siguiente lote.`
+      );
+      matarChromeHuerfano().catch(() => {});
+      terminar({
+        resultados: lotePages.map(({ url, meta }) =>
+          resultadoVacio(
+            url,
+            meta,
+            `El proceso de auditoría se interrumpió inesperadamente (código ${code}), probablemente por falta de memoria.`
+          )
+        ),
+        cancelado: false,
+      });
+    });
+
+    // Mientras el lote corre, vigila si pidieron cancelar la auditoría.
+    // Antes esto se revisaba entre cada página dentro del mismo proceso;
+    // ahora el punto de control vive aquí y la señal se reenvía al
+    // worker, que cierra su Chrome de inmediato (corta la página que
+    // esté auditando en ese momento, en vez de esperar a que termine).
+    vigilanciaTimer = setInterval(async () => {
+      if (terminado || cancelacionEnviada) return;
+      if (await hayCancelacionPedida(slug)) {
+        cancelacionEnviada = true;
+        try {
+          child.send({ tipo: 'cancelar' });
+        } catch {
+          /* el canal ya se cerró — el 'exit' handler de abajo se encarga */
+        }
+        // Red de seguridad: si el worker no confirma "fin" en 5s tras
+        // pedirle cancelar, se fuerza su cierre.
+        setTimeout(() => {
+          if (!terminado) child.kill();
+        }, 5000);
+      }
+    }, 800);
+
+    child.send({ tipo: 'lote', pages: lotePages.map(({ url, meta }) => ({ url, meta })) });
+  });
 }
 
 export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
@@ -312,104 +409,31 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
       actualizado: new Date().toISOString(),
     });
 
-    let chrome = await launchChrome();
     const auditResults = [];
 
-    try {
-      for (let i = 0; i < pages.length; i++) {
-        // Punto de control entre páginas: nunca corta a media auditoría de
-        // Lighthouse, solo antes de arrancar la siguiente página.
-        await verificarCancelacion(slug);
+    for (let inicioLote = 0; inicioLote < pages.length; inicioLote += LOTE) {
+      // Punto de control entre lotes: nunca corta a media auditoría de
+      // Lighthouse (eso lo maneja ejecutarLoteEnWorker mientras el lote
+      // corre), solo antes de arrancar el siguiente lote.
+      await verificarCancelacion(slug);
 
-        if (i > 0 && i % LOTE === 0) {
-          try {
-            await killChrome(chrome);
-          } catch {
-            /* EPERM en Windows al limpiar el perfil temporal — no bloquea, se ignora */
-          }
-          chrome = await launchChrome();
-        }
+      const lotePages = pages.slice(inicioLote, inicioLote + LOTE);
+      console.log(
+        `[auditoria] "${slug}": lote ${Math.floor(inicioLote / LOTE) + 1} — páginas ${inicioLote + 1} a ${inicioLote + lotePages.length} de ${pages.length}`
+      );
 
-        const { url, meta: pageMeta } = pages[i];
-        const inicio = Date.now();
-        console.log(`[auditoria] "${slug}": página ${i + 1}/${pages.length} — empieza Lighthouse en ${url}`);
+      const { resultados, cancelado } = await ejecutarLoteEnWorker(slug, lotePages, inicioLote, pages.length);
+      auditResults.push(...resultados);
 
-        const vigilante = vigilarCancelacionDurante(slug);
-        const promesaAudit = auditPage(chrome, url);
-        // Si perdemos la carrera de abajo (nos cancelan) y por eso matamos
-        // Chrome, esta promesa va a terminar rechazando sola más tarde
-        // (Lighthouse pierde la conexión) — este catch vacío evita que
-        // Node se queje de un "unhandled rejection" por una promesa que
-        // decidimos dejar de esperar a propósito.
-        promesaAudit.catch(() => {});
-
-        try {
-          const resultado = await Promise.race([promesaAudit, vigilante.promesa]);
-          vigilante.detener();
-
-          if (resultado === CANCELADO) {
-            console.log(
-              `[cancelar] "${slug}": señal detectada mientras Lighthouse auditaba ${url} (llevaba ${Math.round((Date.now() - inicio) / 1000)}s) — cerrando Chrome para cortar de inmediato en vez de esperar a que esa página termine.`
-            );
-            try {
-              await killChrome(chrome);
-            } catch {
-              /* EPERM esperado en Windows al forzar el cierre — no bloquea */
-            }
-            await limpiarCancelacion(slug);
-            throw new AuditoriaCancelada();
-          }
-
-          console.log(`[auditoria] "${slug}": página ${i + 1}/${pages.length} terminada en ${Math.round((Date.now() - inicio) / 1000)}s.`);
-          auditResults.push({ ...resultado, meta: pageMeta });
-        } catch (err) {
-          vigilante.detener();
-          if (err instanceof AuditoriaCancelada) throw err;
-
-          // auditPage() puede rechazar porque Chrome se cerró a la fuerza
-          // (por nuestra propia cancelación, justo cuando perdimos la
-          // carrera de arriba por un pelo) o por un error real de esa
-          // página. Si de verdad hay una cancelación pedida, es lo
-          // primero — no lo tratamos como "página con error".
-          if (await hayCancelacionPedida(slug)) {
-            await limpiarCancelacion(slug);
-            console.log(`[cancelar] "${slug}": Chrome se cerró por la cancelación mientras auditaba ${url}.`);
-            throw new AuditoriaCancelada();
-          }
-
-          console.log(`[auditoria] "${slug}": página ${i + 1}/${pages.length} falló tras ${Math.round((Date.now() - inicio) / 1000)}s — ${err.message}`);
-          auditResults.push({
-            url,
-            meta: pageMeta,
-            scores: { performance: 0, accessibility: 0, bestPractices: 0, seo: 0 },
-            metrics: {},
-            opportunities: [],
-            diagnostics: [],
-            error: err.message,
-          });
-        }
-
-        await marcarProgreso(slug, {
-          estado: 'auditando',
-          paginasHechas: i + 1,
-          paginasTotal: pages.length,
-          urlActual: url,
-          mensaje: `Auditando con Lighthouse (${i + 1}/${pages.length})…`,
-          actualizado: new Date().toISOString(),
-        });
-      }
-    } finally {
-      try {
-        await killChrome(chrome);
-      } catch {
-        /* EPERM en Windows — ignorar */
+      if (cancelado) {
+        await limpiarCancelacion(slug);
+        throw new AuditoriaCancelada();
       }
     }
 
-    // Último punto de control: si cancelaron mientras se auditaba la
-    // ÚLTIMA página, el loop de arriba ya no vuelve a pasar por su propio
-    // chequeo (no hay siguiente iteración) y seguiría de largo generando
-    // el reporte como si nada. Este chequeo extra evita ese caso.
+    // Último punto de control: si cancelaron justo al terminar el último
+    // lote (carrera entre el "fin" del worker y la señal de cancelación),
+    // este chequeo extra evita generar el reporte como si nada.
     await verificarCancelacion(slug);
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
