@@ -11,5 +11,18 @@
     "linksRotos": 10,
     "problemasSEO": 32,
     "carpetaReporte": "grupo-herramientas/2026-09-01T03-54-08"
+  },
+  {
+    "fecha": "2026-09-02T16:05:09.446Z",
+    "paginasAuditadas": 168,
+    "promedios": {
+      "performance": 80,
+      "accessibility": 96,
+      "bestPractices": 94,
+      "seo": 100
+    },
+    "linksRotos": 0,
+    "problemasSEO": 31,
+    "carpetaReporte": "grupo-herramientas/2026-09-02T16-05-08"
   }
 ]
