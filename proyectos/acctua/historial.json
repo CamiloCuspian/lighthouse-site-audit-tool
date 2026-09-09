@@ -11,5 +11,41 @@
     "linksRotos": 177,
     "problemasSEO": 204,
     "carpetaReporte": "acctua/2026-09-04T14-20-07"
+  },
+  {
+    "fecha": "2026-09-08T18:13:59.513Z",
+    "paginasAuditadas": 94,
+    "promedios": {
+      "performance": 50,
+      "accessibility": 95,
+      "bestPractices": 76,
+      "seo": 100
+    },
+    "linksRotos": 185,
+    "problemasSEO": 136,
+    "carpetaReporte": "acctua/2026-09-08T18-13-59"
+  },
+  {
+    "fecha": "2026-09-09T20:12:05.132Z",
+    "paginasAuditadas": 284,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 290,
+      "htmlPages": 284,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 224,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 50,
+      "accessibility": 94,
+      "bestPractices": 76,
+      "seo": 99
+    },
+    "linksRotos": 2,
+    "problemasSEO": 387,
+    "carpetaReporte": "acctua/2026-09-09T16-07-59"
   }
 ]

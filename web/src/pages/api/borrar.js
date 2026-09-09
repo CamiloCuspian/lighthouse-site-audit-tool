@@ -1,3 +1,4 @@
+import { slugValido } from '../../lib/projects.js';
 import { auditoriaEnCurso } from '../../lib/audit-runner.js';
 import { borrarProyecto } from '../../lib/projects.js';
 
@@ -6,7 +7,7 @@ import { borrarProyecto } from '../../lib/projects.js';
 // Lighthouse escribiendo en una carpeta que ya no existe.
 export async function POST({ request }) {
   const { slug } = await request.json();
-  if (!slug) {
+  if (!slugValido(slug)) {
     return new Response(JSON.stringify({ error: 'Falta el slug del proyecto.' }), { status: 400 });
   }
 

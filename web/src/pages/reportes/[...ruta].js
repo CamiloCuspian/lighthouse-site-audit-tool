@@ -7,7 +7,8 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { join, extname, resolve, relative, isAbsolute } from 'node:path';
+import { PROJECT_ROOT } from '../../../../cli/paths.js';
 
 const TIPOS = {
   '.html': 'text/html; charset=utf-8',
@@ -22,8 +23,10 @@ export async function GET({ params }) {
   if (!ruta) return new Response('No encontrado', { status: 404 });
 
   // Evita salir de la carpeta reports/ con ../
-  const segmentos = ruta.split('/').filter((s) => s && s !== '..');
-  const rutaArchivo = join(process.cwd(), '..', 'reports', ...segmentos);
+  const root = join(PROJECT_ROOT, 'reports');
+  const rutaArchivo = resolve(root, ruta);
+  const rel = relative(root, rutaArchivo);
+  if (rel.startsWith('..') || isAbsolute(rel)) return new Response('Ruta inválida', { status: 400 });
 
   try {
     const contenido = await readFile(rutaArchivo);

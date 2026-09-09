@@ -43,6 +43,8 @@ const ruta =
       <p><a href={meta.dominio} target="_blank" rel="noopener">{meta.dominio}</a></p>
     </div>
     <div class="acciones-header">
+      <label>Máximo de páginas <input id="max-paginas" type="number" min="1" step="1" value="500" style="width:6rem" /></label>
+      <label><input id="sin-limite" type="checkbox" /> Sin límite de páginas</label>
       <button id="btn-auditar" class="boton boton-primario">Auditar ahora</button>
       <button id="btn-borrar" class="boton boton-peligro">Borrar proyecto</button>
     </div>
@@ -175,7 +177,7 @@ const ruta =
       caja.hidden = false;
       btnCancelar.hidden = true;
       cancelando = false;
-      mensaje.textContent = '¡Auditoría completada! Recargando…';
+      mensaje.textContent = estado.mensaje ?? 'Auditoría finalizada. Recargando…';
       setTimeout(() => location.reload(), 1200);
     } else if (estado.estado === 'cancelado') {
       if (intervalo) clearInterval(intervalo);
@@ -227,7 +229,7 @@ const ruta =
       const res = await fetch('/api/auditar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug }),
+        body: JSON.stringify({ slug, maxPaginas: Number(document.getElementById('max-paginas').value), sinLimite: document.getElementById('sin-limite').checked }),
       });
       if (!res.ok) {
         const texto = await res.text();

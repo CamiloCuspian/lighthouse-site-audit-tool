@@ -1,8 +1,9 @@
+import { slugValido } from '../../lib/projects.js';
 import { cancelarAuditoria } from '../../lib/audit-runner.js';
 
 export async function POST({ request }) {
   const { slug } = await request.json();
-  if (!slug) {
+  if (!slugValido(slug)) {
     return new Response(JSON.stringify({ error: 'Falta el slug del proyecto.' }), { status: 400 });
   }
 

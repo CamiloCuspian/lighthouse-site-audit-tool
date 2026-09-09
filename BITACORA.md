@@ -15,6 +15,8 @@ resolvió, agrega lo que quedó abierto.
 
 ## Pendientes activos
 
+- [ ] Revisión 2026-09-08: validar auditoría completa de Acctua, limpieza EPERM de Chrome en Windows y reanudación persistente. Ver REVISION-TECNICA.md; las pruebas locales pasan, pero no se certificó una ejecución larga.
+
 - [ ] **Bug viejo "Iniciando repetido" — probablemente ya resuelto de rebote,
       falta confirmar.** Al entrar a la página de un proyecto sin hacer clic
       en nada, aparecía el mensaje "Iniciando" repetidamente sin parar. En
@@ -120,6 +122,11 @@ Flujo sugerido para las 3 personas del equipo:
 ---
 
 ## Historial de sesiones
+
+### 2026-09-08 — Cobertura, 429 y fiabilidad de reportes
+
+Se revisaron 15 reportes. En Acctua, 184 de 185 supuestos enlaces rotos del 08-sep eran 429. Se añadieron pausas/reintentos, descubrimiento por robots/sitemaps, conservación de parámetros y barras, cobertura explícita y separación de errores Lighthouse de puntuaciones válidas. Se corrigieron rutas del worker compilado, validación de rutas, escrituras de estado y conservación de resultados parciales del worker. Nueve pruebas, lint y build pasan. Lighthouse real produjo mediciones locales; limpieza de Chrome dio EPERM. Detalles, evidencia y pendientes: REVISION-TECNICA.md y revision-datos.json. No se modificaron los reportes históricos ni los cambios de Acctua ya existentes; no se hizo commit/push.
+
 
 ### 2026-09-02 — `reports/` nunca llegaba al compañero: estaba en .gitignore desde el inicio
 

@@ -11,19 +11,37 @@
  * del sitio a lo largo del tiempo con un historial que pesa casi nada.
  */
 
-import { readFile, writeFile, mkdir, readdir, access, rm } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir, access, rm, rename } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
+import { PROJECT_ROOT } from '../../../cli/paths.js';
 
 // web/src/lib -> raíz del repo (donde vive cli/, proyectos/, reports/)
-const ROOT = join(process.cwd(), '..');
+const ROOT = PROJECT_ROOT;
 const PROYECTOS_DIR = join(ROOT, 'proyectos');
 const REPORTS_DIR = join(ROOT, 'reports');
+const escrituras = globalThis.__lhEscrituras ??= new Map();
+
+function guardarJson(path, data) {
+  const previous = escrituras.get(path) ?? Promise.resolve();
+  const next = previous.catch(() => {}).then(async () => {
+    const temp = path + '.' + randomUUID() + '.tmp';
+    try {
+      await writeFile(temp, JSON.stringify(data, null, 2) + '\n');
+      await rename(temp, path);
+    } finally {
+      await rm(temp, { force: true });
+    }
+  });
+  escrituras.set(path, next);
+  return next.finally(() => { if (escrituras.get(path) === next) escrituras.delete(path); });
+}
 
 /**
  * Valida que un slug sea un simple nombre de carpeta (sin "..", "/" ni "\"),
  * para no poder borrar nada fuera de proyectos/ o reports/ por accidente.
  */
-function slugValido(slug) {
+export function slugValido(slug) {
   return typeof slug === 'string' && slug.length > 0 && /^[a-z0-9-]+$/.test(slug);
 }
 
@@ -69,11 +87,14 @@ export async function listarProyectos() {
 }
 
 export async function leerMeta(slug) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   const raw = await readFile(join(PROYECTOS_DIR, slug, 'meta.json'), 'utf-8');
   return JSON.parse(raw);
 }
 
 export async function crearProyecto({ nombre, dominio }) {
+  const parsed = new URL(dominio);
+  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('El dominio debe ser HTTP(S).');
   const slug = slugify(nombre);
   if (!slug) throw new Error('El nombre del cliente no es válido.');
 
@@ -92,6 +113,7 @@ export async function crearProyecto({ nombre, dominio }) {
 
 /** Historial compacto: solo promedios y conteos, nunca el detalle completo. */
 export async function leerHistorial(slug) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   const path = join(PROYECTOS_DIR, slug, 'historial.json');
   if (!(await existe(path))) return [];
   const raw = await readFile(path, 'utf-8');
@@ -99,14 +121,16 @@ export async function leerHistorial(slug) {
 }
 
 export async function appendHistorial(slug, registro) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   const historial = await leerHistorial(slug);
   historial.push(registro);
   const dir = join(PROYECTOS_DIR, slug);
   await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, 'historial.json'), JSON.stringify(historial, null, 2) + '\n');
+  await guardarJson(join(dir, 'historial.json'), historial);
 }
 
 export async function leerEstado(slug) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   const path = join(PROYECTOS_DIR, slug, 'estado.json');
   if (!(await existe(path))) return { estado: 'inactivo' };
   const raw = await readFile(path, 'utf-8');
@@ -114,9 +138,10 @@ export async function leerEstado(slug) {
 }
 
 export async function writeEstado(slug, estado) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   const dir = join(PROYECTOS_DIR, slug);
   await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, 'estado.json'), JSON.stringify(estado, null, 2));
+  await guardarJson(join(dir, 'estado.json'), estado);
 }
 
 /**
@@ -136,16 +161,19 @@ export async function writeEstado(slug, estado) {
  * importar qué instancia del módulo lo pidió.
  */
 export async function pedirCancelacion(slug) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   const dir = join(PROYECTOS_DIR, slug);
   await mkdir(dir, { recursive: true });
   await writeFile(join(dir, 'cancelar.flag'), new Date().toISOString());
 }
 
 export async function hayCancelacionPedida(slug) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   return existe(join(PROYECTOS_DIR, slug, 'cancelar.flag'));
 }
 
 export async function limpiarCancelacion(slug) {
+  if (!slugValido(slug)) throw new Error('Slug de proyecto inválido.');
   await rm(join(PROYECTOS_DIR, slug, 'cancelar.flag'), { force: true });
 }
 

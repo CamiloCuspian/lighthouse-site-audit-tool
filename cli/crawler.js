@@ -4,16 +4,16 @@
  * y detecta links rotos (404, 500, timeouts).
  */
 
-import fetch from 'node-fetch';
+import { createRequester, discoverSitemaps, normalizeUrl, decodeEntities } from './discovery.js';
 import chalk from 'chalk';
 
 // ── REGEX HELPERS ────────────────────────────────────────────────────────────
 
 function extractLinks(html) {
   const links = [];
-  const regex = /href=["']([^"'#][^"']*?)["']/gi;
+  const regex = /<a\b[^>]*\bhref\s*=\s*(?:"([^"#][^"]*)"|'([^'#][^']*)'|([^\s>"']+))/gi;
   let match;
-  while ((match = regex.exec(html)) !== null) links.push(match[1]);
+  while ((match = regex.exec(html)) !== null) links.push(decodeEntities(match[1] ?? match[2] ?? match[3]));
   return links;
 }
 
@@ -71,194 +71,79 @@ function estimateWordCount(html) {
   return clean.split(' ').filter((w) => w.length > 1).length;
 }
 
-// ── LECTOR DE SITEMAP ────────────────────────────────────────────────────────
-
-/**
- * Lee un sitemap.xml (o sitemap index) y devuelve todas las URLs encontradas.
- * Soporta sitemap index con múltiples sub-sitemaps.
- */
-async function readSitemap(sitemapUrl, depth = 0) {
-  if (depth > 3) return []; // evitar bucles infinitos
-  const urls = [];
-  try {
-    const res = await fetch(sitemapUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LighthouseAuditBot/1.0; +bot)' },
-      signal: AbortSignal.timeout(10000),
-      redirect: 'follow',
-    });
-    if (!res.ok) return urls;
-    const text = await res.text();
-
-    // ¿Es un sitemap index? (<sitemapindex>)
-    const isSitemapIndex = /<sitemapindex/i.test(text);
-    if (isSitemapIndex) {
-      // Extraer URLs de sub-sitemaps
-      const subRegex = /<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>/gi;
-      let m;
-      const subFetches = [];
-      while ((m = subRegex.exec(text)) !== null) {
-        subFetches.push(readSitemap(m[1].trim(), depth + 1));
-      }
-      const results = await Promise.all(subFetches);
-      results.forEach((r) => urls.push(...r));
-    } else {
-      // Sitemap estándar — extraer todas las <loc>
-      const locRegex = /<loc>([^<]+)<\/loc>/gi;
-      let m;
-      while ((m = locRegex.exec(text)) !== null) {
-        urls.push(m[1].trim());
-      }
-    }
-  } catch {
-    /* sitemap no disponible o error de red — continuar sin él */
-  }
-  return urls;
-}
-
 // ── CRAWL PRINCIPAL ──────────────────────────────────────────────────────────
 
-export async function crawlSite(baseUrl, maxPages = 500, onProgress, onStep) {
+export async function crawlSite(baseUrl, maxPages = 500, onProgress, onStep, options = {}) {
+  if (maxPages !== Infinity && (!Number.isSafeInteger(maxPages) || maxPages < 1)) {
+    throw new Error('El máximo de páginas debe ser un entero positivo.');
+  }
+  const start = normalizeUrl(baseUrl);
+  const request = createRequester(options, onStep);
+  const first = await request(start);
+  const origin = new URL(first.ok ? first.url : start).origin;
+  const queue = [];
+  const queued = new Set();
   const visited = new Set();
-  const queue = [{ url: baseUrl, foundOn: null }];
-  // Set con las URLs ya encoladas — antes se chequeaba con
-  // `queue.find(...)` en cada URL nueva, que es O(n) por llamada y hacía
-  // el crawl cuadrático (O(n²)) en sitios grandes con muchos links
-  // internos: con miles de URLs candidatas, esa sola comprobación podía
-  // tardar minutos y hacer parecer "colgada" la auditoría (o dejarla
-  // corriendo tanto tiempo de fondo que aumentaba el riesgo de toparse con
-  // que la máquina se suspenda o el servidor se caiga antes de terminar).
-  const enCola = new Set([baseUrl]);
-  const pages = []; // { url, meta }
-  const brokenLinks = []; // { url, status, foundOn }
-
-  const origin = new URL(baseUrl).origin;
-  const unlimited = !isFinite(maxPages);
-
-  console.log(`\n🔍 Crawleando ${baseUrl} (${unlimited ? 'sin límite de páginas' : 'máximo ' + maxPages + ' páginas'})...\n`);
-
-  // ── Sembrar queue con URLs del sitemap.xml ─────────────────────────────────
-  const sitemapUrl = new URL('/sitemap.xml', baseUrl).href;
-  console.log(`  📄 Buscando sitemap.xml en ${sitemapUrl}...`);
-  const sitemapUrls = await readSitemap(sitemapUrl);
-  if (sitemapUrls.length > 0) {
-    console.log(`  ✓ Sitemap encontrado: ${sitemapUrls.length} URL(s) descubiertas\n`);
-    for (const sUrl of sitemapUrls) {
-      try {
-        const parsed = new URL(sUrl);
-        if (parsed.origin !== origin) continue;
-        if (!['http:', 'https:'].includes(parsed.protocol)) continue;
-        const normalized = sUrl.split('?')[0].split('#')[0].replace(/\/$/, '') || baseUrl;
-        if (!enCola.has(normalized)) {
-          enCola.add(normalized);
-          queue.push({ url: normalized, foundOn: 'sitemap.xml' });
-        }
-      } catch { /* URL inválida en el sitemap */ }
-    }
-  } else {
-    console.log(`  ℹ No se encontró sitemap.xml — el crawl se basará en los links del HTML\n`);
-  }
-
-  while (queue.length > 0 && pages.length < maxPages) {
-    // Punto de control en CADA vuelta del loop, sin importar si esta URL
-    // termina siendo una página válida, un link roto, un redirect o algo
-    // ya visitado. Es a propósito distinto de onProgress (que solo se
-    // llama cuando se encuentra una página válida): en sitios con muchos
-    // links rotos o redirects entre una página válida y la siguiente,
-    // onProgress solo puede tardar bastante en volver a llamarse, y quien
-    // esté esperando a cancelar la auditoría no debería tener que esperar
-    // tanto.
-    await onStep?.();
-
-    const { url: rawUrl, foundOn } = queue.shift();
-    const cleanUrl = rawUrl.split('?')[0].split('#')[0].replace(/\/$/, '') || baseUrl;
-
-    if (visited.has(cleanUrl)) continue;
-    visited.add(cleanUrl);
-
-    let res;
+  const pages = [], brokenLinks = [], crawlErrors = [], skipped = [], warnings = [];
+  const enqueue = (value, foundOn, base = origin) => {
     try {
-      res = await fetch(cleanUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LighthouseAuditBot/1.0; +bot)' },
-        signal: AbortSignal.timeout(10000),
-        redirect: 'follow',
-      });
-    } catch {
-      // Timeout u otro error de red → link roto
-      if (foundOn) {
-        brokenLinks.push({ url: cleanUrl, status: 'Timeout/Error', foundOn });
-        console.log(`  💀 [roto] ${cleanUrl} ← ${foundOn}`);
-      }
+      const url = normalizeUrl(value, base);
+      if (new URL(url).origin !== origin || queued.has(url)) return;
+      queued.add(url);
+      queue.push({ url, foundOn });
+    } catch { /* Enlace no HTTP o inválido. */ }
+  };
+  enqueue(first.ok ? first.url : start, null);
+  const sitemapUrls = await discoverSitemaps(origin, request, onStep, warnings);
+  for (const url of sitemapUrls) enqueue(url, 'sitemap');
+  let cursor = 0;
+  while (cursor < queue.length && pages.length < maxPages) {
+    await onStep?.();
+    const { url, foundOn } = queue[cursor++];
+    if (visited.has(url)) continue;
+    visited.add(url);
+    const response = cursor === 1 ? first : await request(url);
+    if (!response.ok) {
+      const item = { url, foundOn, status: response.status, attempts: response.attempts, error: response.error };
+      if ([404, 410].includes(response.status)) brokenLinks.push(item);
+      else crawlErrors.push(item);
       continue;
     }
-
-    // Link roto (solo registrar si alguien lo enlaza internamente)
-    if (!res.ok) {
-      if (foundOn) {
-        brokenLinks.push({ url: cleanUrl, status: res.status, foundOn });
-        console.log(`  💀 [${res.status}] ${cleanUrl} ← ${foundOn}`);
-      }
+    const cleanUrl = normalizeUrl(response.url);
+    if (new URL(cleanUrl).origin !== origin) {
+      skipped.push({ url, reason: 'Redirección fuera del sitio', target: cleanUrl });
       continue;
     }
-
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('text/html')) continue;
-
-    const html = await res.text();
-
-    // ── Extraer meta tags SEO ──────────────────────────────────────────────
+    if (cleanUrl !== url && visited.has(cleanUrl)) continue;
+    visited.add(cleanUrl);
+    if (!/text\/html|application\/xhtml\+xml/i.test(response.headers.get('content-type') || '')) {
+      skipped.push({ url, reason: 'Recurso no HTML' });
+      continue;
+    }
+    const html = response.text;
     const meta = {
-      title: getTitle(html),
-      description: getMeta(html, 'description'),
-      ogTitle: getMeta(html, 'og:title'),
-      ogDescription: getMeta(html, 'og:description'),
-      h1: getH1(html),
-      h2s: getH2s(html),
-      canonical: getCanonical(html),
-      robots: getRobots(html),
-      wordCount: estimateWordCount(html),
+      title: getTitle(html), description: getMeta(html, 'description'),
+      ogTitle: getMeta(html, 'og:title'), ogDescription: getMeta(html, 'og:description'),
+      h1: getH1(html), h2s: getH2s(html), canonical: getCanonical(html),
+      robots: getRobots(html), wordCount: estimateWordCount(html),
     };
-
-    // Alertas SEO automáticas
     meta.issues = detectSeoIssues(meta, cleanUrl);
-
     pages.push({ url: cleanUrl, meta });
-    console.log(`  ✓ [${pages.length}] ${cleanUrl}`);
-    onProgress?.(pages.length, cleanUrl);
-
-    // ── Descubrir más links ────────────────────────────────────────────────
-    const hrefs = extractLinks(html);
-    for (const href of hrefs) {
-      if (
-        !href ||
-        href.startsWith('mailto:') ||
-        href.startsWith('tel:') ||
-        href.startsWith('javascript:')
-      )
-        continue;
-
-      try {
-        const absolute = new URL(href, cleanUrl).href;
-        const linkParsed = new URL(absolute);
-
-        if (linkParsed.origin !== origin) continue;
-        if (!['http:', 'https:'].includes(linkParsed.protocol)) continue;
-
-        const normalized = absolute.split('?')[0].split('#')[0].replace(/\/$/, '');
-        if (!visited.has(normalized) && !enCola.has(normalized)) {
-          enCola.add(normalized);
-          queue.push({ url: normalized, foundOn: cleanUrl });
-        }
-      } catch {
-        /* href inválido */
-      }
-    }
+    await onProgress?.(pages.length, cleanUrl);
+    let documentBase = cleanUrl;
+    const baseTag = /<base\b[^>]*href\s*=\s*["']([^"']+)["']/i.exec(html);
+    if (baseTag) try { documentBase = new URL(decodeEntities(baseTag[1]), cleanUrl).href; } catch { /* inválido */ }
+    for (const href of extractLinks(html)) enqueue(href, cleanUrl, documentBase);
   }
-
-  const limitedMsg = (!unlimited && pages.length >= maxPages)
-    ? chalk.yellow(` (límite de ${maxPages} alcanzado — usa --all para auditar todo)`)
-    : '';
-  console.log(`\n📋 Total páginas: ${pages.length}${limitedMsg} | Links rotos: ${brokenLinks.length}\n`);
-  return { pages, brokenLinks };
+  const pending = queue.slice(cursor).filter(({ url }) => !visited.has(url));
+  const coverage = {
+    discovered: queued.size, htmlPages: pages.length, pending: pending.length,
+    limitReached: pending.length > 0, sitemapUrls: sitemapUrls.length,
+    complete: pending.length === 0 && crawlErrors.length === 0 && warnings.length === 0,
+    scope: 'HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas.',
+  };
+  console.log(chalk.cyan('Páginas HTML: ' + pages.length + ' | Rotas: ' + brokenLinks.length + ' | Sin verificar: ' + crawlErrors.length + ' | Pendientes: ' + pending.length));
+  return { pages, brokenLinks, crawlErrors, skipped, warnings, pending, coverage };
 }
 
 // ── DETECTOR DE PROBLEMAS SEO ────────────────────────────────────────────────
@@ -292,7 +177,7 @@ function detectSeoIssues(meta, url) {
 
   if (!meta.h1) issues.push({ type: 'error', msg: 'Sin H1' });
 
-  if (meta.canonical && meta.canonical !== url && !meta.canonical.endsWith('/'))
+  if (meta.canonical && (() => { try { return normalizeUrl(meta.canonical, url) !== normalizeUrl(url); } catch { return true; } })())
     issues.push({ type: 'info', msg: `Canonical apunta a URL diferente: ${meta.canonical}` });
 
   if (meta.robots && (meta.robots.includes('noindex') || meta.robots.includes('nofollow')))

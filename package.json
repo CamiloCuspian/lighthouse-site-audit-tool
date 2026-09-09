@@ -27,6 +27,7 @@
   },
   "scripts": {
     "audit": "node cli/index.js",
+    "test": "node --test",
     "lint": "eslint cli/",
     "format": "prettier --write cli/"
   },

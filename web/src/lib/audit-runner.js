@@ -43,11 +43,11 @@
  *    Core Web Vitals.
  */
 
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { PROJECT_ROOT } from '../../../cli/paths.js';
 import { fork } from 'node:child_process';
 import { crawlSite } from '../../../cli/crawler.js';
-import { matarChromeHuerfano } from '../../../cli/auditor.js';
 import { generateReport } from '../../../cli/reporter.js';
 import { generateSitemap } from '../../../cli/sitemap.js';
 import {
@@ -60,53 +60,12 @@ import {
   limpiarCancelacion,
 } from './projects.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const AUDIT_WORKER_PATH = join(__dirname, '../../../cli/audit-worker.js');
+const AUDIT_WORKER_PATH = join(PROJECT_ROOT, 'cli/audit-worker.js');
 
 const LOTE = 50; // páginas por lote — cada lote corre en su propio proceso hijo (ver comentario arriba)
-const enCurso = new Set();
+const enCurso = globalThis.__lhEnCurso ??= new Set();
 
-// ─────────────────────────────────────────────────────────────────────────
-// Red de seguridad: nunca dejar que el proceso del servidor se caiga por
-// completo por un error que nadie capturó explícitamente.
-//
-// Node, por defecto, TERMINA el proceso entero ante una excepción no
-// capturada o una promesa rechazada sin manejar (comportamiento estándar
-// desde Node 15). Esto es lo que más probablemente explica el reporte del
-// usuario de "en determinado tiempo se para el servidor y finaliza, toca
-// volverlo a iniciar": una auditoría de 300-500 páginas corre horas, y
-// basta con que Chrome se caiga inesperadamente en UNA sola página (una
-// página rara, sin memoria, un timeout profundo dentro de chrome-launcher
-// o del protocolo de depuración de Chrome) para que ese error escape de
-// los try/catch normales y tumbe TODO el servidor — no solo esa
-// auditoría, sino la interfaz completa para todo el equipo.
-//
-// Con este manejador, ese mismo error se registra en la consola pero el
-// servidor sigue vivo. La auditoría afectada puede quedar en un estado
-// raro (por eso también existe estadoEfectivo(), que se autocorrige en el
-// siguiente poll), pero ya no hace falta reiniciar todo a mano.
-function instalarRedDeSeguridad() {
-  if (globalThis.__lhRedDeSeguridadInstalada) return;
-  globalThis.__lhRedDeSeguridadInstalada = true;
-
-  process.on('unhandledRejection', (err) => {
-    console.error('[servidor] Promesa rechazada sin capturar (el servidor sigue corriendo):', err);
-  });
-  process.on('uncaughtException', (err) => {
-    console.error('[servidor] Excepción no capturada (el servidor sigue corriendo):', err);
-  });
-}
-instalarRedDeSeguridad();
-
-// Última vez que cada auditoría en curso dio señales de vida reales (cada
-// escritura de progreso a estado.json). Si el error de arriba ocurre
-// FUERA de la cadena de promesas que audita normalmente (por ejemplo, un
-// evento tardío del proceso de Chrome que ya no está siendo esperado por
-// ningún `await`), el `try/finally` de iniciarAuditoria() nunca llega a
-// correr: el proceso sigue vivo gracias a la red de seguridad, pero esa
-// auditoría puntual queda fantasma — "auditando" en disco y en `enCurso`
-// para siempre, sin que nada la esté avanzando de verdad.
-const ultimaActividad = new Map();
+const ultimaActividad = globalThis.__lhUltimaActividad ??= new Map();
 
 /** Envuelve writeEstado(slug, ...) marcando también la señal de vida. */
 async function marcarProgreso(slug, estado) {
@@ -137,18 +96,11 @@ function iniciarVigilante() {
       console.log(
         `[vigilante] "${slug}": sin señales de vida hace más de ${Math.round(
           SIN_ACTIVIDAD_MAX_MS / 60000
-        )} min — probablemente un error interno la interrumpió sin que nadie la limpiara. Marcando como error.`
+        )} min — probablemente un error interno la interrumpió sin que nadie la limpiara. Solicitando cancelación.`
       );
-      enCurso.delete(slug);
-      ultimaActividad.delete(slug);
-      matarChromeHuerfano().catch(() => {});
-      writeEstado(slug, {
-        estado: 'error',
-        mensaje:
-          'La auditoría se interrumpió por un error interno inesperado y dejó de avanzar. Dale clic en "Auditar ahora" para reintentar.',
-        actualizado: new Date().toISOString(),
-      }).catch(() => {});
-      limpiarCancelacion(slug).catch(() => {});
+      // Mantener el bloqueo hasta que el trabajo confirme su cierre.
+      ultimaActividad.set(slug, ahora);
+      pedirCancelacion(slug).catch(err => console.error('[vigilante]', err));
     }
   }, 30000).unref();
 }
@@ -189,11 +141,6 @@ export async function estadoEfectivo(slug) {
     };
     await writeEstado(slug, corregido);
     await limpiarCancelacion(slug).catch(() => {});
-    // Best-effort: si el servidor se reinició a mitad de la auditoría, el
-    // Chrome headless que esa corrida había lanzado puede seguir vivo de
-    // fondo (huérfano, sin nada que lo controle) — lo intentamos matar
-    // aquí para no dejarlo consumiendo CPU/RAM indefinidamente.
-    matarChromeHuerfano().catch(() => {});
     return corregido;
   }
   return estado;
@@ -251,34 +198,39 @@ function resultadoVacio(url, meta, mensajeError) {
  * que deba tumbar toda la auditoría — sus páginas quedan marcadas con
  * error y la auditoría sigue con el siguiente lote.
  */
-function ejecutarLoteEnWorker(slug, lotePages, offsetGlobal, totalPaginas) {
+export function ejecutarLoteEnWorker(slug, lotePages, offsetGlobal, totalPaginas, workerPath = AUDIT_WORKER_PATH) {
   return new Promise((resolve) => {
-    const child = fork(AUDIT_WORKER_PATH, [], { stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
+    const child = fork(workerPath, [], { stdio: ['ignore', 'inherit', 'inherit', 'ipc'], execArgv: [] });
 
+    const parciales = new Map();
+    let ultimoMensaje = Date.now();
     let terminado = false;
     let vigilanciaTimer = null;
     let cancelacionEnviada = false;
+    let progresoPendiente = Promise.resolve();
 
     const terminar = (resultado) => {
       if (terminado) return;
       terminado = true;
       if (vigilanciaTimer) clearInterval(vigilanciaTimer);
-      resolve(resultado);
+      progresoPendiente.finally(() => resolve(resultado));
     };
 
     child.on('message', (msg) => {
       if (!msg || typeof msg !== 'object') return;
 
+      ultimoMensaje = Date.now();
       if (msg.tipo === 'progreso') {
+        if (msg.resultado) parciales.set(msg.indice, msg.resultado);
         const i = offsetGlobal + msg.indice;
-        marcarProgreso(slug, {
+        progresoPendiente = progresoPendiente.then(() => marcarProgreso(slug, {
           estado: 'auditando',
           paginasHechas: i + 1,
           paginasTotal: totalPaginas,
           urlActual: lotePages[msg.indice]?.url ?? '',
           mensaje: `Auditando con Lighthouse (${i + 1}/${totalPaginas})…`,
           actualizado: new Date().toISOString(),
-        }).catch(() => {
+        })).catch(() => {
           /* si falla una escritura de progreso no se detiene la auditoría por eso */
         });
       } else if (msg.tipo === 'fin') {
@@ -286,6 +238,10 @@ function ejecutarLoteEnWorker(slug, lotePages, offsetGlobal, totalPaginas) {
       } else if (msg.tipo === 'error-fatal') {
         console.error(`[auditoria] "${slug}": el proceso de auditoría avisó un error fatal antes de morir — ${msg.mensaje}`);
       }
+    });
+
+    child.on('error', (error) => {
+      terminar({ resultados: lotePages.map(({ url, meta }, index) => parciales.get(index) ?? resultadoVacio(url, meta, error.message)), cancelado: cancelacionEnviada });
     });
 
     child.on('exit', (code) => {
@@ -299,16 +255,16 @@ function ejecutarLoteEnWorker(slug, lotePages, offsetGlobal, totalPaginas) {
       console.error(
         `[auditoria] "${slug}": el proceso de auditoría terminó inesperadamente (código ${code}) — probablemente sin memoria. Se marcan sus páginas como fallidas y se continúa con el siguiente lote.`
       );
-      matarChromeHuerfano().catch(() => {});
+
       terminar({
-        resultados: lotePages.map(({ url, meta }) =>
-          resultadoVacio(
+        resultados: lotePages.map(({ url, meta }, index) =>
+          parciales.get(index) ?? resultadoVacio(
             url,
             meta,
             `El proceso de auditoría se interrumpió inesperadamente (código ${code}), probablemente por falta de memoria.`
           )
         ),
-        cancelado: false,
+        cancelado: cancelacionEnviada,
       });
     });
 
@@ -319,10 +275,11 @@ function ejecutarLoteEnWorker(slug, lotePages, offsetGlobal, totalPaginas) {
     // esté auditando en ese momento, en vez de esperar a que termine).
     vigilanciaTimer = setInterval(async () => {
       if (terminado || cancelacionEnviada) return;
+      if (Date.now() - ultimoMensaje > 4 * 60 * 1000) { child.kill(); return; }
       if (await hayCancelacionPedida(slug)) {
         cancelacionEnviada = true;
         try {
-          child.send({ tipo: 'cancelar' });
+          child.send({ tipo: 'cancelar' }, () => {});
         } catch {
           /* el canal ya se cerró — el 'exit' handler de abajo se encarga */
         }
@@ -334,7 +291,7 @@ function ejecutarLoteEnWorker(slug, lotePages, offsetGlobal, totalPaginas) {
       }
     }, 800);
 
-    child.send({ tipo: 'lote', pages: lotePages.map(({ url, meta }) => ({ url, meta })) });
+    child.send({ tipo: 'lote', pages: lotePages.map(({ url, meta }) => ({ url, meta })) }, () => {});
   });
 }
 
@@ -345,11 +302,10 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
   // (por ejemplo, si la auditoría terminó en error antes de llegar a
   // revisarla) — si no se limpia, esta auditoría nueva se cancelaría sola
   // en el primer punto de control.
-  await limpiarCancelacion(slug);
-
   try {
+    await limpiarCancelacion(slug);
     const meta = await leerMeta(slug);
-    const siteUrl = meta.dominio.endsWith('/') ? meta.dominio.slice(0, -1) : meta.dominio;
+    const siteUrl = meta.dominio;
 
     await marcarProgreso(slug, {
       estado: 'crawleando',
@@ -372,11 +328,11 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
     // siguiente, cancelar podía tardar mucho en surtir efecto (o no
     // notarse nunca si el crawl terminaba antes). onStep se llama en CADA
     // vuelta del loop del crawler, sin excepción.
-    const { pages, brokenLinks } = await crawlSite(
+    const discovery = await crawlSite(
       siteUrl,
       maxPaginas,
       (encontradas, url) => {
-        marcarProgreso(slug, {
+        return marcarProgreso(slug, {
           estado: 'crawleando',
           paginasHechas: 0,
           paginasTotal: 0,
@@ -388,9 +344,15 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
           /* si falla una escritura de progreso no se detiene el crawl por eso */
         });
       },
-      () => verificarCancelacion(slug) // crawlSite hace `await onStep?.()`
+      async () => { ultimaActividad.set(slug, Date.now()); await verificarCancelacion(slug); }
     );
 
+    const { pages, brokenLinks } = discovery;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const carpetaRelativa = slug + '/' + timestamp;
+    const outputDir = join(PROJECT_ROOT, 'reports', carpetaRelativa);
+    await mkdir(outputDir, { recursive: true });
+    await writeFile(join(outputDir, 'discovery.json'), JSON.stringify(discovery, null, 2));
     if (pages.length === 0) {
       await writeEstado(slug, {
         estado: 'error',
@@ -424,6 +386,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
 
       const { resultados, cancelado } = await ejecutarLoteEnWorker(slug, lotePages, inicioLote, pages.length);
       auditResults.push(...resultados);
+      await writeFile(join(outputDir, 'audit-progress.json'), JSON.stringify(auditResults, null, 2));
 
       if (cancelado) {
         await limpiarCancelacion(slug);
@@ -436,19 +399,18 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
     // este chequeo extra evita generar el reporte como si nada.
     await verificarCancelacion(slug);
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const carpetaRelativa = `${slug}/${timestamp}`;
-    const outputDir = join(process.cwd(), '..', 'reports', carpetaRelativa);
 
     generateSitemap(pages, outputDir);
-    generateReport(auditResults, brokenLinks, outputDir, new URL(siteUrl).hostname);
+    generateReport(auditResults, brokenLinks, outputDir, new URL(siteUrl).hostname, null, discovery);
 
     const promedios = calcularPromedios(auditResults);
     const problemasSEO = auditResults.reduce((n, r) => n + (r.meta?.issues?.length ?? 0), 0);
 
     await appendHistorial(slug, {
       fecha: new Date().toISOString(),
-      paginasAuditadas: auditResults.length,
+      paginasAuditadas: auditResults.filter(r => !r.error).length,
+      paginasFallidas: auditResults.filter(r => r.error).length,
+      cobertura: discovery.coverage,
       promedios,
       linksRotos: brokenLinks.length,
       problemasSEO,
@@ -460,7 +422,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
       paginasHechas: pages.length,
       paginasTotal: pages.length,
       urlActual: '',
-      mensaje: 'Auditoría completada.',
+      mensaje: 'Auditoría finalizada: ' + auditResults.filter(r => !r.error).length + ' mediciones válidas; ' + auditResults.filter(r => r.error).length + ' fallidas; ' + discovery.crawlErrors.length + ' URLs sin verificar; ' + discovery.pending.length + ' pendientes por límite.',
       actualizado: new Date().toISOString(),
     });
   } catch (err) {
@@ -489,6 +451,7 @@ export async function iniciarAuditoria(slug, { maxPaginas = 500 } = {}) {
 }
 
 function calcularPromedios(results) {
+  results = results.filter(r => !r.error);
   const n = results.length || 1;
   const suma = (clave) => results.reduce((s, r) => s + (r.scores?.[clave] ?? 0), 0);
   return {

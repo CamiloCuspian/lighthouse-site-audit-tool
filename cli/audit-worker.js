@@ -76,10 +76,14 @@ process.on('message', async (msg) => {
         } catch (err) {
           if (cancelado) break; // Chrome cerrado por cancelación, no un error real de la página
           resultados.push(resultadoVacio(url, meta, err.message));
+          // Una conexión CDP rota no debe hacer fallar todas las páginas siguientes.
+          await killChrome(chromeActual).catch(() => {});
+          chromeActual = null;
+          if (i + 1 < pages.length && !cancelado) chromeActual = await launchChrome();
         }
 
         try {
-          process.send({ tipo: 'progreso', indice: i });
+          process.send({ tipo: 'progreso', indice: i, resultado: resultados.at(-1) });
         } catch {
           /* el padre ya no escucha (por ejemplo, se está cerrando) — ignorar */
         }
@@ -96,7 +100,7 @@ process.on('message', async (msg) => {
     }
 
     try {
-      process.send({ tipo: 'fin', resultados, cancelado });
+      await new Promise((resolve, reject) => process.send({ tipo: 'fin', resultados, cancelado }, error => error ? reject(error) : resolve()));
     } catch {
       /* nada que hacer si el padre ya no escucha */
     }

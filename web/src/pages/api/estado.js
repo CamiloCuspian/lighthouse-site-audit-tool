@@ -1,8 +1,9 @@
+import { slugValido } from '../../lib/projects.js';
 import { estadoEfectivo } from '../../lib/audit-runner.js';
 
 export async function GET({ url }) {
   const slug = url.searchParams.get('slug');
-  if (!slug) {
+  if (!slugValido(slug)) {
     return new Response(JSON.stringify({ error: 'Falta el slug del proyecto.' }), { status: 400 });
   }
 

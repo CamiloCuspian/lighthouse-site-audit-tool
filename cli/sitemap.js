@@ -8,14 +8,16 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 export function generateSitemap(pages, outputDir) {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-  const urls = pages
+  const urls = pages.filter(({ url, meta }) => {
+    if (/noindex/i.test(meta?.robots ?? '')) return false;
+    if (!meta?.canonical) return true;
+    try { return new URL(meta.canonical, url).href === new URL(url).href; } catch { return false; }
+  })
     .map(
       ({ url }) => `
   <url>
     <loc>${escXml(url)}</loc>
-    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>${url.split('/').length <= 4 ? '1.0' : '0.8'}</priority>
   </url>`

@@ -1,6 +1,6 @@
 # 🔦 Lighthouse Reporter
 
-Audita **todas las páginas** de tu sitio web con Google Lighthouse y genera un **reporte HTML estático completo** — sin pantallas en blanco, sin servidor, sin configuración compleja.
+Audita **las páginas descubiertas** de tu sitio web con Google Lighthouse y genera un **reporte HTML estático completo** — sin pantallas en blanco, sin servidor, sin configuración compleja.
 
 ![Version](https://img.shields.io/badge/version-0.3.0-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-green)
@@ -14,7 +14,7 @@ Audita **todas las páginas** de tu sitio web con Google Lighthouse y genera un 
 
 ## ✨ ¿Qué hace?
 
-- 🔍 **Crawlea** todas las páginas del sitio automáticamente
+- 🔍 **Crawlea** páginas enlazadas o presentes en sitemaps del sitio automáticamente
 - 🔦 **Audita** con Lighthouse: Performance, Accesibilidad, Best Practices y SEO
 - 🔄 **Comparación histórica**: botón para comparar con auditorías anteriores almacenadas automáticamente
 - 🏷️ **Extrae Meta Tags SEO** por página: title, description, H1, canonical, robots, conteo de palabras — con alertas automáticas
@@ -50,7 +50,7 @@ npm install
 ## 📋 Uso
 
 ```bash
-# Auditar un sitio (30 páginas máximo por defecto)
+# Auditar un sitio (500 páginas máximo por defecto)
 node cli/index.js --site https://tusitio.com
 
 # Limitar a 10 páginas
@@ -87,7 +87,7 @@ Luego puedes instalar globalmente: `npm install -g lighthouse-reporter`
 | Opción | Descripción | Default |
 |--------|-------------|---------|
 | `--site` / `-s` | URL del sitio a auditar | *requerido* |
-| `--max` / `-m` | Máximo de páginas a auditar | `30` |
+| `--max` / `-m` | Máximo de páginas a auditar | `500` |
 | `--out` / `-o` | Carpeta de salida del reporte | `./reports` |
 | `--cookie` / `-c` | Cookie para autenticación | |
 | `--header` / `-H` | Header adicional (puede repetirse) | |
@@ -170,3 +170,14 @@ MIT — úsalo libremente, incluso en proyectos comerciales.
 ---
 
 Hecho con ❤️ usando [Lighthouse](https://github.com/GoogleChrome/lighthouse) de Google.
+
+## Revisión de fiabilidad (8 de septiembre de 2026)
+
+Consulta [REVISION-TECNICA.md](./REVISION-TECNICA.md) para ver los fallos confirmados, las correcciones y los pendientes.
+
+- En la interfaz puedes elegir el máximo de páginas o marcar **Sin límite de páginas**. En CLI usa `--all`.
+- El rastreo aplica pausas y hasta tres reintentos ante 429/errores transitorios. Los bloqueos persistentes aparecen como URLs sin verificar, separados de 404/410.
+- `results.json` conserva mediciones válidas en `results` y errores de Lighthouse en `auditErrors`. Los consumidores antiguos deben revisar esta separación.
+- `discovery.json` guarda el descubrimiento incluso cuando no hay páginas auditables. La interfaz guarda también `audit-progress.json` al terminar cada lote.
+- Cobertura completa significa agotar la cola descubierta, no conocer todas las páginas existentes. El crawler no renderiza JavaScript. Los recursos no HTML no se auditan con Lighthouse.
+- Pruebas: `npm test`, `npm run lint` y `npm --prefix web run build`.

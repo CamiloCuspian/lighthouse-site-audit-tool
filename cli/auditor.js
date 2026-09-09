@@ -113,11 +113,19 @@ export async function auditPage(chrome, url, extraHeaders = {}) {
   };
 
   const runnerResult = await lighthouse(url, options);
-  const report = runnerResult.lhr;
+  const report = runnerResult?.lhr;
+  if (!report || report.runtimeError) throw new Error(report?.runtimeError?.message ?? 'Lighthouse no devolvió resultados.');
+  for (const key of ['performance', 'accessibility', 'best-practices', 'seo']) {
+    if (report.categories[key]?.score == null) throw new Error('Lighthouse no pudo medir la categoría ' + key);
+  }
 
   return {
     url,
     fetchTime: report.fetchTime,
+    lighthouseVersion: report.lighthouseVersion,
+    finalUrl: report.finalDisplayedUrl ?? report.finalUrl,
+    runWarnings: report.runWarnings,
+    configSettings: { ...report.configSettings, extraHeaders: undefined },
     scores: {
       performance: Math.round((report.categories.performance?.score ?? 0) * 100),
       accessibility: Math.round((report.categories.accessibility?.score ?? 0) * 100),

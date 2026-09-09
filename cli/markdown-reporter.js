@@ -136,7 +136,6 @@ export function buildMarkdownReport(results, brokenLinks, siteName, date) {
   lines.push('');
 
   for (const r of pagesWithIssues) {
-    const path = r.url.replace(/^https?:\/\/[^/]+/, '') || '/';
 
     lines.push(`### ${r.url}`);
     lines.push(

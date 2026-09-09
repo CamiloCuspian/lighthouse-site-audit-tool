@@ -11,7 +11,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, mkdirSync, writeFileSync } from 'fs';
 
 import { crawlSite } from './crawler.js';
 import { launchChrome, killChrome, auditPage } from './auditor.js';
@@ -47,7 +47,9 @@ if (opts.cookie) {
   extraHeaders['Cookie'] = opts.cookie;
 }
 opts.header.forEach((h) => {
-  const [name, value] = h.split('=', 2);
+  const separator = h.indexOf('=');
+  const name = h.slice(0, separator);
+  const value = separator < 0 ? '' : h.slice(separator + 1);
   if (name && value) extraHeaders[name] = value;
 });
 
@@ -63,24 +65,27 @@ if (opts.compare) {
 }
 
 async function main() {
-  const siteUrl = opts.site.endsWith('/') ? opts.site.slice(0, -1) : opts.site;
-  const maxPages = opts.all ? Infinity : parseInt(opts.max, 10);
+  const siteUrl = opts.site;
+  const maxPages = opts.all ? Infinity : Number(opts.max);
   const outputDir = resolve(opts.out);
 
-  console.log(chalk.bold.blue('\n🔦 Lighthouse Reporter v0.2.0\n'));
+  console.log(chalk.bold.blue('\n🔦 Lighthouse Reporter v0.3.0\n'));
   console.log(chalk.gray(`  Sitio    : ${siteUrl}`));
   console.log(chalk.gray(`  Máx pags : ${maxPages === Infinity ? 'Sin límite (--all)' : maxPages}`));
   console.log(chalk.gray(`  Salida   : ${outputDir}\n`));
 
   // 1. Crawlear el sitio → obtener páginas + meta tags + links rotos
-  let pages, brokenLinks;
+  let pages, brokenLinks, discovery;
   try {
-    ({ pages, brokenLinks } = await crawlSite(siteUrl, maxPages));
+    discovery = await crawlSite(siteUrl, maxPages, undefined, undefined, { extraHeaders });
+    ({ pages, brokenLinks } = discovery);
   } catch (err) {
     console.error(chalk.red(`\n✗ Error al crawlear el sitio: ${err.message}`));
     process.exit(1);
   }
 
+  mkdirSync(outputDir, { recursive: true });
+  writeFileSync(resolve(outputDir, 'discovery.json'), JSON.stringify(discovery, null, 2));
   if (pages.length === 0) {
     console.error(
       chalk.red('\n✗ No se encontraron páginas. Verifica que la URL sea correcta y accesible.')
@@ -141,6 +146,7 @@ async function main() {
     }
   }
 
+  writeFileSync(resolve(outputDir, 'audit-errors.json'), JSON.stringify(auditErrors, null, 2));
   if (auditResults.length === 0) {
     console.error(
       chalk.red('\n✗ Ninguna página se auditó con éxito. Revisa que Chrome esté instalado.')
@@ -156,7 +162,7 @@ async function main() {
   // 5. Generar reportes
   console.log(chalk.blue('\n📊 Generando reportes...'));
   const siteName = new URL(siteUrl).hostname;
-  const { reportPath, mdPath } = generateReport(auditResults, brokenLinks, outputDir, siteName, prevResults);
+  const { reportPath, mdPath } = generateReport(auditResults, brokenLinks, outputDir, siteName, prevResults, { ...discovery, auditErrors });
   console.log(chalk.gray(`     → ${reportPath}`));
   console.log(chalk.gray(`     → ${mdPath}`));
 

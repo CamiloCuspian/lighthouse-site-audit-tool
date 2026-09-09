@@ -541,7 +541,7 @@ function buildClientReportHtml(results, brokenLinks, siteName, date) {
           <span style="font-size:.72rem;">Velocidad: ${scoreSpan(r.scores.performance)}</span>
           <span style="font-size:.72rem;">SEO: ${scoreSpan(r.scores.seo)}</span>
           <span style="font-size:.72rem;">Accesib.: ${scoreSpan(r.scores.accessibility)}</span>
-          <span style="font-size:.72rem;">Seguridad: ${scoreSpan(r.scores.bestPractices)}</span>
+          <span style="font-size:.72rem;">Buenas prácticas: ${scoreSpan(r.scores.bestPractices)}</span>
         </div>
       </div>`;
     });
@@ -651,7 +651,16 @@ function buildClientReportHtml(results, brokenLinks, siteName, date) {
 
 // ── EXPORT PRINCIPAL ──────────────────────────────────────────────────────────
 
-export function generateReport(results, brokenLinks, outputDir, siteName, prevResults = null) {
+export function generateReport(results, brokenLinks, outputDir, siteName, prevResults = null, discovery = {}) {
+  const auditErrors = [...(discovery.auditErrors ?? []), ...results.filter(r => r.error).map(r => ({ url: r.url, error: r.error }))];
+  results = results.filter(r => !r.error);
+  if (!results.length) throw new Error('Ninguna página tiene una medición válida; no se genera un informe de puntuaciones.');
+  const { coverage = null, crawlErrors = [], pending = [], warnings = [], skipped = [] } = discovery;
+  const incomplete = auditErrors.length > 0 || crawlErrors.length > 0 || pending.length > 0 || warnings.length > 0;
+  const noticeText = 'Cobertura ' + (incomplete ? 'parcial' : 'del rastreo') + ': ' + results.length + ' mediciones válidas; ' + auditErrors.length + ' auditorías fallidas; ' + crawlErrors.length + ' URLs sin verificar; ' + pending.length + ' pendientes por límite; ' + warnings.length + ' avisos de descubrimiento. El rastreo usa HTML y sitemaps; no garantiza todas las URLs del sitio.';
+  const failures = [...auditErrors, ...crawlErrors, ...pending, ...warnings];
+  const notice = '<section style="padding:1rem;background:#fff4d6;color:#422006"><strong>' + escHtml(noticeText) + '</strong>' + (failures.length ? '<details><summary>Ver URLs pendientes y errores</summary><ul>' + failures.map(f => '<li>' + escHtml(f.url) + ': ' + escHtml(String(f.error ?? f.reason ?? f.status ?? 'Pendiente')) + '</li>').join('') + '</ul></details>' : '') + '</section>';
+  if (prevResults?.results) prevResults = { ...prevResults, results: prevResults.results.filter(r => !r.error) };
   mkdirSync(outputDir, { recursive: true });
 
   const now = new Date();
@@ -677,7 +686,7 @@ export function generateReport(results, brokenLinks, outputDir, siteName, prevRe
   }
 
   let comparison = null;
-  if (prevResults && prevResults.results) {
+  if (prevResults?.results?.length) {
     const prevTotal = prevResults.results.length;
     const prevAvgPerf = Math.round(
       prevResults.results.reduce((s, r) => s + r.scores.performance, 0) / prevTotal
@@ -982,28 +991,28 @@ function scoreColor(score) {
 </html>`;
 
   const outFile = join(outputDir, 'index.html');
-  writeFileSync(outFile, html, 'utf-8');
+  writeFileSync(outFile, html.replace(/<body[^>]*>/, match => match + notice), 'utf-8');
 
   const clientReportFile = join(outputDir, 'client-report.html');
-  writeFileSync(clientReportFile, buildClientReportHtml(results, brokenLinks, siteName, date), 'utf-8');
+  writeFileSync(clientReportFile, buildClientReportHtml(results, brokenLinks, siteName, date).replace(/<body[^>]*>/, match => match + notice), 'utf-8');
 
   const jsonFile = join(outputDir, 'results.json');
   writeFileSync(
     jsonFile,
-    JSON.stringify({ site: siteName, date, results, brokenLinks }, null, 2),
+    JSON.stringify({ site: siteName, date, results, brokenLinks, auditErrors, coverage, crawlErrors, pending, warnings, skipped }, null, 2),
     'utf-8'
   );
 
   // Reporte Markdown para IA
   const mdFile = join(outputDir, 'ai-report.md');
-  writeFileSync(mdFile, buildMarkdownReport(results, brokenLinks, siteName, date), 'utf-8');
+  writeFileSync(mdFile, noticeText + '\n\n' + failures.map(f => '- ' + f.url + ': ' + (f.error ?? f.reason ?? f.status ?? 'Pendiente')).join('\n') + '\n\n' + buildMarkdownReport(results, brokenLinks, siteName, date), 'utf-8');
 
   // Guardar en historial
   const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const historyFile = join(outputDir, 'history', `${timestamp}.json`);
   writeFileSync(
     historyFile,
-    JSON.stringify({ site: siteName, date, results, brokenLinks }, null, 2),
+    JSON.stringify({ site: siteName, date, results, brokenLinks, auditErrors, coverage, crawlErrors, pending, warnings, skipped }, null, 2),
     'utf-8'
   );
   previousReports.unshift(timestamp);
