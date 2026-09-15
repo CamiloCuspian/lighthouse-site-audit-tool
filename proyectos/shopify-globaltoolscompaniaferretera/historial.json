@@ -37,5 +37,28 @@
     "linksRotos": 127,
     "problemasSEO": 85,
     "carpetaReporte": "shopify-globaltoolscompaniaferretera/2026-09-03T14-13-36"
+  },
+  {
+    "fecha": "2026-09-11T22:39:38.860Z",
+    "paginasAuditadas": 147,
+    "paginasFallidas": 1,
+    "cobertura": {
+      "discovered": 149,
+      "htmlPages": 148,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 135,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 53,
+      "accessibility": 88,
+      "bestPractices": 95,
+      "seo": 100
+    },
+    "linksRotos": 0,
+    "problemasSEO": 64,
+    "carpetaReporte": "shopify-globaltoolscompaniaferretera/2026-09-11T22-04-13"
   }
 ]
