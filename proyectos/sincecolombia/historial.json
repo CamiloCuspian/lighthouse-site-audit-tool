@@ -1,0 +1,25 @@
+[
+  {
+    "fecha": "2026-09-16T23:21:59.356Z",
+    "paginasAuditadas": 82,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 83,
+      "htmlPages": 82,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 77,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 66,
+      "accessibility": 99,
+      "bestPractices": 100,
+      "seo": 90
+    },
+    "linksRotos": 1,
+    "problemasSEO": 16,
+    "carpetaReporte": "sincecolombia/2026-09-16T23-06-33"
+  }
+]

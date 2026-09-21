@@ -1,0 +1,25 @@
+[
+  {
+    "fecha": "2026-09-17T00:21:40.551Z",
+    "paginasAuditadas": 69,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 69,
+      "htmlPages": 69,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 65,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 60,
+      "accessibility": 96,
+      "bestPractices": 96,
+      "seo": 90
+    },
+    "linksRotos": 0,
+    "problemasSEO": 28,
+    "carpetaReporte": "sinceecuador/2026-09-17T00-08-32"
+  }
+]
