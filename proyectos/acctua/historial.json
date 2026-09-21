@@ -47,5 +47,74 @@
     "linksRotos": 2,
     "problemasSEO": 387,
     "carpetaReporte": "acctua/2026-09-09T16-07-59"
+  },
+  {
+    "fecha": "2026-09-12T19:09:37.912Z",
+    "paginasAuditadas": 284,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 291,
+      "htmlPages": 284,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 224,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 41,
+      "accessibility": 94,
+      "bestPractices": 73,
+      "seo": 100
+    },
+    "linksRotos": 3,
+    "problemasSEO": 81,
+    "carpetaReporte": "acctua/2026-09-12T16-59-52"
+  },
+  {
+    "fecha": "2026-09-15T04:23:23.345Z",
+    "paginasAuditadas": 299,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 306,
+      "htmlPages": 299,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 237,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 36,
+      "accessibility": 99,
+      "bestPractices": 76,
+      "seo": 100
+    },
+    "linksRotos": 0,
+    "problemasSEO": 89,
+    "carpetaReporte": "acctua/2026-09-15T00-47-31"
+  },
+  {
+    "fecha": "2026-09-15T20:39:06.650Z",
+    "paginasAuditadas": 299,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 306,
+      "htmlPages": 299,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 237,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 46,
+      "accessibility": 99,
+      "bestPractices": 79,
+      "seo": 100
+    },
+    "linksRotos": 0,
+    "problemasSEO": 89,
+    "carpetaReporte": "acctua/2026-09-15T16-36-56"
   }
 ]
