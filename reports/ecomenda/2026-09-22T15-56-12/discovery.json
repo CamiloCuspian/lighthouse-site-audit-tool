@@ -1,0 +1,1268 @@
+{
+  "pages": [
+    {
+      "url": "https://ecomenda.com.co/",
+      "meta": {
+        "title": "Ecomenda | Tienda Online de Moda y Belleza en Colombia | Envíos a Todo",
+        "description": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "ogTitle": "Ecomenda | Tienda Online de Moda y Belleza en Colombia | Envíos a Todo",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Elige el cuidado que tu piel necesita",
+          "Los favoritos de la rutina",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/",
+        "robots": "",
+        "wordCount": 440,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (70 chars, máximo 60)"
+          },
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (167 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/mascarilla-de-ojos-peptido-azul",
+      "meta": {
+        "title": "Parches de Colágeno para Ojeras | Hidratación y Mirada Rejuvenecida\n &ndash; Ecomenda",
+        "description": "Descubre los parches de colágeno con algas marinas que hidratan profundamente, reducen ojeras y revitalizan tu mirada desde la primera aplicación. Resultados inmediatos, piel suave y sin grasa. Ideal para ojos cansados. ¡Luce una mirada fresca y rejuvenecida!",
+        "ogTitle": "Parches de Colágeno para Ojeras | Hidratación y Mirada Rejuvenecida",
+        "ogDescription": "Descubre los parches de colágeno con algas marinas que hidratan profundamente, reducen ojeras y revitalizan tu mirada desde la primera aplicación. Resultados inmediatos, piel suave y sin grasa. Ideal para ojos cansados. ¡Luce una mirada fresca y rejuvenecida!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Parches de Colágeno para Ojeras | Hidratación y Mirada Rejuvenecida",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/mascarilla-de-ojos-peptido-azul",
+        "robots": "",
+        "wordCount": 693,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (85 chars, máximo 60)"
+          },
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (259 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/crema-urea-50ml",
+      "meta": {
+        "title": "Crema Urea al 40% | Solución para Pies Agrietados - EcomendaStore",
+        "description": "¿Talones agrietados, manos secas o callos dolorosos? Descubre la crema con Urea al 40% que exfolia, hidrata y repara desde la primera semana. Resultados reales, envío rápido y pago al recibir. Piel suave garantizada o te devolvemos tu dinero. ¡Pide hoy sin riesgos!",
+        "ogTitle": "Crema Urea al 40% | Solución para Pies Agrietados - EcomendaStore",
+        "ogDescription": "¿Talones agrietados, manos secas o callos dolorosos? Descubre la crema con Urea al 40% que exfolia, hidrata y repara desde la primera semana. Resultados reales, envío rápido y pago al recibir. Piel suave garantizada o te devolvemos tu dinero. ¡Pide hoy sin riesgos!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "CREMA UREA AL 40% - MANOS Y PIES",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Manos Agrietadas Que Arden: La Solución Que Los Dermatólogos Recomiendan",
+          "Dermatitis en las Manos: Cómo Curar Grietas Severas y Piel Agrietada Rápidamente"
+        ],
+        "canonical": "https://ecomenda.com.co/products/crema-urea-50ml",
+        "robots": "",
+        "wordCount": 569,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (65 chars, máximo 60)"
+          },
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (265 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/baba-caracol-al-92-hidrata-y-repara",
+      "meta": {
+        "title": "Crema Baba de Caracol 92% | Hidratación y Reparación Facial\n &ndash; Ecomenda",
+        "description": "Regenera tu piel con la crema de baba de caracol al 92%. Hidrata, repara, reduce manchas, acné y arrugas. ¡Envío gratis y pagás al recibir!",
+        "ogTitle": "Crema Baba de Caracol 92% | Hidratación y Reparación Facial",
+        "ogDescription": "Regenera tu piel con la crema de baba de caracol al 92%. Hidrata, repara, reduce manchas, acné y arrugas. ¡Envío gratis y pagás al recibir!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Crema Baba de Caracol 92% | Hidratación y Reparación Facial",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "¿Qué hace diferente a esta crema?",
+          "¿Qué tiene esta crema que otras no?"
+        ],
+        "canonical": "https://ecomenda.com.co/products/baba-caracol-al-92-hidrata-y-repara",
+        "robots": "",
+        "wordCount": 633,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (77 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/proyector-hy300",
+      "meta": {
+        "title": "HY300 PRO | Cine en Casa 4K | Compra tu Proyector Premium Hoy\n &ndash; Ecomenda",
+        "description": "¿Buscas un proyector potente y portátil? HY300 PRO ofrece 4K, sonido envolvente y conexión inalámbrica ultra rápida. Garantía 12 meses. ¡Ordénalo ahora!",
+        "ogTitle": "HY300 PRO | Cine en Casa 4K | Compra tu Proyector Premium Hoy",
+        "ogDescription": "¿Buscas un proyector potente y portátil? HY300 PRO ofrece 4K, sonido envolvente y conexión inalámbrica ultra rápida. Garantía 12 meses. ¡Ordénalo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "HY300 PRO Cine en Casa | Transforma Tu Hogar en un Teatro",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "¿Por qué el HY300 PRO es tu mejor elección?",
+          "Miles ya lo disfrutan"
+        ],
+        "canonical": "https://ecomenda.com.co/products/proyector-hy300",
+        "robots": "",
+        "wordCount": 578,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (79 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/crema-urea-al-40-pies-manos-y-codos",
+      "meta": {
+        "title": "Crema Urea al 40% para la dermatitis Pies, manos y codos\n &ndash; Ecomenda",
+        "description": "Transforma tus pies en 7 días La única crema con Urea 40% que elimina durezas y grietas sin dolor. Resultados garantizados desde la primera aplicación. Ver Oferta Especial 1,850+ Clientes satisfechos 4.8 Calificación promedio 96% Recomprarían &quot;Por primera vez en años puedo usar sandalias sin vergüenza. UreaMax cambió m",
+        "ogTitle": "Crema Urea al 40% para la dermatitis Pies, manos y codos",
+        "ogDescription": "Transforma tus pies en 7 días La única crema con Urea 40% que elimina durezas y grietas sin dolor. Resultados garantizados desde la primera aplicación. Ver Oferta Especial 1,850+ Clientes satisfechos 4.8 Calificación promedio 96% Recomprarían &quot;Por primera vez en años puedo usar sandalias sin vergüenza. UreaMax cambió m",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Crema Urea al 40%  Pies, manos y codos",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "¿Cansado de esconder tus pies?",
+          "UreaMax elimina el problema de raíz"
+        ],
+        "canonical": "https://ecomenda.com.co/products/crema-urea-al-40-pies-manos-y-codos",
+        "robots": "",
+        "wordCount": 748,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (74 chars, máximo 60)"
+          },
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (325 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/king-maker-potenciador-de-testosterona",
+      "meta": {
+        "title": "KING MAKER - POTENCIADOR DE ENERGIA MUSCULAR\n &ndash; Ecomenda",
+        "description": "✨ Potencia tu masculinidad al máximo con ingredientes 100% naturales Descubre la fórmula premium diseñada para elevar tu energía, vitalidad y desempeño físico. 💥 Beneficios clave:✔ Aumenta la masculinidad natural y presencia física.✔ Mejora la fuerza, energía y resistencia.✔ Apoya el crecimiento muscular magro y defini",
+        "ogTitle": "KING MAKER - POTENCIADOR DE ENERGIA MUSCULAR",
+        "ogDescription": "✨ Potencia tu masculinidad al máximo con ingredientes 100% naturales Descubre la fórmula premium diseñada para elevar tu energía, vitalidad y desempeño físico. 💥 Beneficios clave:✔ Aumenta la masculinidad natural y presencia física.✔ Mejora la fuerza, energía y resistencia.✔ Apoya el crecimiento muscular magro y defini",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "KING MAKER - POTENCIADOR DE ENERGIA MUSCULAR",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/king-maker-potenciador-de-testosterona",
+        "robots": "",
+        "wordCount": 483,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (62 chars, máximo 60)"
+          },
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (321 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/spray-eliminacion-de-lipomas",
+      "meta": {
+        "title": "SPRAY ELIMINACION DE LIPOMAS\n &ndash; Ecomenda",
+        "description": "⚡ PROMOCIÓN DEl AÑO: PAGA EN CASA AL RECIBIR + ENVÍO GRATIS ⚡ ¿Tienes Incómodas Bolitas de Grasa en el Cuerpo y Te Da Pánico una Cirugía? Disuelve, desinflama y aplana los lipomas subcutáneos de forma natural, segura y sin bisturís dolorosos. ¿Sabías qué? Las cirugías de extirpación dejan cicatrices imborrables, conlle",
+        "ogTitle": "SPRAY ELIMINACION DE LIPOMAS",
+        "ogDescription": "⚡ PROMOCIÓN DEl AÑO: PAGA EN CASA AL RECIBIR + ENVÍO GRATIS ⚡ ¿Tienes Incómodas Bolitas de Grasa en el Cuerpo y Te Da Pánico una Cirugía? Disuelve, desinflama y aplana los lipomas subcutáneos de forma natural, segura y sin bisturís dolorosos. ¿Sabías qué? Las cirugías de extirpación dejan cicatrices imborrables, conlle",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "SPRAY ELIMINACION DE LIPOMAS",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "¿Cómo Funciona el Spray Lipo-Out?",
+          "Beneficios Clave del Tratamiento"
+        ],
+        "canonical": "https://ecomenda.com.co/products/spray-eliminacion-de-lipomas",
+        "robots": "",
+        "wordCount": 540,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (320 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/masajeador-electrico-de-presion",
+      "meta": {
+        "title": "Masajeador Eléctrico De Presión\n &ndash; Ecomenda",
+        "description": "🚚 ENVÍOS A TODO COLOMBIA   |   📦 PAGO CONTRA ENTREGA ✨ MASAJEADOR PORTÁTIL MULTIZONA Dale a tu cuerpo el descanso que merece Disfruta de un masaje práctico en cuello, hombros, espalda, brazos, piernas y otras zonas donde deseas disfrutar de un momento de relajación. ★★★★★ Diseño ergonómico y portátil Antes: $139.900 $5",
+        "ogTitle": "Masajeador Eléctrico De Presión",
+        "ogDescription": "🚚 ENVÍOS A TODO COLOMBIA   |   📦 PAGO CONTRA ENTREGA ✨ MASAJEADOR PORTÁTIL MULTIZONA Dale a tu cuerpo el descanso que merece Disfruta de un masaje práctico en cuello, hombros, espalda, brazos, piernas y otras zonas donde deseas disfrutar de un momento de relajación. ★★★★★ Diseño ergonómico y portátil Antes: $139.900 $5",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Masajeador Eléctrico De Presión",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Una forma práctica de disfrutar tus momentos de descanso",
+          "Úsalo en diferentes zonas"
+        ],
+        "canonical": "https://ecomenda.com.co/products/masajeador-electrico-de-presion",
+        "robots": "",
+        "wordCount": 787,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (322 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/corrector-de-postura",
+      "meta": {
+        "title": "Corrector de Postura Ajustable | Envío Gratis Colombia\n &ndash; Ecomenda",
+        "description": "Corrector de postura ajustable para mujer y hombre. Ligero, discreto bajo la ropa y con velcro. Ideal si trabajas sentado. Pago contra entrega y envío gratis.",
+        "ogTitle": "Corrector de Postura Ajustable | Envío Gratis Colombia",
+        "ogDescription": "Corrector de postura ajustable para mujer y hombre. Ligero, discreto bajo la ropa y con velcro. Ideal si trabajas sentado. Pago contra entrega y envío gratis.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Corrector de Postura Ajustable para Mujer y Hombre",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/corrector-de-postura",
+        "robots": "",
+        "wordCount": 633,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (72 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/cepillo-secador-alisador",
+      "meta": {
+        "title": "Cepillo Secador y Alisador 3 en 1 | Pago Contraentrega\n &ndash; Ecomenda",
+        "description": "Cepillo secador y alisador con aceite de aguacate: seca, alisa y da volumen en un solo paso. 3 modos de calor. Envío gratis y pago contra entrega.",
+        "ogTitle": "Cepillo Secador y Alisador 3 en 1 | Pago Contraentrega",
+        "ogDescription": "Cepillo secador y alisador con aceite de aguacate: seca, alisa y da volumen en un solo paso. 3 modos de calor. Envío gratis y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Cepillo Secador y Alisador con Aceite de Aguacate 3 en 1",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/cepillo-secador-alisador",
+        "robots": "",
+        "wordCount": 622,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (72 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/irrigador-bucal-recargable",
+      "meta": {
+        "title": "Irrigador Bucal Recargable Portátil | Envío a toda Colombia\n &ndash; Ecomenda",
+        "description": "Irrigador bucal recargable por USB con 3 modos y boquilla 360°. Limpia entre dientes, brackets e implantes. Envío gratis y pago contra entrega.",
+        "ogTitle": "Irrigador Bucal Recargable Portátil | Envío a toda Colombia",
+        "ogDescription": "Irrigador bucal recargable por USB con 3 modos y boquilla 360°. Limpia entre dientes, brackets e implantes. Envío gratis y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Irrigador Bucal Recargable Portátil con 3 Modos",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/irrigador-bucal-recargable",
+        "robots": "",
+        "wordCount": 620,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (77 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/masajeador-cuello-espalda",
+      "meta": {
+        "title": "Masajeador de Cuello y Espalda Eléctrico con Calor\n &ndash; Ecomenda",
+        "description": "Masajeador eléctrico de cuello y espalda tipo shiatsu con calor. Relaja la tensión en casa u oficina. Envío gratis y pago contra entrega.",
+        "ogTitle": "Masajeador de Cuello y Espalda Eléctrico con Calor",
+        "ogDescription": "Masajeador eléctrico de cuello y espalda tipo shiatsu con calor. Relaja la tensión en casa u oficina. Envío gratis y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Masajeador de Cuello y Espalda Eléctrico con Calor",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/masajeador-cuello-espalda",
+        "robots": "",
+        "wordCount": 579,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (68 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/almohada-ortopedica-cervical",
+      "meta": {
+        "title": "Almohada Ortopédica Cervical para Dolor de Cuello\n &ndash; Ecomenda",
+        "description": "Almohada ortopédica cervical de 60 x 48 x 7 cm con funda lavable. Ayuda a alinear cuello y columna al dormir. Envío gratis y pago contra entrega.",
+        "ogTitle": "Almohada Ortopédica Cervical para Dolor de Cuello",
+        "ogDescription": "Almohada ortopédica cervical de 60 x 48 x 7 cm con funda lavable. Ayuda a alinear cuello y columna al dormir. Envío gratis y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Almohada Ortopédica Cervical para Dolor de Cuello",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/almohada-ortopedica-cervical",
+        "robots": "",
+        "wordCount": 633,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (67 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/corrector-de-juanetes",
+      "meta": {
+        "title": "Corrector de Juanetes Día y Noche | Alivio del Dolor\n &ndash; Ecomenda",
+        "description": "Corrector de juanetes ajustable con férula acolchada y doble correa. Sirve para pie izquierdo o derecho. Envío gratis a toda Colombia y pago contra entrega.",
+        "ogTitle": "Corrector de Juanetes Día y Noche | Alivio del Dolor",
+        "ogDescription": "Corrector de juanetes ajustable con férula acolchada y doble correa. Sirve para pie izquierdo o derecho. Envío gratis a toda Colombia y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Corrector de Juanetes Ajustable Día y Noche",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/corrector-de-juanetes",
+        "robots": "",
+        "wordCount": 605,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (70 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/gua-sha-rodillo-jade",
+      "meta": {
+        "title": "Gua Sha y Rodillo de Jade Facial | Kit 2 en 1\n &ndash; Ecomenda",
+        "description": "Kit de gua sha facial y rodillo de jade para masajear rostro y cuello. Relaja y ayuda a desinflamar. Envío gratis y pago contra entrega en Colombia.",
+        "ogTitle": "Gua Sha y Rodillo de Jade Facial | Kit 2 en 1",
+        "ogDescription": "Kit de gua sha facial y rodillo de jade para masajear rostro y cuello. Relaja y ayuda a desinflamar. Envío gratis y pago contra entrega en Colombia.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Gua Sha y Rodillo de Jade Facial | Kit 2 en 1",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/gua-sha-rodillo-jade",
+        "robots": "",
+        "wordCount": 636,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (63 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/depiladora-laser-ipl",
+      "meta": {
+        "title": "Depiladora Láser IPL para Casa | Piel Suave sin Vello\n &ndash; Ecomenda",
+        "description": "Depiladora láser IPL de uso doméstico que debilita el vello desde la raíz para reducirlo sesión a sesión. Envío gratis a toda Colombia y pago contra entrega.",
+        "ogTitle": "Depiladora Láser IPL para Casa | Piel Suave sin Vello",
+        "ogDescription": "Depiladora láser IPL de uso doméstico que debilita el vello desde la raíz para reducirlo sesión a sesión. Envío gratis a toda Colombia y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Depiladora Láser IPL para Uso en Casa",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/depiladora-laser-ipl",
+        "robots": "",
+        "wordCount": 687,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (71 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/humidificador-difusor-aromas",
+      "meta": {
+        "title": "Humidificador Difusor de Aromas Tipo Madera | Envío Gratis\n &ndash; Ecomenda",
+        "description": "Humidificador y difusor de aromas ultrasónico tipo madera. Niebla fría para humedecer y aromatizar tu espacio. Envío gratis y pago contra entrega.",
+        "ogTitle": "Humidificador Difusor de Aromas Tipo Madera | Envío Gratis",
+        "ogDescription": "Humidificador y difusor de aromas ultrasónico tipo madera. Niebla fría para humedecer y aromatizar tu espacio. Envío gratis y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Humidificador Difusor de Aromas Tipo Madera",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/humidificador-difusor-aromas",
+        "robots": "",
+        "wordCount": 557,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (76 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/products/rodillera-ortopedica-compresion",
+      "meta": {
+        "title": "Rodillera Ortopédica de Compresión para Dolor de Rodilla\n &ndash; Ecomenda",
+        "description": "Rodillera ortopédica y deportiva de compresión: soporte y estabilidad para la rodilla en el día a día y el ejercicio. Envío gratis y pago contra entrega.",
+        "ogTitle": "Rodillera Ortopédica de Compresión para Dolor de Rodilla",
+        "ogDescription": "Rodillera ortopédica y deportiva de compresión: soporte y estabilidad para la rodilla en el día a día y el ejercicio. Envío gratis y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Rodillera Ortopédica de Compresión para Dolor de Rodilla",
+          "Beneficios y detalles",
+          "Cómo usar",
+          "Envíos y garantía",
+          "Una elección pensada para tu rutina.",
+          "Customer Reviews",
+          "De Tu Interés"
+        ],
+        "canonical": "https://ecomenda.com.co/products/rodillera-ortopedica-compresion",
+        "robots": "",
+        "wordCount": 557,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (74 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/pages/contact",
+      "meta": {
+        "title": "Contacto\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Contacto",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Questions or comments? Get in touch and we'll be happy to help.",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/pages/contact",
+        "robots": "",
+        "wordCount": 175,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy corto (26 chars, mínimo 30)"
+          },
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          },
+          {
+            "type": "warning",
+            "msg": "Contenido escaso (~175 palabras, recomendado 300+)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/salud",
+      "meta": {
+        "title": "Salud y bienestar: alivio del dolor y cuidado en casa | Ecomenda",
+        "description": "Masajeadores, correctores de postura, almohada cervical, rodillera, humidificador y más para tu bienestar. Envío a toda Colombia.",
+        "ogTitle": "Salud y bienestar: alivio del dolor y cuidado en casa | Ecomenda",
+        "ogDescription": "Masajeadores, correctores de postura, almohada cervical, rodillera, humidificador y más para tu bienestar. Envío a toda Colombia.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "9 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "9 productos",
+          "¿No encuentras lo que buscas?"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/salud",
+        "robots": "",
+        "wordCount": 653,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (64 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/belleza",
+      "meta": {
+        "title": "Productos de belleza y cuidado de la piel | Ecomenda",
+        "description": "Cremas para piel seca, baba de caracol, gua sha, depiladora IPL y más productos de belleza. Envío a toda Colombia y pago contra entrega.",
+        "ogTitle": "Productos de belleza y cuidado de la piel | Ecomenda",
+        "ogDescription": "Cremas para piel seca, baba de caracol, gua sha, depiladora IPL y más productos de belleza. Envío a toda Colombia y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "8 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "8 productos",
+          "¿No encuentras lo que buscas?"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/belleza",
+        "robots": "",
+        "wordCount": 660,
+        "issues": []
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/productos-mas-vendidos",
+      "meta": {
+        "title": "Productos mas vendidos\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Productos mas vendidos",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "4 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "4 productos",
+          "Diapositiva de imagen"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/productos-mas-vendidos",
+        "robots": "",
+        "wordCount": 470,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/lo-que-deseas-ver",
+      "meta": {
+        "title": "lo que deseas ver\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "lo que deseas ver",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "7 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "7 productos",
+          "Diapositiva de imagen"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/lo-que-deseas-ver",
+        "robots": "",
+        "wordCount": 599,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/todos-los-productos",
+      "meta": {
+        "title": "todos los productos\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "todos los productos",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "7 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "7 productos",
+          "Diapositiva de imagen"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/todos-los-productos",
+        "robots": "",
+        "wordCount": 597,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/catalogo",
+      "meta": {
+        "title": "Catálogo de productos de bienestar y belleza | Ecomenda",
+        "description": "Compra correctores de postura, masajeadores, productos para el cuidado de la piel y más. Envío a toda Colombia y pago fácil en Ecomenda.",
+        "ogTitle": "Catálogo de productos de bienestar y belleza | Ecomenda",
+        "ogDescription": "Compra correctores de postura, masajeadores, productos para el cuidado de la piel y más. Envío a toda Colombia y pago fácil en Ecomenda.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "18 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "18 productos",
+          "¿No encuentras lo que buscas?"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/catalogo",
+        "robots": "",
+        "wordCount": 986,
+        "issues": []
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/alivio-del-dolor",
+      "meta": {
+        "title": "Alivio del dolor y postura: masajeadores y correctores | Ecomenda",
+        "description": "Correctores de postura, masajeadores de cuello y espalda, almohada cervical, rodillera y corrector de juanetes. Envío a toda Colombia y pago contra entrega.",
+        "ogTitle": "Alivio del dolor y postura: masajeadores y correctores | Ecomenda",
+        "ogDescription": "Correctores de postura, masajeadores de cuello y espalda, almohada cervical, rodillera y corrector de juanetes. Envío a toda Colombia y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "6 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "6 productos",
+          "¿No encuentras lo que buscas?"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/alivio-del-dolor",
+        "robots": "",
+        "wordCount": 568,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (65 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/cuidado-de-la-piel",
+      "meta": {
+        "title": "Cuidado de la piel: cremas, baba de caracol y gua sha | Ecomenda",
+        "description": "Crema de urea al 40%, baba de caracol al 92%, parches para ojeras y gua sha de jade. Cuida tu piel en casa. Envío a toda Colombia.",
+        "ogTitle": "Cuidado de la piel: cremas, baba de caracol y gua sha | Ecomenda",
+        "ogDescription": "Crema de urea al 40%, baba de caracol al 92%, parches para ojeras y gua sha de jade. Cuida tu piel en casa. Envío a toda Colombia.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "5 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "5 productos",
+          "¿No encuentras lo que buscas?"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/cuidado-de-la-piel",
+        "robots": "",
+        "wordCount": 567,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (64 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/cuidado-personal",
+      "meta": {
+        "title": "Cuidado personal: depiladora IPL, cepillo secador e irrigador | Ecomenda",
+        "description": "Depiladora láser IPL para casa, cepillo secador alisador 3 en 1 e irrigador bucal recargable. Envío a toda Colombia y pago contra entrega.",
+        "ogTitle": "Cuidado personal: depiladora IPL, cepillo secador e irrigador | Ecomenda",
+        "ogDescription": "Depiladora láser IPL para casa, cepillo secador alisador 3 en 1 e irrigador bucal recargable. Envío a toda Colombia y pago contra entrega.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "3 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "3 productos",
+          "¿No encuentras lo que buscas?"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/cuidado-personal",
+        "robots": "",
+        "wordCount": 467,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (72 chars, máximo 60)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/ofertas",
+      "meta": {
+        "title": "Ofertas y descuentos en bienestar y belleza | Ecomenda",
+        "description": "Productos de belleza, cuidado de la piel y bienestar con descuento. Envío a toda Colombia y pago contra entrega en Ecomenda.",
+        "ogTitle": "Ofertas y descuentos en bienestar y belleza | Ecomenda",
+        "ogDescription": "Productos de belleza, cuidado de la piel y bienestar con descuento. Envío a toda Colombia y pago contra entrega en Ecomenda.",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "5 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "5 productos",
+          "¿No encuentras lo que buscas?"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/ofertas",
+        "robots": "",
+        "wordCount": 551,
+        "issues": []
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/blogs/noticias",
+      "meta": {
+        "title": "Noticias\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Noticias",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/blogs/noticias",
+        "robots": "",
+        "wordCount": 156,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy corto (26 chars, mínimo 30)"
+          },
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          },
+          {
+            "type": "warning",
+            "msg": "Contenido escaso (~156 palabras, recomendado 300+)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/blogs/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia",
+      "meta": {
+        "title": "Crema Urea al 40%: El Secreto Clínico para Manos y Pies Suaves en Colo\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Crema Urea al 40%: El Secreto Clínico para Manos y Pies Suaves en Colo",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/blogs/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia",
+        "robots": "",
+        "wordCount": 256,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (88 chars, máximo 60)"
+          },
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          },
+          {
+            "type": "warning",
+            "msg": "Contenido escaso (~256 palabras, recomendado 300+)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/blogs/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia",
+      "meta": {
+        "title": "Crema Urea al 40%: El Secreto Clínico para Manos y Pies Suaves en Colo\n &ndash; Ecomenda",
+        "description": "¿Buscas comprar crema urea 40% en Colombia con envío gratis y pago contraentrega? Descubre cómo la Crema Urea al 40% repara manos resecas, piel que se pela, talones agrietados y callos con resultados reales. Crema Urea 40% para manos y pies: hidratación clínica y reparación visible. ¿Por qué la Crema Urea al 40% funcio",
+        "ogTitle": "Crema Urea al 40%: El Secreto Clínico para Manos y Pies Suaves en Colo",
+        "ogDescription": "¿Buscas comprar crema urea 40% en Colombia con envío gratis y pago contraentrega? Descubre cómo la Crema Urea al 40% repara manos resecas, piel que se pela, talones agrietados y callos con resultados reales. Crema Urea 40% para manos y pies: hidratación clínica y reparación visible. ¿Por qué la Crema Urea al 40% funcio",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "¿Por qué la Crema Urea al 40% funciona tan bien?",
+          "Beneficios y resultados esperados",
+          "Cómo usar la crema para obtener el máximo resultado",
+          "Compra segura en Colombia: envío gratis y pago contraentrega",
+          "Preguntas frecuentes sobre crema urea 40%",
+          "De Tu Interés",
+          "Contacto"
+        ],
+        "canonical": "https://ecomenda.com.co/blogs/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia",
+        "robots": "",
+        "wordCount": 619,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy largo (88 chars, máximo 60)"
+          },
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (320 chars, máximo 160)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/cart",
+      "meta": {
+        "title": "Tu carrito\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Tu carrito",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "¿Tienes una cuenta?",
+          "Total estimado",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/cart",
+        "robots": "",
+        "wordCount": 194,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy corto (28 chars, mínimo 30)"
+          },
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          },
+          {
+            "type": "warning",
+            "msg": "Contenido escaso (~194 palabras, recomendado 300+)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/search",
+      "meta": {
+        "title": "Buscar\n &ndash; Ecomenda",
+        "description": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "ogTitle": "Buscar",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/search",
+        "robots": "",
+        "wordCount": 157,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy corto (24 chars, mínimo 30)"
+          },
+          {
+            "type": "warning",
+            "msg": "Meta description muy larga (167 chars, máximo 160)"
+          },
+          {
+            "type": "warning",
+            "msg": "Contenido escaso (~157 palabras, recomendado 300+)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/policies/refund-policy",
+      "meta": {
+        "title": "Política de reembolso\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Política de reembolso",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/policies/refund-policy",
+        "robots": "",
+        "wordCount": 500,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/policies/privacy-policy",
+      "meta": {
+        "title": "Política de privacidad\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Política de privacidad",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Cambios a Esta Política de Privacidad",
+          "Cómo Recopilamos y Utilizamos Su Información Personal",
+          "Qué Información Personal Recopilamos",
+          "Cómo Utilizamos Su Información Personal",
+          "Cookies",
+          "Cómo Divulgamos Información Personal",
+          "Sitios Web y Enlaces de Terceros"
+        ],
+        "canonical": "https://ecomenda.com.co/policies/privacy-policy",
+        "robots": "",
+        "wordCount": 2423,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/policies/shipping-policy",
+      "meta": {
+        "title": "Política de envío\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Política de envío",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "INFORMACIÓN GENERAL",
+          "TRANSPORTADORAS",
+          "PROCESAMIENTO DE PEDIDOS",
+          "TIEMPOS DE ENTREGA",
+          "SEGUIMIENTO DE PEDIDOS",
+          "COBERTURA",
+          "COSTOS DE ENVÍO"
+        ],
+        "canonical": "https://ecomenda.com.co/policies/shipping-policy",
+        "robots": "",
+        "wordCount": 579,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/policies/terms-of-service",
+      "meta": {
+        "title": "Términos del servicio\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Términos del servicio",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "VISIÓN GENERAL",
+          "SECCIÓN 1 - TÉRMINOS DE LA TIENDA EN LÍNEA",
+          "SECCIÓN 2 - CONDICIONES GENERALES",
+          "SECCIÓN 3 - EXACTITUD, INTEGRIDAD Y ACTUALIDAD DE LA INFORMACIÓN",
+          "SECCIÓN 4 - MODIFICACIONES AL SERVICIO Y PRECIOS",
+          "SECCIÓN 5 - PRODUCTOS O SERVICIOS (si aplica)",
+          "SECCIÓN 6 - EXACTITUD DE LA INFORMACIÓN DE FACTURACIÓN Y CUENTA"
+        ],
+        "canonical": "https://ecomenda.com.co/policies/terms-of-service",
+        "robots": "",
+        "wordCount": 2952,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/policies/contact-information",
+      "meta": {
+        "title": "Información de contacto\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Información de contacto",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "De Tu Interés",
+          "Contacto",
+          "Suscríbete al boletin de ofertas y lanzamientos"
+        ],
+        "canonical": "https://ecomenda.com.co/policies/contact-information",
+        "robots": "",
+        "wordCount": 181,
+        "issues": [
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          },
+          {
+            "type": "warning",
+            "msg": "Contenido escaso (~181 palabras, recomendado 300+)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/all",
+      "meta": {
+        "title": "Productos\n &ndash; Ecomenda",
+        "description": "",
+        "ogTitle": "Productos",
+        "ogDescription": "Ecomenda la mejor selección de productos de moda y belleza en Colombia. Encuentra tendencias exclusivas, precios increíbles y envíos rápidos. ¡Renueva tu estilo ahora!",
+        "h1": "¡Gracias, {{customer.first_name}}! 🎉",
+        "h2s": [
+          "Artículo agregado a tu carrito",
+          "Filtrar:",
+          "Ordenar por:",
+          "18 productos",
+          "Filtrar y ordenar",
+          "Filtrar",
+          "18 productos",
+          "Diapositiva de imagen"
+        ],
+        "canonical": "https://ecomenda.com.co/collections/all",
+        "robots": "",
+        "wordCount": 1027,
+        "issues": [
+          {
+            "type": "warning",
+            "msg": "Título muy corto (27 chars, mínimo 30)"
+          },
+          {
+            "type": "error",
+            "msg": "Sin meta description"
+          }
+        ]
+      }
+    }
+  ],
+  "brokenLinks": [
+    {
+      "url": "https://ecomenda.com.co/products/crema-urea-40-manos-pies",
+      "foundOn": "https://ecomenda.com.co/blogs/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia",
+      "status": 404,
+      "attempts": 1
+    },
+    {
+      "url": "https://ecomenda.com.co/collections/cuidado-de-manos",
+      "foundOn": "https://ecomenda.com.co/blogs/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia/crema-urea-al-40-el-secreto-clinico-para-manos-y-pies-suaves-en-colombia",
+      "status": 404,
+      "attempts": 1
+    }
+  ],
+  "crawlErrors": [
+    {
+      "url": "https://ecomenda.com.co/customer_authentication/redirect?locale=es&region_country=CO",
+      "foundOn": "https://ecomenda.com.co/",
+      "status": 406,
+      "attempts": 1
+    },
+    {
+      "url": "https://ecomenda.com.co/cart/add?id=ID_DE_LA_VARIANTE&quantity=1",
+      "foundOn": "https://ecomenda.com.co/products/masajeador-electrico-de-presion",
+      "status": 422,
+      "attempts": 1
+    }
+  ],
+  "skipped": [
+    {
+      "url": "https://ecomenda.com.co/agents.md",
+      "reason": "Recurso no HTML"
+    }
+  ],
+  "warnings": [],
+  "pending": [],
+  "coverage": {
+    "discovered": 46,
+    "htmlPages": 41,
+    "pending": 0,
+    "limitReached": false,
+    "sitemapUrls": 34,
+    "complete": false,
+    "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+  }
+}

@@ -1,0 +1,25 @@
+[
+  {
+    "fecha": "2026-09-22T16:04:41.775Z",
+    "paginasAuditadas": 41,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 46,
+      "htmlPages": 41,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 34,
+      "complete": false,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 73,
+      "accessibility": 96,
+      "bestPractices": 95,
+      "seo": 97
+    },
+    "linksRotos": 2,
+    "problemasSEO": 56,
+    "carpetaReporte": "ecomenda/2026-09-22T15-56-12"
+  }
+]
