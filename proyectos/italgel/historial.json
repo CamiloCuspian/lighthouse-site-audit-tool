@@ -1,0 +1,25 @@
+[
+  {
+    "fecha": "2026-09-21T16:56:51.222Z",
+    "paginasAuditadas": 50,
+    "paginasFallidas": 0,
+    "cobertura": {
+      "discovered": 50,
+      "htmlPages": 50,
+      "pending": 0,
+      "limitReached": false,
+      "sitemapUrls": 50,
+      "complete": true,
+      "scope": "HTML y sitemaps del origen final; no ejecuta JavaScript ni garantiza páginas huérfanas."
+    },
+    "promedios": {
+      "performance": 74,
+      "accessibility": 96,
+      "bestPractices": 100,
+      "seo": 100
+    },
+    "linksRotos": 0,
+    "problemasSEO": 6,
+    "carpetaReporte": "italgel/2026-09-21T16-47-14"
+  }
+]
